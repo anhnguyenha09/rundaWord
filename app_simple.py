@@ -77,8 +77,16 @@ def load_user(user_id):
 
 # ==================== ROUTES ====================
 
+# Home
+@app.route('/')
+def index():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    return redirect(url_for('login'))
+
+
 # Auth Routes
-@app.route('/auth/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
@@ -99,7 +107,7 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/auth/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
@@ -129,7 +137,7 @@ def register():
     return render_template('register.html')
 
 
-@app.route('/auth/logout')
+@app.route('/logout')
 @login_required
 def logout():
     logout_user()
@@ -138,13 +146,6 @@ def logout():
 
 
 # Main Routes
-@app.route('/')
-def index():
-    if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
-    return redirect(url_for('login'))
-
-
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -161,7 +162,7 @@ def profile():
 
 
 # Vocab Routes
-@app.route('/vocab/packages')
+@app.route('/packages')
 @login_required
 def packages():
     user_packages = VocabPackage.query.filter_by(user_id=current_user.id)\
@@ -169,7 +170,7 @@ def packages():
     return render_template('packages.html', packages=user_packages)
 
 
-@app.route('/vocab/package/<int:package_id>')
+@app.route('/package/<int:package_id>')
 @login_required
 def package_detail(package_id):
     package = VocabPackage.query.get_or_404(package_id)
@@ -181,7 +182,7 @@ def package_detail(package_id):
     return render_template('package_detail.html', package=package)
 
 
-@app.route('/vocab/create', methods=['GET', 'POST'])
+@app.route('/create', methods=['GET', 'POST'])
 @login_required
 def create_package():
     if request.method == 'POST':
@@ -202,7 +203,7 @@ def create_package():
     return render_template('create_package.html')
 
 
-@app.route('/vocab/edit/<int:package_id>', methods=['GET', 'POST'])
+@app.route('/edit/<int:package_id>', methods=['GET', 'POST'])
 @login_required
 def edit_package(package_id):
     package = VocabPackage.query.get_or_404(package_id)

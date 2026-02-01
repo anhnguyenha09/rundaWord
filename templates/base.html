@@ -13,7 +13,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('main.index') if current_user.is_authenticated else url_for('auth.login') }}">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
                 RundaWord
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -23,27 +23,27 @@
                 <ul class="navbar-nav ms-auto align-items-center">
                     {% if current_user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a>
+                            <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('vocab.packages') }}">Thư viện</a>
+                            <a class="nav-link" href="{{ url_for('packages') }}">Thư viện</a>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-user-circle me-1"></i> {{ current_user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{{ url_for('main.profile') }}">Hồ sơ</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('profile') }}">Hồ sơ</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">Đăng xuất</a></li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">Đăng xuất</a></li>
                             </ul>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.login') }}">Đăng nhập</a>
+                            <a class="nav-link" href="{{ url_for('login') }}">Đăng nhập</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn btn-outline-light ms-2 px-3" href="{{ url_for('auth.register') }}">Đăng ký</a>
+                            <a class="nav-link btn btn-outline-light ms-2 px-3" href="{{ url_for('register') }}">Đăng ký</a>
                         </li>
                     {% endif %}
                 </ul>

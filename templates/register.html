@@ -10,7 +10,7 @@
                 <div class="card-body p-5">
                     <h2 class="text-center mb-4">Đăng ký</h2>
                     
-                    <form method="POST" action="{{ url_for('auth.register') }}">
+                    <form method="POST" action="{{ url_for('register') }}">
                         <div class="mb-3">
                             <label for="name" class="form-label">Tên hiển thị</label>
                             <input type="text" class="form-control" id="name" name="name" required>
@@ -35,7 +35,7 @@
                     </form>
                     
                     <div class="text-center mt-3">
-                        <p>Đã có tài khoản? <a href="{{ url_for('auth.login') }}">Đăng nhập</a></p>
+                        <p>Đã có tài khoản? <a href="{{ url_for('login') }}">Đăng nhập</a></p>
                     </div>
                 </div>
             </div>
