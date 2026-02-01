@@ -1,54 +1,51 @@
 {% extends "base.html" %}
 
-{% block title %}Trang Chủ - RundaWord{% endblock %}
+{% block title %}Dashboard - RundaWord{% endblock %}
 
 {% block content %}
-<!-- Welcome Banner -->
-<div class="welcome-banner">
-    <div class="welcome-content">
-        <h1 class="welcome-title">Welcome, Hà Anh Nguyễn!</h1>
-        <p class="welcome-subtitle">Time for some lessons today!</p>
-    </div>
-    <div class="welcome-icon">📏</div>
-</div>
-
-<!-- Recently Learned Section -->
-<section class="recently-learned">
-    <div class="section-header">
-        <h2 class="section-title">Recently learned</h2>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2>Chào mừng, {{ current_user.name or current_user.username }}!</h2>
+                    <p class="text-muted">Sẵn sàng học tiếng Anh hôm nay chưa?</p>
+                </div>
+            </div>
+        </div>
     </div>
     
-    <div class="grid grid-cols-3">
-        <!-- Package Card 1 -->
-        <div class="package-card">
-            <h3>Economy</h3>
-            <p class="package-card-time">20 minutes ago</p>
+    <div class="row">
+        <div class="col-12">
+            <h3>Gói từ gần đây</h3>
         </div>
         
-        <!-- Package Card 2 -->
-        <div class="package-card">
-            <h3>Politics</h3>
-            <p class="package-card-time">1 hour ago</p>
-        </div>
-        
-        <!-- Package Card 3 -->
-        <div class="package-card">
-            <h3>Environment</h3>
-            <p class="package-card-time">3 days ago</p>
-        </div>
-        
-        <!-- Package Card 4 -->
-        <div class="package-card">
-            <h3>ABCDEFG</h3>
-            <p class="package-card-time">1 week ago</p>
+        {% if packages %}
+            {% for package in packages %}
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('package_detail', package_id=package.id) }}" class="text-decoration-none">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ package.package_name }}</h5>
+                            <p class="card-text text-muted small">
+                                {{ package.vocabularies|length }} từ
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <p class="text-muted">Bạn chưa có gói từ nào. <a href="{{ url_for('create_package') }}">Tạo ngay!</a></p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12 text-end">
+            <a href="{{ url_for('packages') }}" class="btn btn-link">Xem tất cả gói từ →</a>
         </div>
     </div>
-
-    <!-- Go to Packages Link -->
-    <div style="text-align: right; margin-top: var(--spacing-8);">
-        <a href="{{ url_for('packages') }}" style="font-size: var(--text-lg); color: var(--dark-text); text-decoration: none; font-weight: 500;">
-            Go to Vocabulary Packages <span style="margin-left: 8px;">→</span>
-        </a>
-    </div>
-</section>
+</div>
 {% endblock %}

@@ -1,69 +1,35 @@
 {% extends "base.html" %}
 
-{% block title %}Tạo Gói Từ Mới - RundaWord{% endblock %}
+{% block title %}Tạo Gói Từ - RundaWord{% endblock %}
 
 {% block content %}
-<h1>Create new Vocabulary Package</h1>
-
-<div class="card" style="max-width: 600px;">
-    <form method="POST" enctype="multipart/form-data">
-        <!-- Package Name -->
-        <div class="form-group">
-            <label class="form-label">
-                Package Name
-                <span class="required">*</span>
-            </label>
-            <input type="text" name="package_name" class="form-input" placeholder="Insert package name" required>
-        </div>
-
-        <!-- Description -->
-        <div class="form-group">
-            <label class="form-label">Description</label>
-            <textarea name="description" class="form-textarea" placeholder="Describe this package in beautiful words" maxlength="70"></textarea>
-            <div class="char-count">0/70 char</div>
-        </div>
-
-        <!-- File Upload -->
-        <div class="form-group">
-            <label class="form-label">
-                Vocabularies Upload
-                <span class="required">*</span>
-            </label>
-            <div style="position: relative; display: flex; align-items: center;">
-                <input type="file" name="vocab_file" class="form-input" placeholder="Upload .xlsx file containing your vocabularies" accept=".xlsx,.xls" required>
-                <button type="button" class="btn btn-icon" style="position: absolute; right: 10px; background: none; color: var(--gray-500);">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                        <line x1="14" y1="11" x2="14" y2="17"></line>
-                    </svg>
-                </button>
-            </div>
-            <p class="form-helper">
-                <a href="{{ url_for('static', filename='templates/template.xlsx') }}" style="color: var(--primary-light); font-weight: 500;">Tải xuống .xlsx template tại đây</a>
-            </p>
-        </div>
-
-        <!-- Error Message -->
-        <div class="error-message">
-            You have to fill all required fields (<span style="color: var(--error);">*</span>) before submitting.
-        </div>
-
-        <!-- Submit Button -->
-        <div style="text-align: center; margin-top: var(--spacing-8);">
-            <button type="submit" class="btn btn-primary" style="background-color: #6b7280;">Create Package</button>
-        </div>
-    </form>
-</div>
-
-<script>
-    // Character count for textarea
-    const textarea = document.querySelector('textarea[name="description"]');
-    const charCount = document.querySelector('.char-count');
+<div class="container mt-4">
+    <h2 class="mb-4">Tạo gói từ vựng mới</h2>
     
-    textarea.addEventListener('input', function() {
-        charCount.textContent = this.value.length + '/70 char';
-    });
-</script>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="package_name" class="form-label">Tên gói <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="package_name" name="package_name" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Mô tả</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" maxlength="200"></textarea>
+                            <div class="form-text">Tối đa 200 ký tự</div>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Tạo gói</button>
+                            <a href="{{ url_for('packages') }}" class="btn btn-secondary">Hủy</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

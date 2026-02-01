@@ -1,48 +1,40 @@
 {% extends "base.html" %}
 
-{% block title %}Thư Viện Gói Từ - RundaWord{% endblock %}
+{% block title %}Thư Viện - RundaWord{% endblock %}
 
 {% block content %}
-<!-- Header with Create Button -->
-<div class="section-header">
-    <h1 class="section-title">Vocabulary Packages</h1>
-    <div class="section-action">
-        <a href="{{ url_for('create_package') }}" class="btn btn-primary">Create new package</a>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Gói từ vựng của tôi</h2>
+        <a href="{{ url_for('create_package') }}" class="btn btn-primary">Tạo gói mới</a>
     </div>
-</div>
-
-<!-- Packages Grid -->
-<div class="grid grid-cols-3">
-    <!-- Package Card 1 -->
-    <a href="{{ url_for('package_detail', package_id=1) }}" style="text-decoration: none;">
-        <div class="package-card">
-            <h3>Economy</h3>
-            <p class="package-card-time">20 minutes ago</p>
-        </div>
-    </a>
     
-    <!-- Package Card 2 -->
-    <a href="{{ url_for('package_detail', package_id=2) }}" style="text-decoration: none;">
-        <div class="package-card">
-            <h3>Politics</h3>
-            <p class="package-card-time">1 hour ago</p>
-        </div>
-    </a>
-    
-    <!-- Package Card 3 -->
-    <a href="{{ url_for('package_detail', package_id=3) }}" style="text-decoration: none;">
-        <div class="package-card">
-            <h3>Environment</h3>
-            <p class="package-card-time">3 days ago</p>
-        </div>
-    </a>
-    
-    <!-- Package Card 4 -->
-    <a href="{{ url_for('package_detail', package_id=4) }}" style="text-decoration: none;">
-        <div class="package-card">
-            <h3>ABCDEFG</h3>
-            <p class="package-card-time">1 week ago</p>
-        </div>
-    </a>
+    <div class="row">
+        {% if packages %}
+            {% for package in packages %}
+            <div class="col-md-3 mb-3">
+                <a href="{{ url_for('package_detail', package_id=package.id) }}" class="text-decoration-none">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ package.package_name }}</h5>
+                            {% if package.package_description %}
+                            <p class="card-text text-muted small">{{ package.package_description }}</p>
+                            {% endif %}
+                            <p class="card-text text-muted small mt-2">
+                                <i class="fas fa-book"></i> {{ package.vocabularies|length }} từ
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Bạn chưa có gói từ nào</p>
+                <a href="{{ url_for('create_package') }}" class="btn btn-primary">Tạo gói đầu tiên</a>
+            </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}
