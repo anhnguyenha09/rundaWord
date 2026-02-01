@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Thư Viện Gói Từ - RundaWord{% endblock %}
+
+{% block content %}
+<!-- Header with Create Button -->
+<div class="section-header">
+    <h1 class="section-title">Vocabulary Packages</h1>
+    <div class="section-action">
+        <a href="{{ url_for('create_package') }}" class="btn btn-primary">Create new package</a>
+    </div>
+</div>
+
+<!-- Packages Grid -->
+<div class="grid grid-cols-3">
+    <!-- Package Card 1 -->
+    <a href="{{ url_for('package_detail', package_id=1) }}" style="text-decoration: none;">
+        <div class="package-card">
+            <h3>Economy</h3>
+            <p class="package-card-time">20 minutes ago</p>
+        </div>
+    </a>
+    
+    <!-- Package Card 2 -->
+    <a href="{{ url_for('package_detail', package_id=2) }}" style="text-decoration: none;">
+        <div class="package-card">
+            <h3>Politics</h3>
+            <p class="package-card-time">1 hour ago</p>
+        </div>
+    </a>
+    
+    <!-- Package Card 3 -->
+    <a href="{{ url_for('package_detail', package_id=3) }}" style="text-decoration: none;">
+        <div class="package-card">
+            <h3>Environment</h3>
+            <p class="package-card-time">3 days ago</p>
+        </div>
+    </a>
+    
+    <!-- Package Card 4 -->
+    <a href="{{ url_for('package_detail', package_id=4) }}" style="text-decoration: none;">
+        <div class="package-card">
+            <h3>ABCDEFG</h3>
+            <p class="package-card-time">1 week ago</p>
+        </div>
+    </a>
+</div>
+{% endblock %}

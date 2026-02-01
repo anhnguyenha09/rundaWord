@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Hồ Sơ Cá Nhân - RundaWord{% endblock %}
+
+{% block content %}
+<!-- Profile Header -->
+<div class="profile-header">
+    <div class="profile-avatar">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="10" r="3"></circle>
+            <path d="M7 20.662a6 6 0 0 1 10 0"></path>
+        </svg>
+    </div>
+    <div class="profile-info">
+        <div class="profile-info-row">
+            <div class="profile-info-item">
+                <div class="profile-info-label">Name</div>
+                <div class="profile-info-value">Hà Anh Nguyễn</div>
+            </div>
+            <div class="profile-info-item">
+                <div class="profile-info-label">Hã Anh Nguyễn</div>
+                <div class="profile-info-value">anhhchinchin@gmail.com</div>
+            </div>
+        </div>
+        <div class="profile-info-row">
+            <div class="profile-info-item">
+                <div class="profile-info-label">Username</div>
+                <div class="profile-info-value">anhhn09</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="profile-stats">
+    <div class="stat-item">
+        <div class="stat-label">Packages created:</div>
+        <div class="stat-value">21</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-label">Practice time:</div>
+        <div class="stat-value">21:21:21</div>
+    </div>
+</div>
+{% endblock %}

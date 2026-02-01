@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RundaWord - Học Tiếng Anh không khó!{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <a href="{{ url_for('home') }}">
+                    <span class="logo-text">Runda</span><br><span class="logo-sub">Word.</span>
+                </a>
+            </div>
+            <nav class="navbar-menu">
+                <a href="{{ url_for('home') }}" class="nav-link">Dashboard</a>
+                <a href="{{ url_for('packages') }}" class="nav-link">Thư viện</a>
+                <a href="{{ url_for('profile') }}" class="nav-user">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path>
+                    </svg>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-logo">
+                <span class="logo-text">Runda</span><br><span class="logo-sub">Word.</span>
+            </div>
+            <div class="footer-info">
+                <h3>RundaWord - Học Tiếng Anh không khó!</h3>
+                <p><strong>📍</strong> Trung Hòa, Cầu Giấy, Hà Nội</p>
+                <p><strong>📞</strong> (+84) 976 643 32X</p>
+                <p><strong>f</strong> facebook.com/rungadao</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

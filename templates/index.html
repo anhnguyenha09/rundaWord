@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Trang Chủ - RundaWord{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<div class="welcome-banner">
+    <div class="welcome-content">
+        <h1 class="welcome-title">Welcome, Hà Anh Nguyễn!</h1>
+        <p class="welcome-subtitle">Time for some lessons today!</p>
+    </div>
+    <div class="welcome-icon">📏</div>
+</div>
+
+<!-- Recently Learned Section -->
+<section class="recently-learned">
+    <div class="section-header">
+        <h2 class="section-title">Recently learned</h2>
+    </div>
+    
+    <div class="grid grid-cols-3">
+        <!-- Package Card 1 -->
+        <div class="package-card">
+            <h3>Economy</h3>
+            <p class="package-card-time">20 minutes ago</p>
+        </div>
+        
+        <!-- Package Card 2 -->
+        <div class="package-card">
+            <h3>Politics</h3>
+            <p class="package-card-time">1 hour ago</p>
+        </div>
+        
+        <!-- Package Card 3 -->
+        <div class="package-card">
+            <h3>Environment</h3>
+            <p class="package-card-time">3 days ago</p>
+        </div>
+        
+        <!-- Package Card 4 -->
+        <div class="package-card">
+            <h3>ABCDEFG</h3>
+            <p class="package-card-time">1 week ago</p>
+        </div>
+    </div>
+
+    <!-- Go to Packages Link -->
+    <div style="text-align: right; margin-top: var(--spacing-8);">
+        <a href="{{ url_for('packages') }}" style="font-size: var(--text-lg); color: var(--dark-text); text-decoration: none; font-weight: 500;">
+            Go to Vocabulary Packages <span style="margin-left: 8px;">→</span>
+        </a>
+    </div>
+</section>
+{% endblock %}
