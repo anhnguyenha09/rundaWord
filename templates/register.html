@@ -1,45 +1,39 @@
 {% extends "base.html" %}
-
 {% block title %}Đăng ký - RundaWord{% endblock %}
-
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-body p-5">
-                    <h2 class="text-center mb-4">Đăng ký</h2>
-                    
-                    <form method="POST" action="{{ url_for('register') }}">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Tên hiển thị</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Mật khẩu</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100">Đăng ký</button>
-                    </form>
-                    
-                    <div class="text-center mt-3">
-                        <p>Đã có tài khoản? <a href="{{ url_for('login') }}">Đăng nhập</a></p>
-                    </div>
-                </div>
+
+<div style="min-height:60vh;display:flex;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:20px;padding:40px 36px;width:100%;max-width:440px;box-shadow:0 8px 40px rgba(13,33,55,0.12);">
+        <h2 style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--navy);text-align:center;margin-bottom:28px;">Đăng ký</h2>
+
+        <form method="POST">
+            <div class="mb-3">
+                <label class="rw-label">Tên</label>
+                <input type="text" class="rw-input" name="name" placeholder="Nhập tên của bạn" required>
             </div>
+            <div class="mb-3">
+                <label class="rw-label">Email</label>
+                <input type="email" class="rw-input" name="email" placeholder="Nhập email của bạn" required>
+            </div>
+            <div class="mb-3">
+                <label class="rw-label">Tên người dùng</label>
+                <input type="text" class="rw-input" name="username" placeholder="Nhập tên người dùng" required>
+            </div>
+            <div class="mb-3">
+                <label class="rw-label">Mật khẩu</label>
+                <input type="password" class="rw-input" name="password" placeholder="Nhập mật khẩu" required>
+            </div>
+            <div class="mb-4">
+                <label class="rw-label">Xác nhận mật khẩu</label>
+                <input type="password" class="rw-input" name="confirm_password" placeholder="Nhập lại mật khẩu" required>
+            </div>
+            <button type="submit" class="btn btn-navy w-100 py-3" style="font-size:1rem;">Đăng ký</button>
+        </form>
+
+        <div class="text-center mt-3">
+            <a href="{{ url_for('login') }}" style="color:var(--accent);font-weight:700;text-decoration:none;font-size:0.95rem;">Đăng nhập</a>
         </div>
     </div>
 </div>
+
 {% endblock %}

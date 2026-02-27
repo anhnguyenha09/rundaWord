@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block title %}Trắc nghiệm - {{ package.package_name }}{% endblock %}
+{% block head_extra %}
+<style>
+    .quiz-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 48px 40px;
+        min-height: 360px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .option-btn {
+        width: 100%;
+        text-align: left;
+        padding: 14px 20px;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        background: white;
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-family: 'Nunito', sans-serif;
+        font-weight: 600;
+        transition: all 0.15s;
+        margin-bottom: 10px;
+        color: var(--navy);
+    }
+
+    .option-btn:hover:not(:disabled) {
+        border-color: var(--accent);
+        background: #eef3fb;
+    }
+
+    .option-btn.correct {
+        border-color: #27ae60;
+        background: #eafaf1;
+        color: #1e8449;
+    }
+
+    .option-btn.wrong {
+        border-color: #e74c3c;
+        background: #fdf2f2;
+        color: #c0392b;
+    }
+
+    .q-word {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--navy);
+        text-align: center;
+    }
+
+    .q-prompt {
+        color: var(--muted);
+        font-size: 0.88rem;
+        margin-bottom: 16px;
+        text-align: center;
+    }
+
+    .score-circle {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        border: 6px solid;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin: 0 auto 20px;
+    }
+</style>
+{% endblock %}
+{% block content %}
+
+<div class="d-flex align-items-center gap-2 mb-4">
+    <a href="{{ url_for('package_detail', package_id=package.id) }}"
+        style="color:var(--muted);font-size:0.85rem;font-weight:600;text-decoration:none;">← {{ package.package_name
+        }}</a>
+    <span style="color:var(--muted);">·</span>
+    <span style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--navy);">{{ package.package_name }} -
+        Multiple Choices mode</span>
+</div>
+
+<div style="max-width:580px;margin:0 auto;">
+    <!-- Score bar -->
+    <div class="d-flex justify-content-between mb-1">
+        <span style="font-size:0.85rem;color:var(--muted);font-weight:600;">Câu <span id="qNum">1</span>/<span
+                id="qTotal">?</span></span>
+        <span style="font-size:0.85rem;font-weight:700;">
+            <span style="color:#27ae60;" id="scoreC">0</span> đúng &nbsp;
+            <span style="color:#e74c3c;" id="scoreW">0</span> sai
+        </span>
+    </div>
+    <div style="background:var(--border);border-radius:8px;height:6px;margin-bottom:20px;">
+        <div id="progressBar"
+            style="background:var(--navy);height:100%;border-radius:8px;width:0%;transition:width 0.3s;"></div>
+    </div>
+
+    <!-- Quiz card -->
+    <div id="quizArea">
+        <div class="quiz-card mb-3">
+            <div class="q-prompt">Nghĩa tiếng Việt của từ này là gì?</div>
+            <div class="q-word" id="qWord">...</div>
+        </div>
+        <div id="options"></div>
+        <div id="nextArea" class="text-center d-none mt-2">
+            <button class="btn btn-navy px-4" onclick="nextQuestion()">Câu tiếp <i
+                    class="fas fa-arrow-right ms-1"></i></button>
+        </div>
+    </div>
+
+    <!-- Result -->
+    <div id="resultArea" class="d-none text-center">
+        <div class="score-circle" id="scoreCircle"></div>
+        <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:1.2rem;color:var(--navy);"
+            id="resultTitle"></div>
+        <div style="color:var(--muted);margin:6px 0 20px;" id="resultDesc"></div>
+        <div class="d-flex gap-3 justify-content-center">
+            <button class="btn btn-navy px-4" onclick="startQuiz()"><i class="fas fa-redo me-2"></i>Làm lại</button>
+            <a href="{{ url_for('flashcard', package_id=package.id) }}" class="btn btn-cream px-4">Flashcard</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+    const allWords = {{ package.vocabularies | map(attribute = 'word_en') | list | tojson }};
+    const allMeanings = {{ package.vocabularies | map(attribute = 'word_vi') | list | tojson }};
+    let questions = [], cur = 0, correct = 0, wrong = 0, answered = false;
+
+    function shuffle(a) { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[b[i], b[j]] = [b[j], b[i]]; } return b; }
+
+    function startQuiz() {
+        const idx = shuffle([...Array(allWords.length).keys()]);
+        questions = idx.map(i => {
+            const c = allMeanings[i];
+            const wrong3 = shuffle(allMeanings.filter((_, j) => j !== i)).slice(0, 3);
+            return { word: allWords[i], correct: c, options: shuffle([c, ...wrong3]) };
+        });
+        cur = 0; correct = 0; wrong = 0; answered = false;
+        document.getElementById('resultArea').classList.add('d-none');
+        document.getElementById('quizArea').classList.remove('d-none');
+        document.getElementById('qTotal').textContent = questions.length;
+        showQ();
+    }
+
+    function showQ() {
+        if (cur >= questions.length) { showResult(); return; }
+        answered = false;
+        const q = questions[cur];
+        document.getElementById('qNum').textContent = cur + 1;
+        document.getElementById('qWord').textContent = q.word;
+        document.getElementById('progressBar').style.width = Math.round(cur / questions.length * 100) + '%';
+        document.getElementById('nextArea').classList.add('d-none');
+        const opts = document.getElementById('options');
+        opts.innerHTML = '';
+        q.options.forEach(o => {
+            const b = document.createElement('button');
+            b.className = 'option-btn'; b.textContent = o;
+            b.onclick = () => answer(b, o, q.correct);
+            opts.appendChild(b);
+        });
+    }
+
+    function answer(btn, sel, cor) {
+        if (answered) return; answered = true;
+        document.querySelectorAll('.option-btn').forEach(b => {
+            b.disabled = true;
+            if (b.textContent === cor) b.classList.add('correct');
+        });
+        if (sel === cor) { btn.classList.add('correct'); correct++; }
+        else { btn.classList.add('wrong'); wrong++; }
+        document.getElementById('scoreC').textContent = correct;
+        document.getElementById('scoreW').textContent = wrong;
+        document.getElementById('nextArea').classList.remove('d-none');
+        if (cur >= questions.length - 1) document.getElementById('nextArea').innerHTML = '<button class="btn btn-navy px-4" onclick="showResult()">Xem kết quả <i class="fas fa-flag ms-1"></i></button>';
+    }
+
+    function nextQuestion() { cur++; showQ(); }
+
+    function showResult() {
+        document.getElementById('quizArea').classList.add('d-none');
+        document.getElementById('resultArea').classList.remove('d-none');
+        const total = questions.length, pct = Math.round(correct / total * 100);
+        const c = document.getElementById('scoreCircle');
+        c.textContent = pct + '%';
+        document.getElementById('progressBar').style.width = '100%';
+        if (pct >= 80) { c.style.borderColor = '#27ae60'; c.style.color = '#27ae60'; document.getElementById('resultTitle').textContent = '🎉 Xuất sắc!'; document.getElementById('resultDesc').textContent = correct + '/' + total + ' câu đúng. Bạn nắm vững từ vựng rất tốt!'; }
+        else if (pct >= 60) { c.style.borderColor = '#f39c12'; c.style.color = '#f39c12'; document.getElementById('resultTitle').textContent = '👍 Khá tốt!'; document.getElementById('resultDesc').textContent = correct + '/' + total + ' câu đúng. Ôn luyện thêm một chút nhé!'; }
+        else { c.style.borderColor = '#e74c3c'; c.style.color = '#e74c3c'; document.getElementById('resultTitle').textContent = '💪 Cần cố gắng thêm!'; document.getElementById('resultDesc').textContent = correct + '/' + total + ' câu đúng. Hãy ôn flashcard trước khi thử lại!'; }
+    }
+
+    startQuiz();
+</script>
+{% endblock %}

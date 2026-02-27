@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Chỉnh sửa hồ sơ - RundaWord{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="page-title mb-0">Chỉnh sửa hồ sơ</div>
+    <div class="d-flex gap-2">
+        <form method="POST">
+            <input type="hidden" name="action" value="cancel">
+            <button type="submit" class="btn btn-cream px-4">Cancel</button>
+        </form>
+        <button type="submit" form="profileForm" class="btn btn-navy px-4">Save</button>
+    </div>
+</div>
+
+<div class="rw-card" style="max-width:600px;">
+    <form method="POST" id="profileForm">
+        <input type="hidden" name="action" value="save">
+        <div class="mb-3">
+            <label class="rw-label">Tên hiển thị</label>
+            <input type="text" class="rw-input editable" name="name" value="{{ current_user.name or '' }}"
+                placeholder="Nhập tên của bạn">
+        </div>
+        <div class="mb-3">
+            <label class="rw-label">Username</label>
+            <input type="text" class="rw-input editable" name="username" value="{{ current_user.username }}"
+                placeholder="Nhập tên người dùng" required>
+        </div>
+        <div class="mb-3">
+            <label class="rw-label">Email</label>
+            <input type="email" class="rw-input" value="{{ current_user.email }}" disabled
+                style="opacity:0.6;cursor:not-allowed;">
+            <div style="font-size:0.8rem;color:var(--muted);margin-top:4px;">Email không thể thay đổi</div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

@@ -1,51 +1,49 @@
 {% extends "base.html" %}
-
 {% block title %}Dashboard - RundaWord{% endblock %}
-
 {% block content %}
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h2>Chào mừng, {{ current_user.name or current_user.username }}!</h2>
-                    <p class="text-muted">Sẵn sàng học tiếng Anh hôm nay chưa?</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="row">
-        <div class="col-12">
-            <h3>Gói từ gần đây</h3>
-        </div>
-        
-        {% if packages %}
-            {% for package in packages %}
-            <div class="col-md-3 mb-3">
-                <a href="{{ url_for('package_detail', package_id=package.id) }}" class="text-decoration-none">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ package.package_name }}</h5>
-                            <p class="card-text text-muted small">
-                                {{ package.vocabularies|length }} từ
-                            </p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="col-12">
-                <p class="text-muted">Bạn chưa có gói từ nào. <a href="{{ url_for('create_package') }}">Tạo ngay!</a></p>
-            </div>
-        {% endif %}
-    </div>
-    
-    <div class="row mt-4">
-        <div class="col-12 text-end">
-            <a href="{{ url_for('packages') }}" class="btn btn-link">Xem tất cả gói từ →</a>
-        </div>
-    </div>
+
+<div class="welcome-banner">
+    <h2>Welcome, {{ current_user.name or current_user.username }}!</h2>
+    <p>Time for some lessons today!</p>
+    <!-- Ruler decoration -->
+    <svg class="welcome-ruler" viewBox="0 0 200 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="8" width="200" height="24" rx="4" fill="white" />
+        {% for i in range(0, 200, 5) %}
+        <line x1="{{ i }}" y1="8" x2="{{ i }}" y2="{{ 8 + (8 if i % 20 == 0 else (5 if i % 10 == 0 else 3)) }}"
+            stroke="#0d2137" stroke-width="1" opacity="0.4" />
+        {% endfor %}
+    </svg>
 </div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="section-header mb-0">Recently learned</div>
+    <a href="{{ url_for('packages') }}" class="text-decoration-none"
+        style="color:var(--muted);font-size:0.88rem;font-weight:600;">
+        Go to Vocabulary Packages →
+    </a>
+</div>
+
+{% if packages %}
+<div class="row g-3">
+    {% for package in packages %}
+    <div class="col-6 col-md-3">
+        <a href="{{ url_for('package_detail', package_id=package.id) }}"
+            class="pkg-card pkg-card-{{ loop.index0 % 4 }}">
+            <div class="pkg-card-name">{{ package.package_name }}</div>
+            <div class="pkg-card-meta">
+                {% set delta = (now - package.updated_at).total_seconds() if now is defined else 0 %}
+                {{ package.updated_at.strftime('%d/%m/%Y') }}
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="rw-card text-center py-5">
+    <i class="fas fa-book-open fa-2x mb-3" style="color:var(--muted)"></i>
+    <p class="text-muted mb-3">Bạn chưa có gói từ vựng nào</p>
+    <a href="{{ url_for('create_package') }}" class="btn btn-navy">Tạo gói từ đầu tiên</a>
+</div>
+{% endif %}
+
 {% endblock %}

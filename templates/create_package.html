@@ -1,35 +1,56 @@
 {% extends "base.html" %}
-
-{% block title %}Tạo Gói Từ - RundaWord{% endblock %}
-
+{% block title %}Tạo gói từ - RundaWord{% endblock %}
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">Tạo gói từ vựng mới</h2>
-    
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-body">
-                    <form method="POST">
-                        <div class="mb-3">
-                            <label for="package_name" class="form-label">Tên gói <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="package_name" name="package_name" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Mô tả</label>
-                            <textarea class="form-control" id="description" name="description" rows="3" maxlength="200"></textarea>
-                            <div class="form-text">Tối đa 200 ký tự</div>
-                        </div>
-                        
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">Tạo gói</button>
-                            <a href="{{ url_for('packages') }}" class="btn btn-secondary">Hủy</a>
-                        </div>
-                    </form>
-                </div>
+
+<div class="page-title">Create new Vocabulary Package</div>
+
+<div class="rw-card" style="max-width:680px;">
+    <form method="POST" enctype="multipart/form-data">
+        <div class="mb-4">
+            <label class="rw-label">Package Name <span class="text-danger">*</span></label>
+            <input type="text" class="rw-input" name="package_name" placeholder="Insert package name" required>
+        </div>
+
+        <div class="mb-4">
+            <label class="rw-label">Description</label>
+            <input type="text" class="rw-input" name="description"
+                placeholder="Describe this package in beautiful words" maxlength="70"
+                oninput="document.getElementById('descCount').textContent=this.value.length">
+            <div class="text-end mt-1" style="font-size:0.8rem;color:var(--muted);">
+                <span id="descCount">0</span>/70 char.
             </div>
         </div>
-    </div>
+
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <label class="rw-label mb-0">Vocabularies Upload <span class="text-danger">*</span></label>
+                <a href="{{ url_for('download_template') }}"
+                    style="font-size:0.85rem;color:var(--accent);font-weight:600;text-decoration:underline;">
+                    Tải xuống .xlsx template tại đây
+                </a>
+            </div>
+            <div class="position-relative">
+                <input type="text" class="rw-input pe-5" id="fileLabel"
+                    placeholder="Upload .xlsx file containing your vocabularies" readonly
+                    onclick="document.getElementById('vocab_file').click()" style="cursor:pointer;">
+                <label for="vocab_file"
+                    style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);">
+                    <i class="fas fa-paperclip"></i>
+                </label>
+                <input type="file" id="vocab_file" name="vocab_file" accept=".csv,.xlsx,.xls" style="display:none;"
+                    onchange="document.getElementById('fileLabel').value=this.files[0]?this.files[0].name:''">
+            </div>
+            <div class="mt-1" style="font-size:0.8rem;color:var(--muted);">Hỗ trợ .csv và .xlsx — 2 cột: Tiếng Anh,
+                Tiếng Việt</div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <div style="font-size:0.85rem;color:#c0392b;">
+                <span id="validMsg"></span>
+            </div>
+            <button type="submit" class="btn btn-navy px-4">Create Package</button>
+        </div>
+    </form>
 </div>
+
 {% endblock %}

@@ -1,53 +1,75 @@
 {% extends "base.html" %}
-
 {% block title %}{{ package.package_name }} - RundaWord{% endblock %}
-
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>{{ package.package_name }}</h2>
-        <div>
-            <a href="{{ url_for('edit_package', package_id=package.id) }}" class="btn btn-secondary">
-                <i class="fas fa-edit"></i> Sửa
-            </a>
+
+<div class="d-flex justify-content-between align-items-start mb-2">
+    <div class="page-title mb-1">{{ package.package_name }}</div>
+    <div class="dropdown">
+        <button class="settings-btn" data-bs-toggle="dropdown">
+            <i class="fas fa-cog"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+                <a class="dropdown-item" href="{{ url_for('edit_package', package_id=package.id) }}">
+                    <i class="fas fa-edit me-2 text-muted"></i>Edit Package
+                </a>
+            </li>
+            <li>
+                <button class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="fas fa-trash me-2"></i>Delete Package
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+{% if package.package_description %}
+<p style="color:var(--text);font-size:0.92rem;line-height:1.6;margin-bottom:24px;">{{ package.package_description }}</p>
+{% endif %}
+
+<div class="section-header">Chế độ học</div>
+<div class="d-flex gap-3 mb-4">
+    <a href="{{ url_for('flashcard', package_id=package.id) }}" class="btn btn-study-flashcard text-center">Flashcard</a>
+    <a href="{{ url_for('quiz', package_id=package.id) }}" class="btn btn-study-quiz text-center">Trắc nghiệm</a>
+</div>
+
+<div class="section-header">Danh sách từ vựng</div>
+
+{% if package.vocabularies %}
+    {% for vocab in package.vocabularies %}
+    <div class="vocab-row">
+        <div class="vocab-num">{{ loop.index }}</div>
+        <div class="row g-2">
+            <div class="col-6"><div class="vocab-field">{{ vocab.word_en }}</div></div>
+            <div class="col-6"><div class="vocab-field">{{ vocab.word_vi }}</div></div>
         </div>
     </div>
-    
-    {% if package.package_description %}
-    <div class="card mb-4">
-        <div class="card-body">
-            <p class="mb-0">{{ package.package_description }}</p>
+    {% endfor %}
+{% else %}
+<div class="rw-card text-center py-4">
+    <i class="fas fa-inbox fa-2x mb-2" style="color:var(--muted)"></i>
+    <p class="text-muted mb-2">Chưa có từ vựng nào</p>
+    <a href="{{ url_for('edit_package', package_id=package.id) }}" class="btn btn-navy btn-sm">Thêm từ vựng</a>
+</div>
+{% endif %}
+
+<!-- Delete modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3">
+            <div class="modal-header pb-0">
+                <h5 class="modal-title fw-bold" style="color:var(--navy)">Are you sure wanting to delete this package?</h5>
+            </div>
+            <div class="modal-body">
+                <p class="text-danger fw-bold mb-0">Gói từ vựng sẽ bị xóa vĩnh viễn.</p>
+            </div>
+            <div class="modal-footer gap-2 justify-content-center">
+                <button type="button" class="btn btn-navy px-4" data-bs-dismiss="modal">Hủy</button>
+                <form method="POST" action="{{ url_for('delete_package', package_id=package.id) }}">
+                    <button type="submit" class="btn btn-navy px-4">Xác nhận</button>
+                </form>
+            </div>
         </div>
     </div>
-    {% endif %}
-    
-    <h4 class="mt-4 mb-3">Danh sách từ vựng ({{ package.vocabularies|length }} từ)</h4>
-    
-    {% if package.vocabularies %}
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Tiếng Anh</th>
-                        <th>Tiếng Việt</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for vocab in package.vocabularies %}
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td><strong>{{ vocab.word_en }}</strong></td>
-                        <td>{{ vocab.word_vi }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle"></i> Chưa có từ vựng nào trong gói này
-        </div>
-    {% endif %}
 </div>
 {% endblock %}

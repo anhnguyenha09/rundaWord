@@ -1,40 +1,34 @@
 {% extends "base.html" %}
-
-{% block title %}Thư Viện - RundaWord{% endblock %}
-
+{% block title %}Thư viện - RundaWord{% endblock %}
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Gói từ vựng của tôi</h2>
-        <a href="{{ url_for('create_package') }}" class="btn btn-primary">Tạo gói mới</a>
-    </div>
-    
-    <div class="row">
-        {% if packages %}
-            {% for package in packages %}
-            <div class="col-md-3 mb-3">
-                <a href="{{ url_for('package_detail', package_id=package.id) }}" class="text-decoration-none">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ package.package_name }}</h5>
-                            {% if package.package_description %}
-                            <p class="card-text text-muted small">{{ package.package_description }}</p>
-                            {% endif %}
-                            <p class="card-text text-muted small mt-2">
-                                <i class="fas fa-book"></i> {{ package.vocabularies|length }} từ
-                            </p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="col-12 text-center py-5">
-                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-                <p class="text-muted">Bạn chưa có gói từ nào</p>
-                <a href="{{ url_for('create_package') }}" class="btn btn-primary">Tạo gói đầu tiên</a>
-            </div>
-        {% endif %}
-    </div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="page-title mb-0">Vocabulary Packages</div>
+    <a href="{{ url_for('create_package') }}" class="btn btn-navy">
+        Create new package
+    </a>
 </div>
+
+{% if packages %}
+<div class="row g-3">
+    {% for package in packages %}
+    <div class="col-6 col-md-4 col-lg-3">
+        <a href="{{ url_for('package_detail', package_id=package.id) }}"
+            class="pkg-card pkg-card-{{ loop.index0 % 4 }}">
+            <div class="pkg-card-name">{{ package.package_name }}</div>
+            <div class="pkg-card-meta">
+                {{ package.updated_at.strftime('%d/%m/%Y') }}
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="rw-card text-center py-5">
+    <i class="fas fa-folder-open fa-3x mb-3" style="color:var(--muted)"></i>
+    <p class="text-muted mb-3">Bạn chưa có gói từ vựng nào</p>
+    <a href="{{ url_for('create_package') }}" class="btn btn-navy">Tạo gói đầu tiên</a>
+</div>
+{% endif %}
+
 {% endblock %}
