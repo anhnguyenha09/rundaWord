@@ -758,3 +758,35 @@ footer small {
     font-size: 1.4rem;
     color: var(--navy);
 }
+
+
+
+/*============================================================
+   22. SCROLL TO TOP / BOTTOM BUTTONS (trang sửa gói từ)
+   ============================================================ */
+   .scroll-buttons {
+    position: fixed;
+    right: 20px;
+    bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 999;
+}
+
+.scroll-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: var(--navy);
+    color: white;
+    font-size: 16px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+}
+
+.scroll-btn:hover {
+    transform: scale(1.1);
+}

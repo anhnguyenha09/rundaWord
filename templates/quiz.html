@@ -104,7 +104,7 @@
     <!-- Quiz card -->
     <div id="quizArea">
         <div class="quiz-card mb-3">
-            <div class="q-prompt">Nghĩa tiếng Việt của từ này là gì?</div>
+            <div class="q-prompt">Từ này có nghĩa là gì?</div>
             <div class="q-word" id="qWord">...</div>
         </div>
         <div id="options"></div>
@@ -132,24 +132,62 @@
 <script>
     const allWords = {{ package.vocabularies | map(attribute = 'word_en') | list | tojson }};
     const allMeanings = {{ package.vocabularies | map(attribute = 'word_vi') | list | tojson }};
+const SESSION_SIZE = 5;
+
+let words = allWords.map((w, i) => ({
+    word: w,
+    meaning: allMeanings[i],
+    nextSession: 0,
+    streak: 0,
+    mastered: false
+}));
+
+let sessionIndex = 0;
+let sessionWords = [];
+
+function buildSession() {
+
+    const due = words.filter(w =>
+    !w.mastered && w.nextSession <= sessionIndex
+);
+
+    const shuffled = shuffle(due);
+
+    sessionWords = shuffled.slice(0, SESSION_SIZE);
+
+    questions = sessionWords.map(q => {
+        const wrong3 = shuffle(allMeanings.filter(m => m !== q.meaning)).slice(0, 3);
+        return {
+            ref: q,
+            word: q.word,
+            correct: q.meaning,
+            options: shuffle([q.meaning, ...wrong3])
+        };
+    });
+
+}
+
     let questions = [], cur = 0, correct = 0, wrong = 0, answered = false;
 
     function shuffle(a) { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[b[i], b[j]] = [b[j], b[i]]; } return b; }
 
     function startQuiz() {
-        const idx = shuffle([...Array(allWords.length).keys()]);
-        questions = idx.map(i => {
-            const c = allMeanings[i];
-            const wrong3 = shuffle(allMeanings.filter((_, j) => j !== i)).slice(0, 3);
-            return { word: allWords[i], correct: c, options: shuffle([c, ...wrong3]) };
-        });
-        cur = 0; correct = 0; wrong = 0; answered = false;
-        document.getElementById('resultArea').classList.add('d-none');
-        document.getElementById('quizArea').classList.remove('d-none');
-        document.getElementById('qTotal').textContent = questions.length;
-        showQ();
-    }
 
+    sessionIndex = 0;
+    correct = 0;
+    wrong = 0;
+
+    buildSession();
+
+    cur = 0;
+
+    document.getElementById('resultArea').classList.add('d-none');
+    document.getElementById('quizArea').classList.remove('d-none');
+
+    document.getElementById('qTotal').textContent = questions.length;
+
+    showQ();
+}
     function showQ() {
         if (cur >= questions.length) { showResult(); return; }
         answered = false;
@@ -169,25 +207,75 @@
     }
 
     function answer(btn, sel, cor) {
-        if (answered) return; answered = true;
-        document.querySelectorAll('.option-btn').forEach(b => {
-            b.disabled = true;
-            if (b.textContent === cor) b.classList.add('correct');
-        });
-        if (sel === cor) { btn.classList.add('correct'); correct++; }
-        else { btn.classList.add('wrong'); wrong++; }
-        document.getElementById('scoreC').textContent = correct;
-        document.getElementById('scoreW').textContent = wrong;
-        document.getElementById('nextArea').classList.remove('d-none');
-        if (cur >= questions.length - 1) document.getElementById('nextArea').innerHTML = '<button class="btn btn-navy px-4" onclick="showResult()">Xem kết quả <i class="fas fa-flag ms-1"></i></button>';
+
+    if (answered) return;
+    answered = true;
+
+    const q = questions[cur];
+
+    document.querySelectorAll('.option-btn').forEach(b => {
+        b.disabled = true;
+        if (b.textContent === cor) b.classList.add('correct');
+    });
+
+    if (sel === cor) {
+
+    btn.classList.add('correct');
+    correct++;
+
+    q.ref.streak++;
+
+    if (q.ref.streak >= 2) {
+        q.ref.mastered = true;
+    } else {
+        q.ref.nextSession = sessionIndex + 2;
     }
 
-    function nextQuestion() { cur++; showQ(); }
+} else {
+
+    btn.classList.add('wrong');
+    wrong++;
+
+    q.ref.streak = 0;
+    q.ref.nextSession = sessionIndex + 1;
+
+}
+
+    document.getElementById('scoreC').textContent = correct;
+    document.getElementById('scoreW').textContent = wrong;
+
+    document.getElementById('nextArea').classList.remove('d-none');
+}
+
+    function nextQuestion() {
+
+    cur++;
+
+    if (cur >= questions.length) {
+
+        sessionIndex++;
+
+        const remaining = words.filter(w => !w.mastered);
+
+        if (remaining.length === 0) {
+            showResult();
+            return;
+        }
+
+        buildSession();
+
+        cur = 0;
+
+        document.getElementById('qTotal').textContent = questions.length;
+    }
+
+    showQ();
+}
 
     function showResult() {
         document.getElementById('quizArea').classList.add('d-none');
         document.getElementById('resultArea').classList.remove('d-none');
-        const total = questions.length, pct = Math.round(correct / total * 100);
+        const total = correct + wrong, pct = Math.round(correct / total * 100);
         const c = document.getElementById('scoreCircle');
         c.textContent = pct + '%';
         document.getElementById('progressBar').style.width = '100%';

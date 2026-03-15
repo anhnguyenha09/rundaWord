@@ -48,7 +48,7 @@
                     onchange="document.getElementById('fileLabel').value=this.files[0]?this.files[0].name:''">
             </div>
             <div class="mt-1" style="font-size:0.8rem;color:var(--danger,#c0392b);">
-                ⚠️ Upload file mới sẽ <strong>thay thế toàn bộ từ vựng hiện tại</strong>.
+                Upload file mới sẽ <strong>thay thế toàn bộ từ vựng hiện tại</strong>.
             </div>
         </div>
     </div>
@@ -91,11 +91,17 @@
     </div>
     {% endfor %}
 
+    {% if package.vocabularies|length > 0 %}
+    <div class="totalVocab">Tổng số từ vựng: {{ package.vocabularies|length }}</div>
+    {% endif %}
+
     {% if not package.vocabularies %}
     <div class="rw-card text-center py-3 text-muted" id="emptyHint">
         <i class="fas fa-inbox me-2"></i>Chưa có từ vựng nào. Thêm từ hoặc upload file ở trên.
     </div>
     {% endif %}
+
+
 
 </form>
 
@@ -115,6 +121,16 @@
             </div>
         </div>
     </div>
+</div>
+
+<div class="scroll-buttons">
+    <button class="scroll-btn" onclick="scrollToTop()" title="Lên đầu trang">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <button class="scroll-btn" onclick="scrollToBottom()" title="Xuống cuối trang">
+        <i class="fas fa-arrow-down"></i>
+    </button>
 </div>
 
 {% endblock %}
@@ -158,5 +174,19 @@
         document.getElementById('deleteWordForm').action = '/word/' + wordId + '/delete';
         new bootstrap.Modal(document.getElementById('deleteWordModal')).show();
     }
+
+    function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+function scrollToBottom() {
+    window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth'
+    });
+}
 </script>
 {% endblock %}
