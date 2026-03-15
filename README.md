@@ -137,3 +137,7 @@ Nếu gặp lỗi, kiểm tra:
 2. Pip đã được cài đặt chưa: `pip --version`
 3. Đã ở đúng thư mục dự án chưa: `pwd` (Mac/Linux) hoặc `cd` (Windows)
 4. Đã cài đặt thư viện chưa: `pip list | grep Flask`
+
+## DANH SÁCH TÀI KHOẢN
+1) admin@admin.com ; 123456
+2) thuannn@gmail.com ; 18052011

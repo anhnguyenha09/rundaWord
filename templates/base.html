@@ -18,14 +18,10 @@
 <body>
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <!-- LOGO
-                 Để đổi thành logo ảnh thật, thay đoạn brand-logo-inner bằng:
-                 <img src="{{ url_for('static', filename='img/logo.png') }}" width="44" height="44" style="border-radius:50%">
-                 và đặt file logo vào static/img/logo.png
-            -->
             <a class="navbar-brand" href="{{ url_for('index') }}">
                 <div class="brand-logo">
-                    <img src="../static/imgs/RundaWord-logo.png" alt="rundaword-logo" width="80" height="70">
+                    <img src="{{ url_for('static', filename='imgs/RundaWord-logo.png') }}" alt="rundaword-logo"
+                        width="80" height="70">
                 </div>
             </a>
 
