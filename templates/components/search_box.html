@@ -1,0 +1,13 @@
+<div class="search-box-wrapper mb-4">
+    <form method="GET" action="{{ action_url }}" class="search-box">
+        <i class="fas fa-search search-icon"></i>
+        <input 
+            type="text" 
+            name="q" 
+            placeholder="{{ placeholder or 'Tìm kiếm...' }}" 
+            value="{{ request.args.get('q', '') }}"
+            class="search-input"
+        >
+        <button type="submit" class="search-btn">Search</button>
+    </form>
+</div>
