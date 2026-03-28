@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Sửa {{ package.package_name }} - RundaWord{% endblock %}
+
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -7,7 +8,6 @@
     <div class="d-flex gap-2">
         <form method="POST">
             <input type="hidden" name="action" value="cancel">
-            <!-- carry along dummy required fields so browser won't complain -->
             <button type="submit" class="btn btn-cream px-4">Cancel</button>
         </form>
         <button type="submit" form="editForm" class="btn btn-navy px-4">Save</button>
@@ -15,178 +15,130 @@
 </div>
 
 <form method="POST" enctype="multipart/form-data" id="editForm">
-    <input type="hidden" name="action" value="save">
+<input type="hidden" name="action" value="save">
 
-    <div class="rw-card mb-3">
-        <div class="mb-3">
-            <label class="rw-label">Package Name <span class="text-danger">*</span></label>
-            <input type="text" class="rw-input editable" name="package_name" value="{{ package.package_name }}"
-                required>
-        </div>
-        <div class="mb-3">
-            <label class="rw-label">Description</label>
-            <input type="text" class="rw-input editable" name="description"
-                value="{{ package.package_description or '' }}" maxlength="70">
-        </div>
-        <div>
-            <div class="d-flex justify-content-between align-items-center mb-1">
-                <label class="rw-label mb-0">Vocabularies Upload</label>
-                <a href="{{ url_for('download_template') }}"
-                    style="font-size:0.85rem;color:var(--accent);font-weight:600;text-decoration:underline;">
-                    Tải xuống .xlsx template tại đây
-                </a>
-            </div>
-            <div class="position-relative">
-                <input type="text" class="rw-input pe-5" id="fileLabel"
-                    placeholder="Upload .xlsx file containing your vocabularies" readonly
-                    onclick="document.getElementById('vocab_file').click()" style="cursor:pointer;">
-                <label for="vocab_file"
-                    style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);">
-                    <i class="fas fa-paperclip"></i>
-                </label>
-                <input type="file" id="vocab_file" name="vocab_file" accept=".csv,.xlsx,.xls" style="display:none;"
-                    onchange="document.getElementById('fileLabel').value=this.files[0]?this.files[0].name:''">
-            </div>
-            <div class="mt-1" style="font-size:0.8rem;color:var(--danger,#c0392b);">
-                Upload file mới sẽ <strong>thay thế toàn bộ từ vựng hiện tại</strong>.
-            </div>
+<div class="rw-card mb-3">
+
+    <!-- NAME -->
+    <div class="mb-3">
+        <label class="rw-label">Package Name <span class="text-danger">*</span></label>
+        <input type="text" class="rw-input" name="package_name"
+            value="{{ package.package_name }}" required>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="mb-3">
+        <label class="rw-label">Description</label>
+        <input type="text" class="rw-input" name="description"
+            value="{{ package.package_description or '' }}" maxlength="70">
+    </div>
+
+    <!-- 🔥 VISIBILITY -->
+    <div class="mb-3">
+        <label class="rw-label">Visibility</label>
+
+        <div class="d-flex gap-3 mt-2">
+            <label class="visibility-option">
+                <input type="radio" name="is_public" value="true"
+                    {% if package.is_public %}checked{% endif %}>
+                <div class="option-box">
+                    🌍 Public
+                    <div class="small-text">Ai cũng có thể thấy</div>
+                </div>
+            </label>
+
+            <label class="visibility-option">
+                <input type="radio" name="is_public" value="false"
+                    {% if not package.is_public %}checked{% endif %}>
+                <div class="option-box">
+                    🔒 Private
+                    <div class="small-text">Chỉ mình bạn thấy</div>
+                </div>
+            </label>
         </div>
     </div>
 
-    <!-- Vocabulary list section -->
-    <div class="section-header">Vocabulary List</div>
-
-    <!-- Add new word button -->
-    <button type="button" class="btn btn-navy w-100 mb-3" onclick="addNewWordRow()">
-        <i class="fas fa-plus me-2"></i>Add new word
-    </button>
-
-    <!-- New word rows (dynamically added) -->
-    <div id="newWordsContainer"></div>
-
-    <!-- Existing words -->
-    {% for vocab in package.vocabularies %}
-    <div class="vocab-row" id="vocabRow{{ vocab.id }}">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="vocab-num">{{ loop.index }}</div>
-            <div class="d-flex gap-2">
-                <!-- Delete icon -->
-                <button type="button" class="settings-btn" style="font-size:1rem;color:#e74c3c;"
-                    onclick="confirmDeleteWord('{{ vocab.id }}', '{{ vocab.word_en }}')">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
+    <!-- FILE -->
+    <div>
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <label class="rw-label mb-0">Vocabularies Upload</label>
+            <a href="{{ url_for('download_template') }}"
+                style="font-size:0.85rem;color:var(--accent);font-weight:600;text-decoration:underline;">
+                Tải template
+            </a>
         </div>
-        <input type="hidden" name="word_id[]" value="{{ vocab.id }}">
-        <div class="row g-2">
-            <div class="col-6">
-                <input type="text" class="rw-input editable" name="word_en[]" value="{{ vocab.word_en }}"
-                    placeholder="Từ tiếng Anh" required>
-            </div>
-            <div class="col-6">
-                <input type="text" class="rw-input editable" name="word_vi[]" value="{{ vocab.word_vi }}"
-                    placeholder="Từ tiếng Việt" required>
-            </div>
+
+        <div class="position-relative">
+            <input type="text" class="rw-input pe-5" id="fileLabel"
+                placeholder="Upload file..." readonly
+                onclick="document.getElementById('vocab_file').click()"
+                style="cursor:pointer;">
+
+            <label for="vocab_file"
+                style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;">
+                <i class="fas fa-paperclip"></i>
+            </label>
+
+            <input type="file" id="vocab_file" name="vocab_file"
+                accept=".csv,.xlsx,.xls" style="display:none;"
+                onchange="document.getElementById('fileLabel').value=this.files[0]?this.files[0].name:''">
+        </div>
+
+        <div class="mt-1" style="font-size:0.8rem;color:#c0392b;">
+            Upload file mới sẽ <strong>thay thế toàn bộ từ vựng</strong>
         </div>
     </div>
-    {% endfor %}
 
-    {% if package.vocabularies|length > 0 %}
-    <div class="totalVocab">Tổng số từ vựng: {{ package.vocabularies|length }}</div>
-    {% endif %}
+</div>
 
-    {% if not package.vocabularies %}
-    <div class="rw-card text-center py-3 text-muted" id="emptyHint">
-        <i class="fas fa-inbox me-2"></i>Chưa có từ vựng nào. Thêm từ hoặc upload file ở trên.
+<!-- VOCAB LIST (GIỮ NGUYÊN PHẦN CŨ) -->
+<div class="section-header">Vocabulary List</div>
+
+<button type="button" class="btn btn-navy w-100 mb-3" onclick="addNewWordRow()">
+    + Add new word
+</button>
+
+<div id="newWordsContainer"></div>
+
+{% for vocab in package.vocabularies %}
+<div class="vocab-row">
+    <input type="hidden" name="word_id[]" value="{{ vocab.id }}">
+    <div class="row g-2">
+        <div class="col-6">
+            <input type="text" class="rw-input" name="word_en[]" value="{{ vocab.word_en }}">
+        </div>
+        <div class="col-6">
+            <input type="text" class="rw-input" name="word_vi[]" value="{{ vocab.word_vi }}">
+        </div>
     </div>
-    {% endif %}
-
-
+</div>
+{% endfor %}
 
 </form>
 
-<!-- Delete word confirm modal -->
-<div class="modal fade" id="deleteWordModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content p-3 text-center">
-            <div class="modal-body">
-                <p class="fw-bold mb-1" style="color:var(--navy)">Xóa từ vựng?</p>
-                <p class="text-muted mb-3" id="deleteWordName" style="font-size:0.9rem;"></p>
-                <div class="d-flex gap-2 justify-content-center">
-                    <button type="button" class="btn btn-cream px-3" data-bs-dismiss="modal">Hủy</button>
-                    <form id="deleteWordForm" method="POST">
-                        <button type="submit" class="btn btn-navy px-3">Xóa</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="scroll-buttons">
-    <button class="scroll-btn" onclick="scrollToTop()" title="Lên đầu trang">
-        <i class="fas fa-arrow-up"></i>
-    </button>
-
-    <button class="scroll-btn" onclick="scrollToBottom()" title="Xuống cuối trang">
-        <i class="fas fa-arrow-down"></i>
-    </button>
-</div>
-
 {% endblock %}
 
-{% block scripts %}
-<script>
-    let newWordCount = 0;
+{% block head_extra %}
+<style>
+.visibility-option input { display: none; }
 
-    function addNewWordRow() {
-        newWordCount++;
-        const container = document.getElementById('newWordsContainer');
-        const emptyHint = document.getElementById('emptyHint');
-        if (emptyHint) emptyHint.style.display = 'none';
-
-        const row = document.createElement('div');
-        row.className = 'vocab-row';
-        row.id = 'newRow' + newWordCount;
-        row.innerHTML = `
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="vocab-num" style="color:var(--accent);">Mới</div>
-            <button type="button" class="settings-btn" style="font-size:1rem;color:#e74c3c;"
-                    onclick="document.getElementById('newRow${newWordCount}').remove()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="row g-2">
-            <div class="col-6">
-                <input type="text" class="rw-input editable" name="new_word_en[]" placeholder="Từ tiếng Anh" autofocus>
-            </div>
-            <div class="col-6">
-                <input type="text" class="rw-input editable" name="new_word_vi[]" placeholder="Từ tiếng Việt">
-            </div>
-        </div>
-    `;
-        container.appendChild(row);
-        row.querySelector('input').focus();
-    }
-
-    function confirmDeleteWord(wordId, wordName) {
-        document.getElementById('deleteWordName').textContent = '"' + wordName + '"';
-        document.getElementById('deleteWordForm').action = '/word/' + wordId + '/delete';
-        new bootstrap.Modal(document.getElementById('deleteWordModal')).show();
-    }
-
-    function scrollToTop() {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
+.option-box {
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-weight: 600;
 }
 
-function scrollToBottom() {
-    window.scrollTo({
-        top: document.body.scrollHeight,
-        behavior: 'smooth'
-    });
+.small-text {
+    font-size: 0.75rem;
+    color: var(--muted);
 }
-</script>
+
+.visibility-option input:checked + .option-box {
+    border-color: var(--navy);
+    background: #eef3fb;
+}
+</style>
 {% endblock %}

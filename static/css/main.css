@@ -41,6 +41,12 @@
     --border: #e2e8f0;
 }
 
+.section-header {
+    font-family: 'Poppins';
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 1.1rem;
+}
 
 /* ============================================================
    2. BASE / RESET
@@ -789,4 +795,72 @@ footer small {
 
 .scroll-btn:hover {
     transform: scale(1.1);
+}
+
+
+
+/*============================================================
+   23. THANH SEARCH (trang Thư viện)
+   ============================================================ */
+   /* Wrapper căn giữa */
+.search-box-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+/* Box chính */
+.search-box {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+}
+
+/* Input */
+.search-input {
+    width: 100%;
+    padding: 12px 110px 12px 40px;
+    border-radius: 20px;
+    border: 1px solid rgba(0,0,0,0.08);
+    outline: none;
+    font-size: 0.95rem;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+    transition: all 0.25s ease;
+}
+
+/* Focus effect */
+.search-input:focus {
+    border-color: var(--navy);
+    box-shadow: 0 8px 22px rgba(13,33,55,0.12);
+}
+
+/* Icon */
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* Button */
+.search-btn {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: var(--navy);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+/* Hover */
+.search-btn:hover {
+    opacity: 0.9;
 }

@@ -21,3 +21,20 @@ class User(UserMixin):
     def check_password(self, password):
         """Kiểm tra mật khẩu khi login"""
         return check_password_hash(self.password_hash, password)
+    
+
+class VocabPackage(db.Model):
+    __tablename__ = 'vocab_packages'
+
+    id = db.Column(db.Integer, primary_key=True)
+    package_name = db.Column(db.String(100), nullable=False)
+    package_description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+
+    # ✅ THÊM DÒNG NÀY
+    is_public = db.Column(db.Boolean, default=True)
+
+    vocabularies = db.relationship('Vocabulary', backref='package', lazy=True)

@@ -7,6 +7,8 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
+from sqlalchemy.sql import func
+import random
 
 load_dotenv()
 
@@ -55,7 +57,9 @@ class VocabPackage(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    is_public = db.Column(db.Boolean, default=True)
     vocabularies = db.relationship('Vocabulary', backref='package', lazy=True, cascade='all, delete-orphan')
+    
 
 
 class Vocabulary(db.Model):
@@ -122,6 +126,55 @@ def index():
         return redirect(url_for('dashboard'))
     return redirect(url_for('login'))
 
+@app.route('/dashboard')
+@login_required
+def dashboard():
+
+    # 1. Continue learning
+    recent_packages = VocabPackage.query\
+        .filter_by(user_id=current_user.id)\
+        .order_by(VocabPackage.updated_at.desc())\
+        .limit(4).all()
+
+    # 2. Explore (tạm random tất cả)
+    public_packages = VocabPackage.query\
+    .filter_by(is_public=True)\
+    .order_by(func.random())\
+    .limit(6).all()
+
+    # 3. Quick Quiz
+    user_packages = VocabPackage.query.filter_by(user_id=current_user.id).all()
+
+    quiz_package = random.choice(user_packages) if user_packages else None
+
+    quiz_words = []
+
+    if quiz_package and quiz_package.vocabularies:
+        vocabs = quiz_package.vocabularies
+        sample = random.sample(vocabs, min(5, len(vocabs)))
+
+        for v in sample:
+            wrong_pool = [x.word_vi for x in vocabs if x.id != v.id]
+
+            wrong = random.sample(wrong_pool, min(3, len(wrong_pool)))
+
+            options = wrong + [v.word_vi]
+            random.shuffle(options)
+
+            quiz_words.append({
+                "word": v.word_en,
+                "correct": v.word_vi,
+                "options": options
+            })
+
+    return render_template(
+        'index.html',
+        recent_packages=recent_packages,
+        public_packages=public_packages,
+        quiz_words=quiz_words,
+        quiz_package=quiz_package
+    )
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -176,12 +229,6 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    recent_packages = VocabPackage.query.filter_by(user_id=current_user.id)\
-        .order_by(VocabPackage.updated_at.desc()).limit(4).all()
-    return render_template('index.html', packages=recent_packages)
 
 
 @app.route('/profile')
@@ -214,10 +261,17 @@ def edit_profile():
 @app.route('/packages')
 @login_required
 def packages():
-    user_packages = VocabPackage.query.filter_by(user_id=current_user.id)\
-        .order_by(VocabPackage.updated_at.desc()).all()
-    return render_template('packages.html', packages=user_packages)
+    q = request.args.get('q', '').strip()
 
+    if q:
+        packages = VocabPackage.query.filter(
+            VocabPackage.package_name.ilike(f"%{q}%")
+        ).all()
+    else:
+        packages = VocabPackage.query.filter_by(user_id=current_user.id)\
+            .order_by(VocabPackage.updated_at.desc()).all()
+
+    return render_template('packages.html', packages=packages)
 
 @app.route('/package/<int:package_id>')
 @login_required
@@ -232,88 +286,148 @@ def package_detail(package_id):
 @app.route('/create', methods=['GET', 'POST'])
 @login_required
 def create_package():
+
     if request.method == 'POST':
         package_name = request.form.get('package_name', '').strip()
         description = request.form.get('description', '').strip()
+
+        # ✅ lấy public/private
+        is_public = request.form.get('is_public') == 'true'
+
         if not package_name:
             flash('Vui lòng nhập tên gói từ!', 'danger')
             return render_template('create_package.html')
+
         new_package = VocabPackage(
             package_name=package_name,
             package_description=description,
-            user_id=current_user.id
+            user_id=current_user.id,
+            is_public=is_public   # ✅ thêm dòng này
         )
+
         db.session.add(new_package)
         db.session.flush()
 
         file = request.files.get('vocab_file')
         imported_count = 0
+
         if file and file.filename and allowed_file(file.filename):
             result = parse_vocab_file(file.read(), file.filename)
+
             if isinstance(result, str):
                 flash(f'Lỗi file: {result}', 'warning')
             else:
                 for en, vi in result:
-                    db.session.add(Vocabulary(word_en=en, word_vi=vi, package_id=new_package.id))
+                    db.session.add(Vocabulary(
+                        word_en=en,
+                        word_vi=vi,
+                        package_id=new_package.id
+                    ))
                 imported_count = len(result)
 
         db.session.commit()
-        flash(f'Tạo gói từ thành công!' + (f' Đã import {imported_count} từ.' if imported_count else ''), 'success')
+
+        flash('Tạo gói từ thành công!', 'success')
         return redirect(url_for('package_detail', package_id=new_package.id))
+
     return render_template('create_package.html')
 
 
 @app.route('/edit/<int:package_id>', methods=['GET', 'POST'])
 @login_required
 def edit_package(package_id):
+
     package = VocabPackage.query.get_or_404(package_id)
+
+    # ❌ không phải chủ -> chặn
     if package.user_id != current_user.id:
         flash('Bạn không có quyền!', 'danger')
         return redirect(url_for('packages'))
 
     if request.method == 'POST':
+
+        # 👉 cancel
         if request.form.get('action') == 'cancel':
             return redirect(url_for('package_detail', package_id=package_id))
 
+        # 👉 validate name
         package_name = request.form.get('package_name', '').strip()
         if not package_name:
             flash('Vui lòng nhập tên gói từ!', 'danger')
             return render_template('edit_package.html', package=package)
 
+        # ====================
+        # UPDATE BASIC INFO
+        # ====================
         package.package_name = package_name
         package.package_description = request.form.get('description', '').strip()
+
+        # ✅ PUBLIC / PRIVATE
+        package.is_public = request.form.get('is_public') == 'true'
+
         package.updated_at = datetime.utcnow()
 
-        # File upload replaces all words
+        # ====================
+        # FILE UPLOAD (overwrite)
+        # ====================
         file = request.files.get('vocab_file')
+
         if file and file.filename and allowed_file(file.filename):
+
             result = parse_vocab_file(file.read(), file.filename)
+
             if isinstance(result, str):
                 flash(f'Lỗi file: {result}', 'warning')
+
             else:
+                # xoá toàn bộ từ cũ
                 Vocabulary.query.filter_by(package_id=package.id).delete()
+
+                # thêm từ mới
                 for en, vi in result:
-                    db.session.add(Vocabulary(word_en=en, word_vi=vi, package_id=package.id))
+                    db.session.add(Vocabulary(
+                        word_en=en,
+                        word_vi=vi,
+                        package_id=package.id
+                    ))
+
                 flash(f'Đã cập nhật {len(result)} từ vựng từ file.', 'info')
+
         else:
-            # Inline word edits
+            # ====================
+            # EDIT TỪ CŨ
+            # ====================
             word_ids = request.form.getlist('word_id[]')
             word_ens = request.form.getlist('word_en[]')
             word_vis = request.form.getlist('word_vi[]')
+
             for wid, en, vi in zip(word_ids, word_ens, word_vis):
                 vocab = Vocabulary.query.get(int(wid))
-                if vocab and vocab.package_id == package.id and en.strip() and vi.strip():
-                    vocab.word_en = en.strip()
-                    vocab.word_vi = vi.strip()
 
-            # New words added inline
+                if vocab and vocab.package_id == package.id:
+                    if en.strip() and vi.strip():
+                        vocab.word_en = en.strip()
+                        vocab.word_vi = vi.strip()
+
+            # ====================
+            # ADD TỪ MỚI
+            # ====================
             new_ens = request.form.getlist('new_word_en[]')
             new_vis = request.form.getlist('new_word_vi[]')
+
             for en, vi in zip(new_ens, new_vis):
                 if en.strip() and vi.strip():
-                    db.session.add(Vocabulary(word_en=en.strip(), word_vi=vi.strip(), package_id=package.id))
+                    db.session.add(Vocabulary(
+                        word_en=en.strip(),
+                        word_vi=vi.strip(),
+                        package_id=package.id
+                    ))
 
+        # ====================
+        # SAVE
+        # ====================
         db.session.commit()
+
         flash('Cập nhật gói từ thành công!', 'success')
         return redirect(url_for('package_detail', package_id=package.id))
 
