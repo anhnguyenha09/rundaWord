@@ -13,25 +13,24 @@
 </div>
 
 {% if packages %}
-<div class="row g-3">
-    {% for package in packages %}
-    <div class="col-6 col-md-4 col-lg-3">
-        <a href="{{ url_for('package_detail', package_id=package.id) }}"
-            class="pkg-card pkg-card-{{ loop.index0 % 4 }}">
-            <div class="pkg-card-name">{{ package.package_name }}</div>
-            <div class="pkg-card-meta">
-                {{ package.updated_at.strftime('%d/%m/%Y') }}
-            </div>
-        </a>
-    </div>
-    {% endfor %}
-</div>
+    <!-- hiển thị danh sách -->
 {% else %}
-<div class="rw-card text-center py-5">
-    <i class="fas fa-folder-open fa-3x mb-3" style="color:var(--muted)"></i>
-    <p class="text-muted mb-3">Bạn chưa có gói từ vựng nào</p>
-    <a href="{{ url_for('create_package') }}" class="btn btn-navy">Tạo gói đầu tiên</a>
-</div>
+
+    {% if request.args.get('q') %}
+        <!-- 🔍 search không có kết quả -->
+        <div class="rw-card text-center py-5">
+            <p class="text-muted mb-3">Không tìm thấy gói từ phù hợp</p>
+        </div>
+    {% else %}
+        <!-- 📦 chưa có gói -->
+        <div class="rw-card text-center py-5">
+            <p class="text-muted mb-3">Bạn chưa có gói từ vựng nào</p>
+            <a href="{{ url_for('create_package') }}" class="btn btn-navy">
+                Tạo gói từ đầu tiên
+            </a>
+        </div>
+    {% endif %}
+
 {% endif %}
 
 {% endblock %}

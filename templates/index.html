@@ -17,32 +17,42 @@
 <div class="section-header mb-2">Continue learning</div>
 
 <div class="row g-3 mb-4">
-    {% for package in recent_packages %}
+    {% if recent_packages %}
+        {% for package in recent_packages %}
     <div class="col-6 col-md-3">
         <a href="{{ url_for('package_detail', package_id=package.id) }}"
-            class="pkg-card pkg-card-{{ loop.index0 % 4 }}">
+           class="pkg-card pkg-card-{{ loop.index0 % 4 }}">
+           
             <div class="pkg-card-name">{{ package.package_name }}</div>
             <div class="pkg-card-meta">Học tiếp →</div>
+
         </a>
     </div>
-    {% endfor %}
+        {% endfor %}
+    {% else %}
+        <p>Bạn chưa có gói từ nào.</p>
+    {% endif %}
 </div>
 
 <!-- EXPLORE -->
 <div class="section-header mb-2">Explore</div>
 
 <div class="row g-3 mb-4">
-    {% for package in public_packages %}
-    <div class="col-6 col-md-2">
-        <a href="{{ url_for('package_detail', package_id=package.id) }}"
-            class="pkg-card">
-            <div class="pkg-card-name">{{ package.package_name }}</div>
-            <div class="pkg-card-meta">
-                {{ package.user.username if package.user else '' }}
-            </div>
-        </a>
-    </div>
-    {% endfor %}
+    {% if public_packages %}
+        {% for package in public_packages %}
+        <div class="col-6 col-md-2">
+            <a href="{{ url_for('package_detail', package_id=package.id) }}"
+               class="pkg-card">
+                <div class="pkg-card-name">{{ package.package_name }}</div>
+                <div class="pkg-card-meta">
+                    {{ package.user.username if package.user else '' }}
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>Chưa có gói từ công khai.</p>
+    {% endif %}
 </div>
 
 <!-- QUICK QUIZ -->
@@ -56,18 +66,43 @@
     </div>
 
     <div id="quickOptions">
-        {% for opt in quiz_words[0].options %}
-        <button class="option-btn">{{ opt }}</button>
-        {% endfor %}
-    </div>
+    {% for opt in quiz_words[0].options %}
+    <button class="option-btn" onclick="checkQuickAnswer(this, '{{ opt }}', '{{ quiz_words[0].correct }}')">
+        {{ opt }}
+    </button>
+    {% endfor %}
+</div>
+
+<script>
+function checkQuickAnswer(btn, selected, correct) {
+
+    document.querySelectorAll('#quickOptions .option-btn').forEach(b => {
+        b.disabled = true;
+
+        if (b.textContent === correct) {
+            b.classList.add('correct');
+        }
+    });
+
+    if (selected === correct) {
+        btn.classList.add('correct');
+    } else {
+        btn.classList.add('wrong');
+    }
+}
+</script>
+
+    <div id="quizResult" class="mt-2 text-center"></div>
 
     <div class="text-center">
         <a href="{{ url_for('quiz', package_id=quiz_package.id) }}"
-            class="btn btn-navy mt-3">
+           class="btn btn-navy mt-3">
             Làm full quiz →
         </a>
     </div>
 </div>
+
+
 {% endif %}
 
 {% endblock %}

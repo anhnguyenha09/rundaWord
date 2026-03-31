@@ -101,9 +101,11 @@
 <div id="newWordsContainer"></div>
 
 {% for vocab in package.vocabularies %}
-<div class="vocab-row">
+<div class="vocab-row d-flex align-items-center gap-2">
+    
     <input type="hidden" name="word_id[]" value="{{ vocab.id }}">
-    <div class="row g-2">
+
+    <div class="row g-2 flex-grow-1">
         <div class="col-6">
             <input type="text" class="rw-input" name="word_en[]" value="{{ vocab.word_en }}">
         </div>
@@ -111,6 +113,11 @@
             <input type="text" class="rw-input" name="word_vi[]" value="{{ vocab.word_vi }}">
         </div>
     </div>
+
+    <button type="button" class="btn btn-danger btn-sm"
+        onclick="removeRow(this)">
+        ✕
+    </button>
 </div>
 {% endfor %}
 
@@ -141,4 +148,35 @@
     background: #eef3fb;
 }
 </style>
+{% endblock %}
+{% block scripts %}
+<script>
+function addNewWordRow() {
+    const container = document.getElementById('newWordsContainer');
+
+    const div = document.createElement('div');
+    div.className = 'vocab-row d-flex align-items-center gap-2';
+
+    div.innerHTML = `
+        <div class="row g-2 flex-grow-1">
+            <div class="col-6">
+                <input type="text" class="rw-input" name="new_word_en[]" placeholder="English">
+            </div>
+            <div class="col-6">
+                <input type="text" class="rw-input" name="new_word_vi[]" placeholder="Tiếng Việt">
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">
+            ✕
+        </button>
+    `;
+
+    container.appendChild(div);
+}
+
+function removeRow(btn) {
+    btn.closest('.vocab-row').remove();
+}
+</script>
 {% endblock %}

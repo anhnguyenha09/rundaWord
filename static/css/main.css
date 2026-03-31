@@ -864,3 +864,29 @@ footer small {
 .search-btn:hover {
     opacity: 0.9;
 }
+
+/* INDEX PAGE update*/
+.pkg-card {
+    display: block;
+    padding: 16px;
+    border-radius: 12px;
+    background: #f5f7fa;
+    text-decoration: none;
+    color: #000;
+    transition: 0.2s;
+}
+
+.pkg-card:hover {
+    transform: translateY(-3px);
+    background: #e9f0ff;
+}
+
+.option-btn {
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: #eee;
+    cursor: pointer;
+}
