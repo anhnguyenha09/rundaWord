@@ -1,29 +1,6 @@
 /* ============================================================
    RUNDAWORD - MAIN STYLESHEET
-   Cấu trúc:
-   1.  CSS Variables (màu sắc, kích thước)
-   2.  Base / Reset
-   3.  Navbar
-   4.  Flash Messages
-   5.  Main Layout
-   6.  Cards chung (rw-card)
-   7.  Package Cards (gradient blue)
-   8.  Buttons
-   9.  Study Mode Buttons (Flashcard / Trắc nghiệm)
-   10. Vocabulary Rows
-   11. Form Inputs & Labels
-   12. Settings / Gear Icon
-   13. Welcome Banner (Dashboard)
-   14. Section Header
-   15. Modal
-   16. Footer
-   17. Page Title
-   18. Dropdown Menu
-   19. Flashcard Study Mode
-   20. Quiz / Multiple Choices
-   21. Profile Page
    ============================================================ */
-
 
 /* ============================================================
    1. CSS VARIABLES
@@ -41,19 +18,10 @@
     --border: #e2e8f0;
 }
 
-.section-header {
-    font-family: 'Poppins';
-    font-weight: 700;
-    color: var(--navy);
-    font-size: 1.1rem;
-}
-
 /* ============================================================
    2. BASE / RESET
    ============================================================ */
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
     font-family: 'Nunito', sans-serif;
@@ -62,15 +30,23 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    /* offset content so it's not hidden under sticky navbar */
+    padding-top: 0;
 }
 
-
 /* ============================================================
-   3. NAVBAR
+   3. NAVBAR — sticky + subtle glass effect
    ============================================================ */
 .navbar {
-    background-color: var(--navy);
-    padding: 14px 0;
+    background-color: rgba(0, 33, 71, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 12px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    transition: background-color 0.3s;
 }
 
 .navbar-brand {
@@ -80,7 +56,6 @@ body {
     text-decoration: none;
 }
 
-/* Logo box (bên trái navbar) */
 .brand-logo {
     width: 52px;
     height: 52px;
@@ -91,8 +66,6 @@ body {
     flex-shrink: 0;
 }
 
-
-/* Link Dashboard, Thư viện */
 .navbar .nav-link {
     color: white !important;
     font-weight: 600;
@@ -100,19 +73,16 @@ body {
     padding: 6px 18px;
     border-radius: 8px;
     transition: background 0.15s;
-    margin: 0 30px 0 30px
+    margin: 0 4px;
 }
 
-.navbar .nav-link:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
+.navbar .nav-link:hover { background: rgba(255,255,255,0.12); }
 
-/* Nút icon profile (hình tròn viền trắng, góc phải navbar) */
 .navbar-icon-btn {
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(255,255,255,0.45);
     color: white;
     display: flex;
     align-items: center;
@@ -123,40 +93,19 @@ body {
     transition: background 0.15s;
     text-decoration: none;
 }
-
-/* Ẩn mũi tên dropdown mặc định Bootstrap */
-.navbar-icon-btn::after {
-    display: none !important;
-}
-
-.navbar-icon-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-}
-
+.navbar-icon-btn::after { display: none !important; }
+.navbar-icon-btn:hover  { background: rgba(255,255,255,0.15); color: white; }
 
 /* ============================================================
    4. FLASH MESSAGES
    ============================================================ */
-.flash-container {
-    padding: 0;
-}
-
-.alert {
-    border-radius: 10px;
-    border: none;
-    font-weight: 600;
-}
-
+.flash-container { padding: 0; }
+.alert { border-radius: 10px; border: none; font-weight: 600; }
 
 /* ============================================================
    5. MAIN LAYOUT
    ============================================================ */
-main {
-    flex: 1;
-    padding: 32px 0;
-}
-
+main { flex: 1; padding: 32px 0; }
 
 /* ============================================================
    6. CARDS CHUNG (rw-card)
@@ -168,79 +117,46 @@ main {
     padding: 20px;
     transition: box-shadow 0.2s, transform 0.15s;
 }
-
-.rw-card:hover {
-    box-shadow: 0 4px 20px rgba(13, 33, 55, 0.08);
-}
-
-.rw-card-link {
-    text-decoration: none;
-    color: inherit;
-    display: block;
-}
-
-.rw-card-link:hover {
-    color: inherit;
-}
-
+.rw-card:hover { box-shadow: 0 4px 20px rgba(13,33,55,0.08); }
 
 /* ============================================================
-   7. PACKAGE CARDS (gradient xanh, dùng ở Dashboard & Thư viện)
+   7. PACKAGE CARDS (gradient xanh) — single definition, no override
    ============================================================ */
 .pkg-card {
-    background: linear-gradient(145deg, #3a6ea5, #6a9fd8);
     border-radius: 16px;
     padding: 22px 20px 18px;
-    color: white;
+    color: white !important;
     cursor: pointer;
-    text-decoration: none;
+    text-decoration: none !important;
     display: block;
     transition: transform 0.15s, box-shadow 0.2s;
     min-height: 110px;
+    border: none;
+    /* default gradient if no modifier class */
+    background: linear-gradient(145deg, #3a6ea5, #6a9fd8);
 }
-
 .pkg-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(58, 110, 165, 0.35);
-    color: white;
+    box-shadow: 0 8px 24px rgba(58,110,165,0.35);
+    color: white !important;
 }
-
 .pkg-card-name {
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     margin-bottom: 10px;
+    color: white;
 }
+.pkg-card-meta { font-size: 0.82rem; opacity: 0.85; color: white; }
 
-.pkg-card-meta {
-    font-size: 0.82rem;
-    opacity: 0.85;
-}
-
-/* Màu gradient theo vị trí (loop.index0 % 4) */
-.pkg-card-0 {
-    background: linear-gradient(145deg, #2a5298, #4a7fc1);
-}
-
-.pkg-card-1 {
-    background: linear-gradient(145deg, #3a6ea5, #6a9fd8);
-}
-
-.pkg-card-2 {
-    background: linear-gradient(145deg, #5b8fc9, #8ab4e0);
-}
-
-.pkg-card-3 {
-    background: linear-gradient(145deg, #7aaad6, #a8cce8);
-    color: var(--navy);
-}
-
+.pkg-card-0 { background: linear-gradient(145deg, #2a5298, #4a7fc1); }
+.pkg-card-1 { background: linear-gradient(145deg, #3a6ea5, #6a9fd8); }
+.pkg-card-2 { background: linear-gradient(145deg, #5b8fc9, #8ab4e0); }
+.pkg-card-3 { background: linear-gradient(145deg, #1a5cad, #4a8fd8); }
 
 /* ============================================================
    8. BUTTONS
    ============================================================ */
-
-/* Nút tối (navy) — action chính: Save, Create, Submit */
 .btn-navy {
     background: var(--navy);
     color: white;
@@ -250,13 +166,8 @@ main {
     padding: 10px 22px;
     transition: background 0.15s;
 }
+.btn-navy:hover { background: var(--navy-light); color: white; }
 
-.btn-navy:hover {
-    background: var(--navy-light);
-    color: white;
-}
-
-/* Nút kem — action phụ: Cancel */
 .btn-cream {
     background: var(--cream-btn);
     color: var(--navy);
@@ -266,13 +177,8 @@ main {
     padding: 10px 22px;
     transition: background 0.15s;
 }
+.btn-cream:hover { background: #d9d0be; color: var(--navy); }
 
-.btn-cream:hover {
-    background: #d9d0be;
-    color: var(--navy);
-}
-
-/* Nút outline navy */
 .btn-outline-navy {
     background: transparent;
     color: var(--navy);
@@ -281,18 +187,11 @@ main {
     font-weight: 700;
     padding: 8px 20px;
 }
-
-.btn-outline-navy:hover {
-    background: var(--navy);
-    color: white;
-}
-
+.btn-outline-navy:hover { background: var(--navy); color: white; }
 
 /* ============================================================
-   9. STUDY MODE BUTTONS (trang chi tiết gói từ)
+   9. STUDY MODE BUTTONS (legacy — kept for compatibility)
    ============================================================ */
-
-/* Nút Flashcard (kem, nền sáng) */
 .btn-study-flashcard {
     background: var(--cream-btn);
     color: var(--navy);
@@ -304,13 +203,8 @@ main {
     flex: 1;
     transition: background 0.15s;
 }
+.btn-study-flashcard:hover { background: #d0c8b5; color: var(--navy); }
 
-.btn-study-flashcard:hover {
-    background: #d0c8b5;
-    color: var(--navy);
-}
-
-/* Nút Trắc nghiệm (navy đậm) */
 .btn-study-quiz {
     background: var(--navy);
     color: white;
@@ -322,18 +216,11 @@ main {
     flex: 1;
     transition: background 0.15s;
 }
-
-.btn-study-quiz:hover {
-    background: var(--navy-light);
-    color: white;
-}
-
+.btn-study-quiz:hover { background: var(--navy-light); color: white; }
 
 /* ============================================================
-   10. VOCABULARY ROWS (danh sách từ trong gói)
+   10. VOCABULARY ROWS
    ============================================================ */
-
-/* Ô chứa 1 cặp từ EN - VI */
 .vocab-row {
     background: white;
     border: 1px solid var(--border);
@@ -341,16 +228,12 @@ main {
     padding: 14px 16px;
     margin-bottom: 10px;
 }
-
-/* Số thứ tự từ (1, 2, 3...) */
 .vocab-row .vocab-num {
     font-weight: 800;
     color: var(--muted);
     font-size: 0.9rem;
     margin-bottom: 8px;
 }
-
-/* Ô từ (chế độ xem - read only style) */
 .vocab-field {
     background: var(--bg);
     border: 1px solid var(--border);
@@ -359,13 +242,17 @@ main {
     font-size: 0.95rem;
     width: 100%;
 }
-
+.totalVocab {
+    text-align: right;
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 600;
+    margin-top: 8px;
+}
 
 /* ============================================================
    11. FORM INPUTS & LABELS
    ============================================================ */
-
-/* Input text dùng chung */
 .rw-input {
     width: 100%;
     border: 1px solid var(--border);
@@ -377,20 +264,11 @@ main {
     color: var(--text);
     transition: border-color 0.15s, box-shadow 0.15s;
 }
-
 .rw-input:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(26, 92, 173, 0.12);
+    box-shadow: 0 0 0 3px rgba(26,92,173,0.12);
 }
-
-/* Chế độ edit — viền xanh luôn hiển thị (trang sửa gói từ) */
-.rw-input.editable {
-    border-color: var(--accent);
-    background: white;
-}
-
-/* Label */
 .rw-label {
     font-weight: 700;
     color: var(--navy);
@@ -399,9 +277,8 @@ main {
     font-size: 0.92rem;
 }
 
-
 /* ============================================================
-   12. SETTINGS / GEAR ICON (nút ⚙️ mở dropdown Edit/Delete)
+   12. SETTINGS / GEAR ICON
    ============================================================ */
 .settings-btn {
     background: none;
@@ -412,14 +289,10 @@ main {
     padding: 4px;
     transition: color 0.15s;
 }
-
-.settings-btn:hover {
-    color: var(--navy);
-}
-
+.settings-btn:hover { color: var(--navy); }
 
 /* ============================================================
-   13. WELCOME BANNER (trang Dashboard)
+   13. WELCOME BANNER
    ============================================================ */
 .welcome-banner {
     background: var(--navy);
@@ -430,34 +303,16 @@ main {
     overflow: hidden;
     margin-bottom: 32px;
 }
-
 .welcome-banner h2 {
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
     font-size: 1.6rem;
     margin-bottom: 6px;
 }
-
-.welcome-banner p {
-    opacity: 0.8;
-    margin: 0;
-    font-size: 1rem;
-}
-
-/* SVG thước kẻ trang trí góc phải banner */
-.welcome-ruler {
-    position: absolute;
-    right: -10px;
-    bottom: -20px;
-    width: 220px;
-    opacity: 0.12;
-    transform: rotate(-10deg);
-}
-
+.welcome-banner p { opacity: 0.8; margin: 0; font-size: 1rem; }
 
 /* ============================================================
    14. SECTION HEADER
-   Dùng cho: "Chế độ học", "Danh sách từ vựng", "Recently learned"
    ============================================================ */
 .section-header {
     font-family: 'Poppins', sans-serif;
@@ -467,25 +322,12 @@ main {
     margin-bottom: 16px;
 }
 
-
 /* ============================================================
-   15. MODAL (hộp thoại xác nhận xóa)
+   15. MODAL
    ============================================================ */
-.modal-content {
-    border-radius: 16px;
-    border: none;
-}
-
-.modal-header {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-
-.modal-footer {
-    border-top: none;
-    padding-top: 0;
-}
-
+.modal-content  { border-radius: 16px; border: none; }
+.modal-header   { border-bottom: none; padding-bottom: 0; }
+.modal-footer   { border-top: none; padding-top: 0; }
 
 /* ============================================================
    16. FOOTER
@@ -495,27 +337,19 @@ footer {
     color: white;
     padding: 28px 0 20px;
 }
-
 footer .footer-logo-text {
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
     font-size: 1rem;
 }
-
-footer p {
-    font-size: 0.88rem;
-    opacity: 0.85;
-    margin: 3px 0;
-}
-
-footer small {
-    opacity: 0.6;
-    font-size: 0.8rem;
-}
-
+footer p        { font-size: 0.88rem; opacity: 0.85; margin: 3px 0; }
+footer small    { opacity: 0.6; font-size: 0.8rem; }
+/* Ensure footer logo SVG/IMG is always white-ish */
+footer .brand-logo img,
+footer .brand-logo svg { filter: brightness(0) invert(1); }
 
 /* ============================================================
-   17. PAGE TITLE (tiêu đề trang lớn, ví dụ: "Politics", "Edit...")
+   17. PAGE TITLE
    ============================================================ */
 .page-title {
     font-family: 'Poppins', sans-serif;
@@ -524,44 +358,28 @@ footer small {
     color: var(--navy);
     margin-bottom: 4px;
 }
-
-.page-desc {
-    color: var(--muted);
-    margin-bottom: 24px;
-    font-size: 0.9rem;
-}
-
+.page-desc { color: var(--muted); margin-bottom: 24px; font-size: 0.9rem; }
 
 /* ============================================================
-   18. DROPDOWN MENU (menu người dùng góc phải navbar)
+   18. DROPDOWN MENU
    ============================================================ */
 .dropdown-menu {
     border-radius: 12px;
     border: 1px solid var(--border);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
 }
-
 .dropdown-item {
     font-weight: 600;
     padding: 8px 16px;
     border-radius: 8px;
     margin: 2px 4px;
 }
-
-.dropdown-item:hover {
-    background: var(--bg);
-}
-
-.dropdown-item.text-danger:hover {
-    background: #fff0f0;
-}
-
+.dropdown-item:hover           { background: var(--bg); }
+.dropdown-item.text-danger:hover { background: #fff0f0; }
 
 /* ============================================================
-   19. FLASHCARD STUDY MODE (trang /flashcard)
+   19. FLASHCARD
    ============================================================ */
-
-/* Vùng chứa thẻ — tạo hiệu ứng 3D perspective */
 .flashcard-area {
     perspective: 1000px;
     width: 100%;
@@ -569,109 +387,54 @@ footer small {
     height: 280px;
     margin: 0 auto 28px;
     cursor: pointer;
+    user-select: none;
 }
-
-/* Thẻ lật */
 .flashcard {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     position: relative;
     transform-style: preserve-3d;
     transition: transform 0.5s ease;
 }
-
-/* Đã lật (click để lật) */
-.flashcard.flipped {
-    transform: rotateY(180deg);
-}
-
-/* Mặt chung (trước và sau) */
+.flashcard.flipped { transform: rotateY(180deg); }
 .fc-face {
-    position: absolute;
-    width: 100%;
-    height: 100%;
+    position: absolute; width: 100%; height: 100%;
     backface-visibility: hidden;
     border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
     padding: 32px;
     border: 1px solid var(--border);
 }
-
-/* Mặt trước: từ tiếng Anh */
-.fc-front {
-    background: white;
-    box-shadow: 0 4px 20px rgba(13, 33, 55, 0.08);
-}
-
-/* Mặt sau: nghĩa tiếng Việt (xoay ngược lúc đầu) */
-.fc-back {
-    background: white;
-    box-shadow: 0 4px 20px rgba(13, 33, 55, 0.08);
-    transform: rotateY(180deg);
-}
-
-/* Từ lớn hiển thị trên thẻ */
-.fc-word {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: var(--navy);
-    text-align: center;
-}
-
-/* Gợi ý nhỏ bên dưới từ */
-.fc-hint {
-    font-size: 0.82rem;
-    color: var(--muted);
-    margin-top: 12px;
-}
-
-/* Nút < > điều hướng thẻ (hình tròn) */
+.fc-front { background: white; box-shadow: 0 4px 20px rgba(13,33,55,0.08); }
+.fc-back  { background: white; box-shadow: 0 4px 20px rgba(13,33,55,0.08); transform: rotateY(180deg); }
+.fc-word  { font-size: 2.2rem; font-weight: 800; color: var(--navy); text-align: center; }
+.fc-hint  { font-size: 0.82rem; color: var(--muted); margin-top: 12px; }
 .nav-circle {
-    width: 48px;
-    height: 48px;
+    width: 48px; height: 48px;
     border-radius: 50%;
     background: var(--bg);
     border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 1rem;
-    color: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1rem; color: var(--navy);
     transition: background 0.15s;
 }
-
-.nav-circle:hover {
-    background: var(--border);
-}
-
-.nav-circle:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-}
-
+.nav-circle:hover    { background: var(--border); }
+.nav-circle:disabled { opacity: 0.35; cursor: not-allowed; }
 
 /* ============================================================
-   20. QUIZ / MULTIPLE CHOICES (trang /quiz)
+   20. QUIZ / MULTIPLE CHOICES
    ============================================================ */
-
-/* Ô chứa câu hỏi */
 .quiz-card {
     background: white;
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 48px 40px;
-    min-height: 360px;
+    padding: 40px 32px;
+    min-height: 160px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
-
-/* Nút lựa chọn đáp án */
 .option-btn {
     width: 100%;
     text-align: left;
@@ -687,62 +450,23 @@ footer small {
     margin-bottom: 10px;
     color: var(--navy);
 }
-
-.option-btn:hover:not(:disabled) {
-    border-color: var(--accent);
-    background: #eef3fb;
-}
-
-/* Đáp án đúng */
-.option-btn.correct {
-    border-color: #27ae60;
-    background: #eafaf1;
-    color: #1e8449;
-}
-
-/* Đáp án sai */
-.option-btn.wrong {
-    border-color: #e74c3c;
-    background: #fdf2f2;
-    color: #c0392b;
-}
-
-/* Từ cần đoán */
-.q-word {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--navy);
-    text-align: center;
-}
-
-/* Gợi ý nhỏ */
-.q-prompt {
-    color: var(--muted);
-    font-size: 0.88rem;
-    margin-bottom: 16px;
-    text-align: center;
-}
-
-/* Vòng tròn điểm kết quả */
+.option-btn:hover:not(:disabled) { border-color: var(--accent); background: #eef3fb; }
+.option-btn.correct { border-color: #27ae60; background: #eafaf1; color: #1e8449; }
+.option-btn.wrong   { border-color: #e74c3c; background: #fdf2f2; color: #c0392b; }
+.q-word   { font-size: 2rem; font-weight: 800; color: var(--navy); text-align: center; }
+.q-prompt { color: var(--muted); font-size: 0.88rem; margin-bottom: 16px; text-align: center; }
 .score-circle {
-    width: 110px;
-    height: 110px;
+    width: 110px; height: 110px;
     border-radius: 50%;
     border: 6px solid;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; font-weight: 800;
     margin: 0 auto 20px;
 }
-
 
 /* ============================================================
    21. PROFILE PAGE
    ============================================================ */
-
-/* Label phần thông tin (NAME / USERNAME / EMAIL) */
 .profile-label {
     color: var(--muted);
     font-size: 0.82rem;
@@ -751,26 +475,13 @@ footer small {
     letter-spacing: 0.05em;
     margin-bottom: 4px;
 }
+.profile-value { font-weight: 700; font-size: 1rem; }
+.profile-stat  { font-weight: 800; font-size: 1.4rem; color: var(--navy); }
 
-/* Giá trị thông tin */
-.profile-value {
-    font-weight: 700;
-    font-size: 1rem;
-}
-
-/* Số thống kê lớn (21 packages...) */
-.profile-stat {
-    font-weight: 800;
-    font-size: 1.4rem;
-    color: var(--navy);
-}
-
-
-
-/*============================================================
-   22. SCROLL TO TOP / BOTTOM BUTTONS (trang sửa gói từ)
+/* ============================================================
+   22. SCROLL BUTTONS
    ============================================================ */
-   .scroll-buttons {
+.scroll-buttons {
     position: fixed;
     right: 20px;
     bottom: 40px;
@@ -779,10 +490,8 @@ footer small {
     gap: 10px;
     z-index: 999;
 }
-
 .scroll-btn {
-    width: 44px;
-    height: 44px;
+    width: 44px; height: 44px;
     border-radius: 50%;
     border: none;
     background: var(--navy);
@@ -792,30 +501,13 @@ footer small {
     cursor: pointer;
     transition: transform 0.15s ease;
 }
+.scroll-btn:hover { transform: scale(1.1); }
 
-.scroll-btn:hover {
-    transform: scale(1.1);
-}
-
-
-
-/*============================================================
-   23. THANH SEARCH (trang Thư viện)
+/* ============================================================
+   23. SEARCH BOX
    ============================================================ */
-   /* Wrapper căn giữa */
-.search-box-wrapper {
-    display: flex;
-    justify-content: center;
-}
-
-/* Box chính */
-.search-box {
-    position: relative;
-    width: 100%;
-    max-width: 520px;
-}
-
-/* Input */
+.search-box-wrapper { display: flex; justify-content: center; }
+.search-box { position: relative; width: 100%; max-width: 520px; }
 .search-input {
     width: 100%;
     padding: 12px 110px 12px 40px;
@@ -827,28 +519,20 @@ footer small {
     box-shadow: 0 6px 18px rgba(0,0,0,0.05);
     transition: all 0.25s ease;
 }
-
-/* Focus effect */
 .search-input:focus {
     border-color: var(--navy);
     box-shadow: 0 8px 22px rgba(13,33,55,0.12);
 }
-
-/* Icon */
 .search-icon {
     position: absolute;
-    left: 14px;
-    top: 50%;
+    left: 14px; top: 50%;
     transform: translateY(-50%);
     color: var(--muted);
     font-size: 0.9rem;
 }
-
-/* Button */
 .search-btn {
     position: absolute;
-    right: 6px;
-    top: 50%;
+    right: 6px; top: 50%;
     transform: translateY(-50%);
     border: none;
     background: var(--navy);
@@ -857,36 +541,7 @@ footer small {
     border-radius: 14px;
     font-size: 0.8rem;
     font-weight: 600;
-    transition: all 0.2s ease;
-}
-
-/* Hover */
-.search-btn:hover {
-    opacity: 0.9;
-}
-
-/* INDEX PAGE update*/
-.pkg-card {
-    display: block;
-    padding: 16px;
-    border-radius: 12px;
-    background: #f5f7fa;
-    text-decoration: none;
-    color: #000;
-    transition: 0.2s;
-}
-
-.pkg-card:hover {
-    transform: translateY(-3px);
-    background: #e9f0ff;
-}
-
-.option-btn {
-    width: 100%;
-    margin-bottom: 8px;
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    background: #eee;
+    transition: opacity 0.2s;
     cursor: pointer;
 }
+.search-btn:hover { opacity: 0.88; }

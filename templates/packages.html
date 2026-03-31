@@ -5,32 +5,48 @@
 {% set action_url = url_for('packages') %}
 {% set placeholder = "Tìm trong thư viện..." %}
 {% include "components/search_box.html" %}
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div class="page-title mb-0">Vocabulary Packages</div>
     <a href="{{ url_for('create_package') }}" class="btn btn-navy">
-        Create new package
+        + Create new package
     </a>
 </div>
 
 {% if packages %}
-    <!-- hiển thị danh sách -->
+<div class="row g-3">
+    {% for package in packages %}
+    <div class="col-6 col-md-3">
+        <a href="{{ url_for('package_detail', package_id=package.id) }}"
+           class="pkg-card pkg-card-{{ loop.index0 % 4 }}">
+            <div class="pkg-card-name">{{ package.package_name }}</div>
+            <div class="pkg-card-meta">
+                {% if package.user %}{{ package.user.username }}  · {% endif %}
+                {{ package.vocabularies | length }} từ
+                {% if not package.is_public %} · 🔒{% endif %}
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
 {% else %}
-
     {% if request.args.get('q') %}
-        <!-- 🔍 search không có kết quả -->
-        <div class="rw-card text-center py-5">
-            <p class="text-muted mb-3">Không tìm thấy gói từ phù hợp</p>
-        </div>
+    <div class="rw-card text-center py-5">
+        <i class="fas fa-search fa-2x mb-3" style="color:var(--muted)"></i>
+        <p class="text-muted mb-3">
+            Không tìm thấy gói từ phù hợp với "<strong>{{ request.args.get('q') }}</strong>"
+        </p>
+        <a href="{{ url_for('packages') }}" class="btn btn-cream">Xem tất cả</a>
+    </div>
     {% else %}
-        <!-- 📦 chưa có gói -->
-        <div class="rw-card text-center py-5">
-            <p class="text-muted mb-3">Bạn chưa có gói từ vựng nào</p>
-            <a href="{{ url_for('create_package') }}" class="btn btn-navy">
-                Tạo gói từ đầu tiên
-            </a>
-        </div>
+    <div class="rw-card text-center py-5">
+        <i class="fas fa-box-open fa-2x mb-3" style="color:var(--muted)"></i>
+        <p class="text-muted mb-3">Bạn chưa có gói từ vựng nào</p>
+        <a href="{{ url_for('create_package') }}" class="btn btn-navy">
+            Tạo gói từ đầu tiên
+        </a>
+    </div>
     {% endif %}
-
 {% endif %}
 
 {% endblock %}

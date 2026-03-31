@@ -8,10 +8,50 @@
     <p>Time for some lessons today!</p>
 </div>
 
-<!-- SEARCH -->
-{% set action_url = url_for('packages') %}
-{% set placeholder = "Tìm gói từ vựng..." %}
-{% include "components/search_box.html" %}
+<!-- SEARCH stays on dashboard -->
+<div class="search-box-wrapper mb-4">
+    <form method="GET" action="{{ url_for('dashboard') }}" class="search-box">
+        <i class="fas fa-search search-icon"></i>
+        <input
+            type="text"
+            name="q"
+            placeholder="Tìm gói từ vựng..."
+            value="{{ search_query or '' }}"
+            class="search-input"
+        >
+        <button type="submit" class="search-btn">Search</button>
+    </form>
+</div>
+
+<!-- SEARCH RESULTS (only shown when query present) -->
+{% if search_query is not none and search_query != '' %}
+<div class="section-header mb-2">
+    🔍 Kết quả cho "<strong>{{ search_query }}</strong>"
+    <a href="{{ url_for('dashboard') }}" style="font-size:0.8rem;font-weight:600;color:var(--muted);margin-left:12px;">✕ Xoá tìm kiếm</a>
+</div>
+
+{% if search_results %}
+<div class="row g-3 mb-5">
+    {% for package in search_results %}
+    <div class="col-6 col-md-3">
+        <a href="{{ url_for('package_detail', package_id=package.id) }}"
+           class="pkg-card pkg-card-{{ loop.index0 % 4 }}">
+            <div class="pkg-card-name">{{ package.package_name }}</div>
+            <div class="pkg-card-meta">
+                {{ package.user.username if package.user else '' }}
+                · {{ package.vocabularies | length }} từ
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="rw-card text-center py-4 mb-5">
+    <p class="text-muted mb-0">Không tìm thấy gói từ nào phù hợp.</p>
+</div>
+{% endif %}
+
+{% else %}
 
 <!-- CONTINUE LEARNING -->
 <div class="section-header mb-2">Continue learning</div>
@@ -22,15 +62,18 @@
     <div class="col-6 col-md-3">
         <a href="{{ url_for('package_detail', package_id=package.id) }}"
            class="pkg-card pkg-card-{{ loop.index0 % 4 }}">
-           
             <div class="pkg-card-name">{{ package.package_name }}</div>
-            <div class="pkg-card-meta">Học tiếp →</div>
-
+            <div class="pkg-card-meta">{{ package.vocabularies | length }} từ · Học tiếp →</div>
         </a>
     </div>
         {% endfor %}
     {% else %}
-        <p>Bạn chưa có gói từ nào.</p>
+        <div class="col-12">
+            <div class="rw-card text-center py-3">
+                <p class="text-muted mb-2">Bạn chưa có gói từ nào.</p>
+                <a href="{{ url_for('create_package') }}" class="btn btn-navy btn-sm">Tạo gói từ đầu tiên</a>
+            </div>
+        </div>
     {% endif %}
 </div>
 
@@ -42,16 +85,17 @@
         {% for package in public_packages %}
         <div class="col-6 col-md-2">
             <a href="{{ url_for('package_detail', package_id=package.id) }}"
-               class="pkg-card">
+               class="pkg-card pkg-card-{{ loop.index0 % 4 }}">
                 <div class="pkg-card-name">{{ package.package_name }}</div>
                 <div class="pkg-card-meta">
                     {{ package.user.username if package.user else '' }}
+                    · {{ package.vocabularies | length }} từ
                 </div>
             </a>
         </div>
         {% endfor %}
     {% else %}
-        <p>Chưa có gói từ công khai.</p>
+        <p class="text-muted">Chưa có gói từ công khai.</p>
     {% endif %}
 </div>
 
@@ -67,30 +111,11 @@
 
     <div id="quickOptions">
     {% for opt in quiz_words[0].options %}
-    <button class="option-btn" onclick="checkQuickAnswer(this, '{{ opt }}', '{{ quiz_words[0].correct }}')">
+    <button class="option-btn" onclick="checkQuickAnswer(this, '{{ opt | e }}', '{{ quiz_words[0].correct | e }}')">
         {{ opt }}
     </button>
     {% endfor %}
-</div>
-
-<script>
-function checkQuickAnswer(btn, selected, correct) {
-
-    document.querySelectorAll('#quickOptions .option-btn').forEach(b => {
-        b.disabled = true;
-
-        if (b.textContent === correct) {
-            b.classList.add('correct');
-        }
-    });
-
-    if (selected === correct) {
-        btn.classList.add('correct');
-    } else {
-        btn.classList.add('wrong');
-    }
-}
-</script>
+    </div>
 
     <div id="quizResult" class="mt-2 text-center"></div>
 
@@ -101,8 +126,26 @@ function checkQuickAnswer(btn, selected, correct) {
         </a>
     </div>
 </div>
-
-
 {% endif %}
 
+{% endif %}{# end search/normal toggle #}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function checkQuickAnswer(btn, selected, correct) {
+    document.querySelectorAll('#quickOptions .option-btn').forEach(b => {
+        b.disabled = true;
+        if (b.textContent.trim() === correct.trim()) {
+            b.classList.add('correct');
+        }
+    });
+    if (selected.trim() === correct.trim()) {
+        btn.classList.add('correct');
+    } else {
+        btn.classList.add('wrong');
+    }
+}
+</script>
 {% endblock %}

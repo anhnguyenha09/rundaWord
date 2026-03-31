@@ -57,9 +57,8 @@ class VocabPackage(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    is_public = db.Column(db.Boolean, default=True)
+    is_public = db.Column(db.Boolean, default=True)   # ✓ already exists in DB
     vocabularies = db.relationship('Vocabulary', backref='package', lazy=True, cascade='all, delete-orphan')
-    
 
 
 class Vocabulary(db.Model):
@@ -126,17 +125,23 @@ def index():
         return redirect(url_for('dashboard'))
     return redirect(url_for('login'))
 
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    q = request.args.get('q', '').strip()
+    search_results = None
+    if q:
+        search_results = VocabPackage.query.filter(
+            VocabPackage.package_name.ilike(f"%{q}%"),
+            VocabPackage.is_public == True
+        ).order_by(VocabPackage.updated_at.desc()).limit(12).all()
 
-    # ===== 1. Continue learning =====
     recent_packages = VocabPackage.query\
         .filter_by(user_id=current_user.id)\
         .order_by(VocabPackage.updated_at.desc())\
         .limit(4).all()
 
-    # ===== 2. Explore =====
     public_packages = VocabPackage.query\
         .filter(
             VocabPackage.is_public == True,
@@ -145,27 +150,18 @@ def dashboard():
         .order_by(func.random())\
         .limit(6).all()
 
-    # ===== 3. Quick Quiz =====
     user_packages = VocabPackage.query.filter_by(user_id=current_user.id).all()
-
     quiz_package = random.choice(user_packages) if user_packages else None
-
     quiz_words = []
-
     if quiz_package:
-        vocabs = quiz_package.vocabularies
-
+        vocabs = list(quiz_package.vocabularies)
         if len(vocabs) >= 2:
             sample = random.sample(vocabs, min(5, len(vocabs)))
-
             for v in sample:
                 wrong_pool = [x.word_vi for x in vocabs if x.id != v.id]
-
                 wrong = random.sample(wrong_pool, min(3, len(wrong_pool)))
-
                 options = wrong + [v.word_vi]
                 random.shuffle(options)
-
                 quiz_words.append({
                     "word": v.word_en,
                     "correct": v.word_vi,
@@ -177,7 +173,9 @@ def dashboard():
         recent_packages=recent_packages,
         public_packages=public_packages,
         quiz_words=quiz_words,
-        quiz_package=quiz_package
+        quiz_package=quiz_package,
+        search_results=search_results,
+        search_query=q
     )
 
 
@@ -234,8 +232,6 @@ def logout():
     return redirect(url_for('login'))
 
 
-
-
 @app.route('/profile')
 @login_required
 def profile():
@@ -266,40 +262,33 @@ def edit_profile():
 @app.route('/packages')
 @login_required
 def packages():
-
     q = request.args.get('q', '').strip()
-
     if q:
-        packages = VocabPackage.query.filter(
+        pkgs = VocabPackage.query.filter(
             VocabPackage.package_name.ilike(f"%{q}%")
         ).all()
-
-        if not packages:
+        if not pkgs:
             flash('Không tìm thấy gói từ phù hợp.', 'warning')
     else:
-        packages = VocabPackage.query.filter_by(user_id=current_user.id)\
+        pkgs = VocabPackage.query.filter_by(user_id=current_user.id)\
             .order_by(VocabPackage.updated_at.desc()).all()
+    return render_template('packages.html', packages=pkgs)
 
-    return render_template('packages.html', packages=packages)
 
 @app.route('/package/<int:package_id>')
 @login_required
 def package_detail(package_id):
-
     package = VocabPackage.query.get_or_404(package_id)
-
-    # cho phép nếu là chủ hoặc public
     if package.user_id != current_user.id and not package.is_public:
         flash('Bạn không có quyền truy cập gói từ này!', 'danger')
         return redirect(url_for('packages'))
-
-    return render_template('package_detail.html', package=package)
+    is_owner = (package.user_id == current_user.id)
+    return render_template('package_detail.html', package=package, is_owner=is_owner)
 
 
 @app.route('/create', methods=['GET', 'POST'])
 @login_required
 def create_package():
-
     if request.method == 'POST':
         package_name = request.form.get('package_name', '').strip()
         description = request.form.get('description', '').strip()
@@ -315,45 +304,37 @@ def create_package():
             user_id=current_user.id,
             is_public=is_public
         )
-
         db.session.add(new_package)
         db.session.flush()
 
         file = request.files.get('vocab_file')
-
         if file and file.filename and allowed_file(file.filename):
             result = parse_vocab_file(file.read(), file.filename)
-
             if isinstance(result, str):
                 flash(f'Lỗi file: {result}', 'warning')
             else:
                 for en, vi in result:
-                    db.session.add(Vocabulary(
-                        word_en=en,
-                        word_vi=vi,
-                        package_id=new_package.id
-                    ))
+                    db.session.add(Vocabulary(word_en=en, word_vi=vi, package_id=new_package.id))
 
         db.session.commit()
-
         flash('Tạo gói từ thành công!', 'success')
         return redirect(url_for('package_detail', package_id=new_package.id))
 
     return render_template('create_package.html')
 
+
 @app.route('/package/<int:package_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_package(package_id):
-
-    if request.form.get('action') == 'cancel':
-        return redirect(url_for('package_detail', package_id=package.id))
-
     package = VocabPackage.query.get_or_404(package_id)
 
     if package.user_id != current_user.id:
+        flash('Bạn không có quyền chỉnh sửa gói từ này!', 'danger')
         return redirect(url_for('packages'))
 
     if request.method == 'POST':
+        if request.form.get('action') == 'cancel':
+            return redirect(url_for('package_detail', package_id=package.id))
 
         package.package_name = request.form.get('package_name', '').strip()
         package.package_description = request.form.get('description', '').strip()
@@ -361,80 +342,82 @@ def edit_package(package_id):
         package.updated_at = datetime.utcnow()
 
         file = request.files.get('vocab_file')
-
-        # ===== upload file → overwrite =====
         if file and file.filename and allowed_file(file.filename):
-
             result = parse_vocab_file(file.read(), file.filename)
-
             if isinstance(result, str):
                 flash(f'Lỗi file: {result}', 'warning')
             else:
                 Vocabulary.query.filter_by(package_id=package.id).delete()
-
                 for en, vi in result:
-                    db.session.add(Vocabulary(
-                        word_en=en,
-                        word_vi=vi,
-                        package_id=package.id
-                    ))
-
+                    db.session.add(Vocabulary(word_en=en, word_vi=vi, package_id=package.id))
                 flash(f'Đã cập nhật {len(result)} từ vựng.', 'info')
-
         else:
-    # ===== 1. EDIT TỪ CŨ =====
             word_ids = request.form.getlist('word_id[]')
             word_ens = request.form.getlist('word_en[]')
             word_vis = request.form.getlist('word_vi[]')
 
             for wid, en, vi in zip(word_ids, word_ens, word_vis):
                 vocab = Vocabulary.query.get(int(wid))
-        if vocab and vocab.package_id == package.id:
-            if en.strip() and vi.strip():
-                vocab.word_en = en.strip()
-                vocab.word_vi = vi.strip()
+                if vocab and vocab.package_id == package.id:
+                    if en.strip() and vi.strip():
+                        vocab.word_en = en.strip()
+                        vocab.word_vi = vi.strip()
 
-    # ===== 2. XOÁ TỪ BỊ REMOVE TRÊN UI =====
-    existing_ids = set(int(wid) for wid in word_ids)
+            existing_ids = set(int(wid) for wid in word_ids if wid)
+            for vocab in Vocabulary.query.filter_by(package_id=package.id).all():
+                if vocab.id not in existing_ids:
+                    db.session.delete(vocab)
 
-    all_vocab = Vocabulary.query.filter_by(package_id=package.id).all()
-
-    for vocab in all_vocab:
-        if vocab.id not in existing_ids:
-            db.session.delete(vocab)
-
-    # ===== 3. THÊM TỪ MỚI =====
-    new_ens = request.form.getlist('new_word_en[]')
-    new_vis = request.form.getlist('new_word_vi[]')
-
-    for en, vi in zip(new_ens, new_vis):
-        if en.strip() and vi.strip():
-            db.session.add(Vocabulary(
-                word_en=en.strip(),
-                word_vi=vi.strip(),
-                package_id=package.id
-            ))
+            for en, vi in zip(request.form.getlist('new_word_en[]'), request.form.getlist('new_word_vi[]')):
+                if en.strip() and vi.strip():
+                    db.session.add(Vocabulary(word_en=en.strip(), word_vi=vi.strip(), package_id=package.id))
 
         db.session.commit()
-
         flash('Cập nhật gói từ thành công!', 'success')
         return redirect(url_for('package_detail', package_id=package.id))
 
     return render_template('edit_package.html', package=package)
 
 
+@app.route('/package/<int:package_id>/clone', methods=['POST'])
+@login_required
+def clone_package(package_id):
+    """Clone a public package from another user into current user's library."""
+    source = VocabPackage.query.get_or_404(package_id)
+
+    if not source.is_public:
+        flash('Gói từ này không công khai!', 'danger')
+        return redirect(url_for('dashboard'))
+
+    if source.user_id == current_user.id:
+        flash('Đây là gói từ của bạn rồi!', 'info')
+        return redirect(url_for('package_detail', package_id=package_id))
+
+    new_pkg = VocabPackage(
+        package_name=source.package_name,
+        package_description=source.package_description,
+        user_id=current_user.id,
+        is_public=False
+    )
+    db.session.add(new_pkg)
+    db.session.flush()
+
+    for v in source.vocabularies:
+        db.session.add(Vocabulary(word_en=v.word_en, word_vi=v.word_vi, package_id=new_pkg.id))
+
+    db.session.commit()
+    flash(f'Đã thêm "{source.package_name}" vào thư viện của bạn!', 'success')
+    return redirect(url_for('package_detail', package_id=new_pkg.id))
+
+
 @app.route('/delete_package/<int:package_id>', methods=['POST'])
 @login_required
 def delete_package(package_id):
-
     package = VocabPackage.query.get_or_404(package_id)
-
     if package.user_id != current_user.id:
         return redirect(url_for('packages'))
-
     db.session.delete(package)
     db.session.commit()
-
     flash(f'Đã xóa gói từ "{package.package_name}".', 'success')
     return redirect(url_for('packages'))
 
@@ -469,18 +452,45 @@ def flashcard(package_id):
 @login_required
 def quiz(package_id):
     package = VocabPackage.query.get_or_404(package_id)
-
     if package.user_id != current_user.id and not package.is_public:
         return redirect(url_for('packages'))
-
     if len(package.vocabularies) < 4:
         flash('Cần ít nhất 4 từ vựng để làm trắc nghiệm!', 'warning')
         return redirect(url_for('package_detail', package_id=package_id))
-
     package.updated_at = datetime.utcnow()
     db.session.commit()
-
     return render_template('quiz.html', package=package)
+
+
+@app.route('/package/<int:package_id>/test')
+@login_required
+def test_mode(package_id):
+    """Written / fill-in-the-blank test mode."""
+    package = VocabPackage.query.get_or_404(package_id)
+    if package.user_id != current_user.id and not package.is_public:
+        return redirect(url_for('packages'))
+    if not package.vocabularies:
+        flash('Gói từ này chưa có từ vựng nào!', 'warning')
+        return redirect(url_for('package_detail', package_id=package_id))
+    package.updated_at = datetime.utcnow()
+    db.session.commit()
+    return render_template('test_mode.html', package=package)
+
+
+@app.route('/package/<int:package_id>/match')
+@login_required
+def match_mode(package_id):
+    """Match pairs mode – click to match EN ↔ VI."""
+    package = VocabPackage.query.get_or_404(package_id)
+    if package.user_id != current_user.id and not package.is_public:
+        return redirect(url_for('packages'))
+    if len(package.vocabularies) < 4:
+        flash('Cần ít nhất 4 từ vựng để chơi ghép thẻ!', 'warning')
+        return redirect(url_for('package_detail', package_id=package_id))
+    package.updated_at = datetime.utcnow()
+    db.session.commit()
+    return render_template('match_mode.html', package=package)
+
 
 @app.route('/download_template')
 @login_required
