@@ -1,8 +1,63 @@
 {% extends "base.html" %}
 {% block title %}{{ package.package_name }} - RundaWord{% endblock %}
+
+{% block head_extra %}
+<style>
+.study-modes-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+}
+@media (max-width: 576px) {
+    .study-modes-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.study-mode-card {
+    border-radius: 14px;
+    padding: 20px 14px 16px;
+    text-align: center;
+    text-decoration: none !important;
+    color: white !important;
+    transition: transform 0.18s, box-shadow 0.18s;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: 110px;
+}
+.study-mode-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.18);
+    color: white !important;
+}
+.study-mode-card.mode-flash  { background: linear-gradient(135deg, #1565a8, #38a4e0); }
+.study-mode-card.mode-quiz   { background: linear-gradient(135deg, #0d7a5f, #1ec99a); }
+.study-mode-card.mode-test   { background: linear-gradient(135deg, #7b2d8b, #b45cc9); }
+.study-mode-card.mode-match  { background: linear-gradient(135deg, #b5451b, #f07d44); }
+.study-mode-icon { font-size: 1.8rem; margin-bottom: 8px; }
+.study-mode-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
+.study-mode-desc { font-size: 0.76rem; opacity: 0.85; }
+
+/* Save button */
+.btn-save {
+    background: white;
+    color: var(--navy);
+    border: 2px solid var(--navy);
+    border-radius: 10px;
+    font-weight: 700;
+    padding: 7px 16px;
+    font-size: 0.88rem;
+    transition: all 0.15s;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.btn-save:hover        { background: var(--navy); color: white; }
+.btn-save.saved-state  { background: var(--navy); color: white; }
+.btn-save.saved-state:hover { background: #c0392b; border-color: #c0392b; }
+</style>
+{% endblock %}
+
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-start mb-2">
+<div class="d-flex justify-content-between align-items-start mb-3">
     <div>
         <div class="page-title mb-1">{{ package.package_name }}</div>
         <div style="font-size:0.85rem;color:var(--muted);font-weight:600;">
@@ -10,20 +65,29 @@
             {% if package.is_public %}
                 · <span style="color:#27ae60;">🌍 Public</span>
             {% else %}
-                · <span style="color:#888;">🔒 Private</span>
+                · <span>🔒 Private</span>
             {% endif %}
             · {{ package.vocabularies | length }} từ
         </div>
     </div>
 
-    <div class="d-flex align-items-center gap-2">
+    <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
         {% if not is_owner %}
-        <!-- Clone button for other users' public packages -->
-        <form method="POST" action="{{ url_for('clone_package', package_id=package.id) }}" style="margin:0;">
-            <button type="submit" class="btn btn-navy btn-sm px-3">
-                <i class="fas fa-plus me-1"></i>Thêm vào thư viện
-            </button>
-        </form>
+            {% if is_saved %}
+            <!-- Already saved → show unsave -->
+            <form method="POST" action="{{ url_for('unsave_package', package_id=package.id) }}" style="margin:0;">
+                <button type="submit" class="btn-save saved-state" title="Xoá khỏi thư viện">
+                    ✓ Đã lưu
+                </button>
+            </form>
+            {% else %}
+            <!-- Not saved yet -->
+            <form method="POST" action="{{ url_for('save_package', package_id=package.id) }}" style="margin:0;">
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-bookmark me-1"></i>Lưu vào thư viện
+                </button>
+            </form>
+            {% endif %}
         {% endif %}
 
         {% if is_owner %}
@@ -38,7 +102,8 @@
                     </a>
                 </li>
                 <li>
-                    <button class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <button class="dropdown-item text-danger"
+                        data-bs-toggle="modal" data-bs-target="#deleteModal">
                         <i class="fas fa-trash me-2"></i>Delete Package
                     </button>
                 </li>
@@ -49,28 +114,30 @@
 </div>
 
 {% if package.package_description %}
-<p style="color:var(--text);font-size:0.92rem;line-height:1.6;margin-bottom:24px;">{{ package.package_description }}</p>
+<p style="color:var(--muted);font-size:0.92rem;line-height:1.6;margin-bottom:24px;">
+    {{ package.package_description }}
+</p>
 {% endif %}
 
-<!-- STUDY MODES - 4 modes -->
+<!-- STUDY MODES -->
 <div class="section-header">Chế độ học</div>
-<div class="study-modes-grid mb-4">
-    <a href="{{ url_for('flashcard', package_id=package.id) }}" class="study-mode-card">
+<div class="study-modes-grid">
+    <a href="{{ url_for('flashcard', package_id=package.id) }}" class="study-mode-card mode-flash">
         <div class="study-mode-icon">🃏</div>
         <div class="study-mode-name">Flashcard</div>
         <div class="study-mode-desc">Lật thẻ ôn từ</div>
     </a>
-    <a href="{{ url_for('quiz', package_id=package.id) }}" class="study-mode-card">
+    <a href="{{ url_for('quiz', package_id=package.id) }}" class="study-mode-card mode-quiz">
         <div class="study-mode-icon">📝</div>
         <div class="study-mode-name">Trắc nghiệm</div>
         <div class="study-mode-desc">Chọn đáp án đúng</div>
     </a>
-    <a href="{{ url_for('test_mode', package_id=package.id) }}" class="study-mode-card">
+    <a href="{{ url_for('test_mode', package_id=package.id) }}" class="study-mode-card mode-test">
         <div class="study-mode-icon">✍️</div>
         <div class="study-mode-name">Kiểm tra</div>
         <div class="study-mode-desc">Gõ đáp án</div>
     </a>
-    <a href="{{ url_for('match_mode', package_id=package.id) }}" class="study-mode-card">
+    <a href="{{ url_for('match_mode', package_id=package.id) }}" class="study-mode-card mode-match">
         <div class="study-mode-icon">🔗</div>
         <div class="study-mode-name">Ghép thẻ</div>
         <div class="study-mode-desc">Nối cặp từ</div>
@@ -85,12 +152,8 @@
 <div class="vocab-row">
     <div class="vocab-num">{{ loop.index }}</div>
     <div class="row g-2">
-        <div class="col-6">
-            <div class="vocab-field">{{ vocab.word_en }}</div>
-        </div>
-        <div class="col-6">
-            <div class="vocab-field">{{ vocab.word_vi }}</div>
-        </div>
+        <div class="col-6"><div class="vocab-field">{{ vocab.word_en }}</div></div>
+        <div class="col-6"><div class="vocab-field">{{ vocab.word_vi }}</div></div>
     </div>
 </div>
 {% endfor %}
@@ -101,13 +164,14 @@
     <i class="fas fa-inbox fa-2x mb-2" style="color:var(--muted)"></i>
     <p class="text-muted mb-2">Chưa có từ vựng nào</p>
     {% if is_owner %}
-    <a href="{{ url_for('edit_package', package_id=package.id) }}" class="btn btn-navy btn-sm">Thêm từ vựng</a>
+    <a href="{{ url_for('edit_package', package_id=package.id) }}" class="btn btn-navy btn-sm">
+        Thêm từ vựng
+    </a>
     {% endif %}
 </div>
 {% endif %}
 
 {% if is_owner %}
-<!-- Delete modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content p-3">
@@ -129,46 +193,11 @@
 {% endif %}
 
 <div class="scroll-buttons">
-    <button class="scroll-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Lên đầu trang">
+    <button class="scroll-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">
         <i class="fas fa-arrow-up"></i>
     </button>
-    <button class="scroll-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="Xuống cuối trang">
+    <button class="scroll-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})">
         <i class="fas fa-arrow-down"></i>
     </button>
 </div>
-
-{% endblock %}
-
-{% block head_extra %}
-<style>
-.study-modes-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-}
-@media (max-width: 576px) {
-    .study-modes-grid { grid-template-columns: repeat(2, 1fr); }
-}
-.study-mode-card {
-    background: white;
-    border: 1.5px solid var(--border);
-    border-radius: 16px;
-    padding: 20px 16px;
-    text-align: center;
-    text-decoration: none;
-    color: var(--navy);
-    transition: all 0.2s;
-    display: block;
-}
-.study-mode-card:hover {
-    border-color: var(--accent);
-    background: #eef3fb;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(26,92,173,0.12);
-    color: var(--navy);
-}
-.study-mode-icon { font-size: 1.8rem; margin-bottom: 8px; }
-.study-mode-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 3px; }
-.study-mode-desc { font-size: 0.78rem; color: var(--muted); }
-</style>
 {% endblock %}

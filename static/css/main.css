@@ -23,6 +23,10 @@
    ============================================================ */
 * { box-sizing: border-box; }
 
+html, body {
+    height: 100%;
+}
+
 body {
     font-family: 'Nunito', sans-serif;
     background: var(--bg);
@@ -30,23 +34,30 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    /* offset content so it's not hidden under sticky navbar */
-    padding-top: 0;
+}
+
+/* Make main expand to fill available space so footer stays at bottom */
+main {
+    flex: 1 0 auto;
+    padding: 32px 0 64px; /* extra bottom padding so content breathes */
+}
+
+footer {
+    flex-shrink: 0;
 }
 
 /* ============================================================
-   3. NAVBAR — sticky + subtle glass effect
+   3. NAVBAR — sticky + glass effect
    ============================================================ */
 .navbar {
-    background-color: rgba(0, 33, 71, 0.92);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background-color: rgba(0, 33, 71, 0.93);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     padding: 12px 0;
     position: sticky;
     top: 0;
     z-index: 1030;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    transition: background-color 0.3s;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 
 .navbar-brand {
@@ -57,12 +68,9 @@ body {
 }
 
 .brand-logo {
-    width: 52px;
-    height: 52px;
+    width: 52px; height: 52px;
     background: transparent;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
 }
 
@@ -75,18 +83,14 @@ body {
     transition: background 0.15s;
     margin: 0 4px;
 }
-
 .navbar .nav-link:hover { background: rgba(255,255,255,0.12); }
 
 .navbar-icon-btn {
-    width: 38px;
-    height: 38px;
+    width: 38px; height: 38px;
     border-radius: 50%;
     border: 2px solid rgba(255,255,255,0.45);
     color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     font-size: 1.2rem;
     cursor: pointer;
     background: transparent;
@@ -103,59 +107,86 @@ body {
 .alert { border-radius: 10px; border: none; font-weight: 600; }
 
 /* ============================================================
-   5. MAIN LAYOUT
-   ============================================================ */
-main { flex: 1; padding: 32px 0; }
-
-/* ============================================================
-   6. CARDS CHUNG (rw-card)
+   5. CARDS CHUNG (rw-card)
    ============================================================ */
 .rw-card {
     background: var(--card-bg);
     border-radius: 16px;
     border: 1px solid var(--border);
     padding: 20px;
-    transition: box-shadow 0.2s, transform 0.15s;
+    transition: box-shadow 0.2s;
 }
 .rw-card:hover { box-shadow: 0 4px 20px rgba(13,33,55,0.08); }
 
 /* ============================================================
-   7. PACKAGE CARDS (gradient xanh) — single definition, no override
+   6. PACKAGE CARDS — fixed size, rich color palette
    ============================================================ */
 .pkg-card {
     border-radius: 16px;
-    padding: 22px 20px 18px;
+    padding: 20px 18px 16px;
     color: white !important;
     cursor: pointer;
     text-decoration: none !important;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* FIXED dimensions */
+    width: 100%;
+    height: 130px;
     transition: transform 0.15s, box-shadow 0.2s;
-    min-height: 110px;
     border: none;
-    /* default gradient if no modifier class */
-    background: linear-gradient(145deg, #3a6ea5, #6a9fd8);
+    background: linear-gradient(135deg, #3a6ea5, #6a9fd8); /* fallback */
+    overflow: hidden;
+    position: relative;
+}
+.pkg-card::after {
+    content: '';
+    position: absolute;
+    top: -20px; right: -20px;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
 }
 .pkg-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(58,110,165,0.35);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.18);
     color: white !important;
 }
 .pkg-card-name {
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
-    font-size: 1.05rem;
-    margin-bottom: 10px;
+    font-size: 0.97rem;
     color: white;
+    line-height: 1.3;
+    /* clamp to 2 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
-.pkg-card-meta { font-size: 0.82rem; opacity: 0.85; color: white; }
+.pkg-card-meta {
+    font-size: 0.78rem;
+    opacity: 0.82;
+    color: white;
+    margin-top: 8px;
+}
 
-.pkg-card-0 { background: linear-gradient(145deg, #2a5298, #4a7fc1); }
-.pkg-card-1 { background: linear-gradient(145deg, #3a6ea5, #6a9fd8); }
-.pkg-card-2 { background: linear-gradient(145deg, #5b8fc9, #8ab4e0); }
-.pkg-card-3 { background: linear-gradient(145deg, #1a5cad, #4a8fd8); }
+/* 12 distinct color gradients cycling with modulo */
+.pkg-card-0  { background: linear-gradient(135deg, #1a3a8a, #3a6fcf); }
+.pkg-card-1  { background: linear-gradient(135deg, #7b2d8b, #b45cc9); }
+.pkg-card-2  { background: linear-gradient(135deg, #0d7a5f, #1ec99a); }
+.pkg-card-3  { background: linear-gradient(135deg, #b5451b, #f07d44); }
+.pkg-card-4  { background: linear-gradient(135deg, #1565a8, #38a4e0); }
+.pkg-card-5  { background: linear-gradient(135deg, #5c2d91, #9b63d4); }
+.pkg-card-6  { background: linear-gradient(135deg, #155e3e, #27ae6f); }
+.pkg-card-7  { background: linear-gradient(135deg, #8b1a1a, #d44e4e); }
+.pkg-card-8  { background: linear-gradient(135deg, #1a5c8b, #3aaee0); }
+.pkg-card-9  { background: linear-gradient(135deg, #6b2d00, #c86a1a); }
+.pkg-card-10 { background: linear-gradient(135deg, #1a4d1a, #3aaa3a); }
+.pkg-card-11 { background: linear-gradient(135deg, #3d1a6b, #7a4ab5); }
 
 /* ============================================================
-   8. BUTTONS
+   7. BUTTONS
    ============================================================ */
 .btn-navy {
     background: var(--navy);
@@ -190,36 +221,26 @@ main { flex: 1; padding: 32px 0; }
 .btn-outline-navy:hover { background: var(--navy); color: white; }
 
 /* ============================================================
-   9. STUDY MODE BUTTONS (legacy — kept for compatibility)
+   8. STUDY MODE BUTTONS (legacy)
    ============================================================ */
 .btn-study-flashcard {
-    background: var(--cream-btn);
-    color: var(--navy);
-    border: none;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 1.05rem;
-    padding: 16px 28px;
-    flex: 1;
+    background: var(--cream-btn); color: var(--navy);
+    border: none; border-radius: 12px; font-weight: 700;
+    font-size: 1.05rem; padding: 16px 28px; flex: 1;
     transition: background 0.15s;
 }
 .btn-study-flashcard:hover { background: #d0c8b5; color: var(--navy); }
 
 .btn-study-quiz {
-    background: var(--navy);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 1.05rem;
-    padding: 16px 28px;
-    flex: 1;
+    background: var(--navy); color: white;
+    border: none; border-radius: 12px; font-weight: 700;
+    font-size: 1.05rem; padding: 16px 28px; flex: 1;
     transition: background 0.15s;
 }
 .btn-study-quiz:hover { background: var(--navy-light); color: white; }
 
 /* ============================================================
-   10. VOCABULARY ROWS
+   9. VOCABULARY ROWS
    ============================================================ */
 .vocab-row {
     background: white;
@@ -229,29 +250,19 @@ main { flex: 1; padding: 32px 0; }
     margin-bottom: 10px;
 }
 .vocab-row .vocab-num {
-    font-weight: 800;
-    color: var(--muted);
-    font-size: 0.9rem;
-    margin-bottom: 8px;
+    font-weight: 800; color: var(--muted); font-size: 0.9rem; margin-bottom: 8px;
 }
 .vocab-field {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 0.95rem;
-    width: 100%;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px; font-size: 0.95rem; width: 100%;
 }
 .totalVocab {
-    text-align: right;
-    font-size: 0.85rem;
-    color: var(--muted);
-    font-weight: 600;
-    margin-top: 8px;
+    text-align: right; font-size: 0.85rem; color: var(--muted);
+    font-weight: 600; margin-top: 8px;
 }
 
 /* ============================================================
-   11. FORM INPUTS & LABELS
+   10. FORM INPUTS & LABELS
    ============================================================ */
 .rw-input {
     width: 100%;
@@ -270,29 +281,21 @@ main { flex: 1; padding: 32px 0; }
     box-shadow: 0 0 0 3px rgba(26,92,173,0.12);
 }
 .rw-label {
-    font-weight: 700;
-    color: var(--navy);
-    margin-bottom: 6px;
-    display: block;
-    font-size: 0.92rem;
+    font-weight: 700; color: var(--navy);
+    margin-bottom: 6px; display: block; font-size: 0.92rem;
 }
 
 /* ============================================================
-   12. SETTINGS / GEAR ICON
+   11. SETTINGS GEAR
    ============================================================ */
 .settings-btn {
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 1.3rem;
-    cursor: pointer;
-    padding: 4px;
-    transition: color 0.15s;
+    background: none; border: none; color: var(--muted);
+    font-size: 1.3rem; cursor: pointer; padding: 4px; transition: color 0.15s;
 }
 .settings-btn:hover { color: var(--navy); }
 
 /* ============================================================
-   13. WELCOME BANNER
+   12. WELCOME BANNER
    ============================================================ */
 .welcome-banner {
     background: var(--navy);
@@ -304,244 +307,174 @@ main { flex: 1; padding: 32px 0; }
     margin-bottom: 32px;
 }
 .welcome-banner h2 {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 1.6rem;
-    margin-bottom: 6px;
+    font-family: 'Poppins', sans-serif; font-weight: 700;
+    font-size: 1.6rem; margin-bottom: 6px;
 }
 .welcome-banner p { opacity: 0.8; margin: 0; font-size: 1rem; }
 
 /* ============================================================
-   14. SECTION HEADER
+   13. SECTION HEADER
    ============================================================ */
 .section-header {
     font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 1.05rem;
-    color: var(--navy);
-    margin-bottom: 16px;
+    font-weight: 700; font-size: 1.05rem;
+    color: var(--navy); margin-bottom: 16px;
 }
 
 /* ============================================================
-   15. MODAL
+   14. MODAL
    ============================================================ */
-.modal-content  { border-radius: 16px; border: none; }
-.modal-header   { border-bottom: none; padding-bottom: 0; }
-.modal-footer   { border-top: none; padding-top: 0; }
+.modal-content { border-radius: 16px; border: none; }
+.modal-header  { border-bottom: none; padding-bottom: 0; }
+.modal-footer  { border-top: none; padding-top: 0; }
 
 /* ============================================================
-   16. FOOTER
+   15. FOOTER
    ============================================================ */
-footer {
-    background: var(--navy);
-    color: white;
-    padding: 28px 0 20px;
-}
+footer { background: var(--navy); color: white; padding: 28px 0 20px; }
 footer .footer-logo-text {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 1rem;
+    font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 1rem;
 }
-footer p        { font-size: 0.88rem; opacity: 0.85; margin: 3px 0; }
-footer small    { opacity: 0.6; font-size: 0.8rem; }
-/* Ensure footer logo SVG/IMG is always white-ish */
+footer p     { font-size: 0.88rem; opacity: 0.85; margin: 3px 0; }
+footer small { opacity: 0.6; font-size: 0.8rem; }
 footer .brand-logo img,
 footer .brand-logo svg { filter: brightness(0) invert(1); }
 
 /* ============================================================
-   17. PAGE TITLE
+   16. PAGE TITLE
    ============================================================ */
 .page-title {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 1.6rem;
-    color: var(--navy);
-    margin-bottom: 4px;
+    font-family: 'Poppins', sans-serif; font-weight: 700;
+    font-size: 1.6rem; color: var(--navy); margin-bottom: 4px;
 }
 .page-desc { color: var(--muted); margin-bottom: 24px; font-size: 0.9rem; }
 
 /* ============================================================
-   18. DROPDOWN MENU
+   17. DROPDOWN
    ============================================================ */
 .dropdown-menu {
-    border-radius: 12px;
-    border: 1px solid var(--border);
+    border-radius: 12px; border: 1px solid var(--border);
     box-shadow: 0 8px 24px rgba(0,0,0,0.1);
 }
 .dropdown-item {
-    font-weight: 600;
-    padding: 8px 16px;
-    border-radius: 8px;
-    margin: 2px 4px;
+    font-weight: 600; padding: 8px 16px;
+    border-radius: 8px; margin: 2px 4px;
 }
-.dropdown-item:hover           { background: var(--bg); }
+.dropdown-item:hover             { background: var(--bg); }
 .dropdown-item.text-danger:hover { background: #fff0f0; }
 
 /* ============================================================
-   19. FLASHCARD
+   18. FLASHCARD
    ============================================================ */
 .flashcard-area {
     perspective: 1000px;
-    width: 100%;
-    max-width: 660px;
-    height: 280px;
+    width: 100%; max-width: 660px; height: 280px;
     margin: 0 auto 28px;
-    cursor: pointer;
-    user-select: none;
+    cursor: pointer; user-select: none;
 }
 .flashcard {
     width: 100%; height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
+    position: relative; transform-style: preserve-3d;
     transition: transform 0.5s ease;
 }
 .flashcard.flipped { transform: rotateY(180deg); }
 .fc-face {
     position: absolute; width: 100%; height: 100%;
-    backface-visibility: hidden;
-    border-radius: 16px;
+    backface-visibility: hidden; border-radius: 16px;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    padding: 32px;
-    border: 1px solid var(--border);
+    padding: 32px; border: 1px solid var(--border);
 }
 .fc-front { background: white; box-shadow: 0 4px 20px rgba(13,33,55,0.08); }
 .fc-back  { background: white; box-shadow: 0 4px 20px rgba(13,33,55,0.08); transform: rotateY(180deg); }
 .fc-word  { font-size: 2.2rem; font-weight: 800; color: var(--navy); text-align: center; }
 .fc-hint  { font-size: 0.82rem; color: var(--muted); margin-top: 12px; }
 .nav-circle {
-    width: 48px; height: 48px;
-    border-radius: 50%;
-    background: var(--bg);
-    border: 1px solid var(--border);
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--bg); border: 1px solid var(--border);
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 1rem; color: var(--navy);
-    transition: background 0.15s;
+    cursor: pointer; font-size: 1rem; color: var(--navy); transition: background 0.15s;
 }
 .nav-circle:hover    { background: var(--border); }
 .nav-circle:disabled { opacity: 0.35; cursor: not-allowed; }
 
 /* ============================================================
-   20. QUIZ / MULTIPLE CHOICES
+   19. QUIZ / MULTIPLE CHOICES
    ============================================================ */
 .quiz-card {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 40px 32px;
-    min-height: 160px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    background: white; border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px 28px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: 140px;
 }
 .option-btn {
-    width: 100%;
-    text-align: left;
+    width: 100%; text-align: left;
     padding: 14px 20px;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    background: white;
-    cursor: pointer;
-    font-size: 0.95rem;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 600;
-    transition: all 0.15s;
-    margin-bottom: 10px;
-    color: var(--navy);
+    border: 2px solid var(--border); border-radius: 12px;
+    background: white; cursor: pointer;
+    font-size: 0.95rem; font-family: 'Nunito', sans-serif;
+    font-weight: 600; transition: all 0.15s;
+    margin-bottom: 10px; color: var(--navy);
 }
 .option-btn:hover:not(:disabled) { border-color: var(--accent); background: #eef3fb; }
 .option-btn.correct { border-color: #27ae60; background: #eafaf1; color: #1e8449; }
 .option-btn.wrong   { border-color: #e74c3c; background: #fdf2f2; color: #c0392b; }
-.q-word   { font-size: 2rem; font-weight: 800; color: var(--navy); text-align: center; }
-.q-prompt { color: var(--muted); font-size: 0.88rem; margin-bottom: 16px; text-align: center; }
+.q-word   { font-size: 1.8rem; font-weight: 800; color: var(--navy); text-align: center; }
+.q-prompt { color: var(--muted); font-size: 0.88rem; margin-bottom: 12px; text-align: center; }
 .score-circle {
-    width: 110px; height: 110px;
-    border-radius: 50%;
-    border: 6px solid;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.8rem; font-weight: 800;
-    margin: 0 auto 20px;
+    width: 110px; height: 110px; border-radius: 50%;
+    border: 6px solid; display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; font-weight: 800; margin: 0 auto 20px;
 }
 
 /* ============================================================
-   21. PROFILE PAGE
+   20. PROFILE
    ============================================================ */
 .profile-label {
-    color: var(--muted);
-    font-size: 0.82rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 4px;
+    color: var(--muted); font-size: 0.82rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;
 }
 .profile-value { font-weight: 700; font-size: 1rem; }
 .profile-stat  { font-weight: 800; font-size: 1.4rem; color: var(--navy); }
 
 /* ============================================================
-   22. SCROLL BUTTONS
+   21. SCROLL BUTTONS
    ============================================================ */
 .scroll-buttons {
-    position: fixed;
-    right: 20px;
-    bottom: 40px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    z-index: 999;
+    position: fixed; right: 20px; bottom: 40px;
+    display: flex; flex-direction: column; gap: 10px; z-index: 999;
 }
 .scroll-btn {
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    border: none;
-    background: var(--navy);
-    color: white;
-    font-size: 16px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-    cursor: pointer;
-    transition: transform 0.15s ease;
+    width: 44px; height: 44px; border-radius: 50%;
+    border: none; background: var(--navy); color: white;
+    font-size: 16px; box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    cursor: pointer; transition: transform 0.15s ease;
 }
 .scroll-btn:hover { transform: scale(1.1); }
 
 /* ============================================================
-   23. SEARCH BOX
+   22. SEARCH BOX
    ============================================================ */
 .search-box-wrapper { display: flex; justify-content: center; }
 .search-box { position: relative; width: 100%; max-width: 520px; }
 .search-input {
-    width: 100%;
-    padding: 12px 110px 12px 40px;
-    border-radius: 20px;
-    border: 1px solid rgba(0,0,0,0.08);
-    outline: none;
-    font-size: 0.95rem;
-    background: #fff;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.05);
-    transition: all 0.25s ease;
+    width: 100%; padding: 12px 110px 12px 40px;
+    border-radius: 20px; border: 1px solid rgba(0,0,0,0.08);
+    outline: none; font-size: 0.95rem; background: #fff;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.05); transition: all 0.25s ease;
 }
 .search-input:focus {
-    border-color: var(--navy);
-    box-shadow: 0 8px 22px rgba(13,33,55,0.12);
+    border-color: var(--navy); box-shadow: 0 8px 22px rgba(13,33,55,0.12);
 }
 .search-icon {
-    position: absolute;
-    left: 14px; top: 50%;
-    transform: translateY(-50%);
-    color: var(--muted);
-    font-size: 0.9rem;
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: 0.9rem;
 }
 .search-btn {
-    position: absolute;
-    right: 6px; top: 50%;
-    transform: translateY(-50%);
-    border: none;
-    background: var(--navy);
-    color: #fff;
-    padding: 6px 14px;
-    border-radius: 14px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    transition: opacity 0.2s;
-    cursor: pointer;
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    border: none; background: var(--navy); color: #fff;
+    padding: 6px 14px; border-radius: 14px; font-size: 0.8rem;
+    font-weight: 600; transition: opacity 0.2s; cursor: pointer;
 }
 .search-btn:hover { opacity: 0.88; }
