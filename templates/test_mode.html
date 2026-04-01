@@ -3,107 +3,76 @@
 
 {% block head_extra %}
 <style>
-/* ── Question block ── */
 .t-block {
-    background: white;
-    border: 2px solid var(--border);
-    border-radius: 16px;
-    padding: 22px 24px 18px;
-    margin-bottom: 16px;
+    background: white; border: 2px solid var(--border);
+    border-radius: 16px; padding: 22px 24px 18px; margin-bottom: 16px;
     transition: border-color 0.2s;
 }
 .t-block.result-correct { border-color: #27ae60; }
 .t-block.result-wrong   { border-color: #e74c3c; }
 
 .t-num {
-    font-size: 0.76rem; font-weight: 700;
-    color: var(--muted); text-transform: uppercase;
-    letter-spacing: 0.05em; margin-bottom: 6px;
+    font-size: 0.76rem; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;
+    display: flex; align-items: center; justify-content: space-between;
 }
-.t-word {
-    font-size: 1.35rem; font-weight: 800;
-    color: var(--navy); margin-bottom: 16px;
+.t-dir-badge {
+    font-size: 0.7rem; font-weight: 700; padding: 2px 8px;
+    border-radius: 20px; border: 1px solid var(--border); color: var(--muted);
 }
+.t-word { font-size: 1.35rem; font-weight: 800; color: var(--navy); margin-bottom: 16px; }
 .t-input {
-    width: 100%;
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    padding: 11px 16px;
-    font-size: 0.97rem;
-    font-family: 'Nunito', sans-serif;
-    background: white;
-    color: var(--text);
-    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%; border: 2px solid var(--border); border-radius: 10px;
+    padding: 11px 16px; font-size: 0.97rem; font-family: 'Nunito', sans-serif;
+    background: white; color: var(--text); transition: border-color 0.15s, box-shadow 0.15s;
 }
-.t-input:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(26,92,173,0.1);
-}
+.t-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,92,173,0.1); }
 .t-input:disabled { background: #f8f8f8; }
 .t-input.input-correct { border-color: #27ae60 !important; background: #f0fdf4; }
 .t-input.input-wrong   { border-color: #e74c3c !important; background: #fff5f5; }
-
-.t-feedback {
-    font-size: 0.88rem; font-weight: 700;
-    margin-top: 8px; min-height: 20px;
-}
+.t-feedback { font-size: 0.88rem; font-weight: 700; margin-top: 8px; min-height: 20px; }
 .t-feedback.fb-correct { color: #27ae60; }
 .t-feedback.fb-wrong   { color: #e74c3c; }
 .t-feedback .correct-ans { color: #c0392b; }
 
-/* ── Sticky header bar ── */
+/* Sticky bar */
 .test-bar {
-    position: sticky;
-    top: 62px;
-    z-index: 100;
-    background: rgba(245, 247, 250, 0.96);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--border);
-    padding: 10px 0;
-    margin-bottom: 24px;
+    position: sticky; top: 62px; z-index: 100;
+    background: rgba(245,247,250,0.96); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border); padding: 10px 0; margin-bottom: 24px;
 }
 .test-bar-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
 }
 
-/* ── Result banner ── */
-#resultBanner {
-    border-radius: 16px;
-    overflow: hidden;
-    margin-bottom: 24px;
+/* Result modal */
+.result-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); backdrop-filter: blur(3px);
+    z-index: 2000; align-items: center; justify-content: center;
 }
-.result-header {
-    background: var(--navy);
-    color: white;
-    padding: 24px 28px;
-    text-align: center;
+.result-overlay.show { display: flex; }
+.result-modal {
+    background: white; border-radius: 20px; max-width: 400px; width: 90%;
+    overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
 }
-.result-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    background: white;
-    border: 1px solid var(--border);
-    border-top: none;
-    border-radius: 0 0 16px 16px;
-    overflow: hidden;
+@keyframes popIn {
+    from { transform: scale(0.75); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
 }
-.result-stat-cell {
-    padding: 18px 12px;
-    text-align: center;
-    border-right: 1px solid var(--border);
+.result-modal-header { background: var(--navy); color: white; padding: 28px 24px; text-align: center; }
+.result-modal-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.35);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; margin: 0 auto 14px;
 }
-.result-stat-cell:last-child { border-right: none; }
-.result-stat-num {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 800; font-size: 1.6rem;
-}
-.result-stat-label {
-    font-size: 0.78rem; color: var(--muted); font-weight: 600; margin-top: 2px;
-}
+.result-modal-body { padding: 20px 24px 24px; }
+.result-stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px; }
+.result-stat { background: var(--bg); border-radius: 12px; padding: 14px 8px; text-align: center; }
+.result-stat-num { font-family:'Poppins',sans-serif; font-weight:800; font-size:1.5rem; }
+.result-stat-lbl { font-size:0.74rem; color:var(--muted); font-weight:600; margin-top:2px; }
 </style>
 {% endblock %}
 
@@ -111,7 +80,7 @@
 <div class="d-flex align-items-center gap-2 mb-3">
     <a href="{{ url_for('package_detail', package_id=package.id) }}"
        style="color:var(--muted);font-size:0.85rem;font-weight:600;text-decoration:none;">
-        ← {{ package.package_name }}
+        <i class="fas fa-arrow-left me-1"></i>{{ package.package_name }}
     </a>
     <span style="color:var(--muted);">·</span>
     <span style="font-family:'Poppins';font-weight:700;color:var(--navy);">Kiểm tra viết</span>
@@ -122,46 +91,56 @@
     <div class="container">
         <div class="test-bar-inner">
             <span style="font-size:0.88rem;color:var(--muted);font-weight:600;">
-                {{ package.vocabularies | length }} câu hỏi
+                <i class="fas fa-pencil-alt me-1"></i>{{ package.vocabularies | length }} câu hỏi
             </span>
             <div class="d-flex gap-2">
                 <button id="submitBtn" class="btn btn-navy px-4" onclick="submitTest()">
-                    Nộp bài
-                </button>
-                <button id="retryBtn" class="btn btn-cream px-3 d-none" onclick="retryTest()">
-                    Làm lại
+                    <i class="fas fa-paper-plane me-1"></i>Nộp bài
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Result banner (hidden until submit) -->
-<div id="resultBanner" class="d-none">
-    <div class="result-header">
-        <div style="font-size:2rem;margin-bottom:6px;" id="resultEmoji">🎉</div>
-        <div style="font-family:'Poppins';font-weight:700;font-size:1.3rem;" id="resultTitle"></div>
-        <div style="opacity:0.8;margin-top:4px;font-size:0.92rem;" id="resultSub"></div>
-    </div>
-    <div class="result-stats">
-        <div class="result-stat-cell">
-            <div class="result-stat-num" id="statCorrect" style="color:#27ae60;">–</div>
-            <div class="result-stat-label">Đúng</div>
+<div id="questionsContainer"></div>
+
+<!-- Result modal -->
+<div class="result-overlay" id="resultOverlay">
+    <div class="result-modal">
+        <div class="result-modal-header">
+            <div class="result-modal-icon" id="resultIcon"></div>
+            <div style="font-family:'Poppins';font-weight:800;font-size:1.3rem;" id="resultTitle"></div>
+            <div style="opacity:0.8;font-size:0.9rem;margin-top:4px;" id="resultSub"></div>
         </div>
-        <div class="result-stat-cell">
-            <div class="result-stat-num" id="statWrong" style="color:#e74c3c;">–</div>
-            <div class="result-stat-label">Sai</div>
-        </div>
-        <div class="result-stat-cell">
-            <div class="result-stat-num" id="statPct" style="color:var(--navy);">–</div>
-            <div class="result-stat-label">Điểm</div>
+        <div class="result-modal-body">
+            <div class="result-stats-row">
+                <div class="result-stat">
+                    <div class="result-stat-num" id="rCorrect" style="color:#27ae60;">–</div>
+                    <div class="result-stat-lbl">Đúng</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-stat-num" id="rWrong" style="color:#e74c3c;">–</div>
+                    <div class="result-stat-lbl">Sai</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-stat-num" id="rPct" style="color:var(--navy);">–</div>
+                    <div class="result-stat-lbl">Điểm</div>
+                </div>
+            </div>
+            <div class="d-flex gap-2 justify-content-center">
+                <button class="btn btn-cream px-4" onclick="retryTest()">
+                    <i class="fas fa-redo me-1"></i>Làm lại
+                </button>
+                <button class="btn btn-cream px-4" onclick="closeResult()">
+                    <i class="fas fa-eye me-1"></i>Xem kết quả
+                </button>
+                <a href="{{ url_for('package_detail', package_id=package.id) }}" class="btn btn-navy px-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+            </div>
         </div>
     </div>
 </div>
-
-<!-- Questions -->
-<div id="questionsContainer"></div>
-
 {% endblock %}
 
 {% block scripts %}
@@ -172,27 +151,27 @@ const allMeanings = {{ package.vocabularies | map(attribute='word_vi') | list | 
 let questions = [];
 let submitted = false;
 
-function normalize(str) {
-    return str.toLowerCase().trim().replace(/\s+/g, ' ');
-}
-
+function normalize(str) { return str.toLowerCase().trim().replace(/\s+/g,' '); }
 function shuffle(arr) {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-    }
+    const a=[...arr];
+    for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
     return a;
 }
-
 function escHtml(s) {
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function buildAndRender() {
-    // Shuffle order
     const indices = shuffle([...Array(allWords.length).keys()]);
-    questions = indices.map(i => ({ word: allWords[i], answer: allMeanings[i] }));
+    // Mix EN→VI and VI→EN randomly
+    questions = indices.map(i => {
+        const enToVi = Math.random() < 0.5;
+        return {
+            prompt:  enToVi ? allWords[i]    : allMeanings[i],
+            answer:  enToVi ? allMeanings[i] : allWords[i],
+            enToVi
+        };
+    });
 
     const container = document.getElementById('questionsContainer');
     container.innerHTML = '';
@@ -201,23 +180,28 @@ function buildAndRender() {
         const block = document.createElement('div');
         block.className = 't-block';
         block.id = 'tblock-' + qi;
+        const dirLabel = q.enToVi ? 'EN → VI' : 'VI → EN';
+        const placeholder = q.enToVi ? 'Nhập nghĩa tiếng Việt...' : 'Enter English meaning...';
         block.innerHTML = `
-            <div class="t-num">Câu ${qi + 1} / ${questions.length}</div>
-            <div class="t-word">${escHtml(q.word)}</div>
+            <div class="t-num">
+                <span>Câu ${qi+1} / ${questions.length}</span>
+                <span class="t-dir-badge">${dirLabel}</span>
+            </div>
+            <div class="t-word">${escHtml(q.prompt)}</div>
             <input type="text" class="t-input" id="tinput-${qi}"
-                placeholder="Nhập nghĩa tiếng Việt..."
+                placeholder="${placeholder}"
                 autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             <div class="t-feedback" id="tfb-${qi}"></div>
         `;
         container.appendChild(block);
     });
 
-    // Enter key: jump to next input
+    // Enter → jump to next input
     questions.forEach((_, qi) => {
-        document.getElementById('tinput-' + qi).addEventListener('keydown', function(e) {
+        document.getElementById('tinput-'+qi).addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                const next = document.getElementById('tinput-' + (qi + 1));
+                const next = document.getElementById('tinput-'+(qi+1));
                 if (next) next.focus();
                 else document.getElementById('submitBtn').focus();
             }
@@ -228,19 +212,18 @@ function buildAndRender() {
 function submitTest() {
     if (submitted) return;
     submitted = true;
+    document.getElementById('submitBtn').disabled = true;
 
     let correct = 0, wrong = 0;
 
     questions.forEach((q, qi) => {
-        const input = document.getElementById('tinput-' + qi);
-        const block = document.getElementById('tblock-' + qi);
-        const fb    = document.getElementById('tfb-' + qi);
+        const input = document.getElementById('tinput-'+qi);
+        const block = document.getElementById('tblock-'+qi);
+        const fb    = document.getElementById('tfb-'+qi);
         const val   = input.value.trim();
-
         input.disabled = true;
 
         if (!val) {
-            // Unanswered → wrong
             wrong++;
             block.classList.add('result-wrong');
             input.classList.add('input-wrong');
@@ -248,52 +231,63 @@ function submitTest() {
             fb.innerHTML = `Bỏ trống. Đáp án: <span class="correct-ans">${escHtml(q.answer)}</span>`;
             return;
         }
-
         if (normalize(val) === normalize(q.answer)) {
             correct++;
             block.classList.add('result-correct');
             input.classList.add('input-correct');
             fb.className = 't-feedback fb-correct';
-            fb.textContent = '✓ Đúng!';
+            fb.innerHTML = '<i class="fas fa-check me-1"></i>Đúng!';
         } else {
             wrong++;
             block.classList.add('result-wrong');
             input.classList.add('input-wrong');
             fb.className = 't-feedback fb-wrong';
-            fb.innerHTML = `✗ Sai. Đáp án: <span class="correct-ans">${escHtml(q.answer)}</span>`;
+            fb.innerHTML = `<i class="fas fa-times me-1"></i>Sai. Đáp án: <span class="correct-ans">${escHtml(q.answer)}</span>`;
         }
     });
 
     const total = correct + wrong;
     const pct   = total > 0 ? Math.round(correct / total * 100) : 0;
 
-    // Show result banner
-    const banner = document.getElementById('resultBanner');
-    banner.classList.remove('d-none');
+    // Populate modal
+    const iconEl = document.getElementById('resultIcon');
+    if (pct >= 80) {
+        iconEl.innerHTML = '<i class="fas fa-trophy"></i>';
+        iconEl.style.background = 'rgba(39,174,96,0.3)';
+        document.getElementById('resultTitle').textContent = 'Xuất sắc!';
+    } else if (pct >= 60) {
+        iconEl.innerHTML = '<i class="fas fa-thumbs-up"></i>';
+        iconEl.style.background = 'rgba(243,156,18,0.3)';
+        document.getElementById('resultTitle').textContent = 'Khá tốt!';
+    } else {
+        iconEl.innerHTML = '<i class="fas fa-dumbbell"></i>';
+        iconEl.style.background = 'rgba(231,76,60,0.3)';
+        document.getElementById('resultTitle').textContent = 'Cần cố gắng thêm!';
+    }
+    document.getElementById('resultSub').textContent  = `Đúng ${correct}/${total} câu`;
+    document.getElementById('rCorrect').textContent   = correct;
+    document.getElementById('rWrong').textContent     = wrong;
+    document.getElementById('rPct').textContent       = pct + '%';
 
-    document.getElementById('resultEmoji').textContent  = pct >= 80 ? '🏆' : pct >= 60 ? '👍' : '💪';
-    document.getElementById('resultTitle').textContent  = pct >= 80 ? 'Xuất sắc!' : pct >= 60 ? 'Khá tốt!' : 'Cần cố gắng thêm!';
-    document.getElementById('resultSub').textContent    = `Bạn trả lời đúng ${correct}/${total} câu`;
-    document.getElementById('statCorrect').textContent  = correct;
-    document.getElementById('statWrong').textContent    = wrong;
-    document.getElementById('statPct').textContent      = pct + '%';
-
-    // Swap buttons
-    document.getElementById('submitBtn').classList.add('d-none');
-    document.getElementById('retryBtn').classList.remove('d-none');
-
-    // Scroll to result
-    banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('resultOverlay').classList.add('show');
 }
 
 function retryTest() {
     submitted = false;
-    document.getElementById('resultBanner').classList.add('d-none');
-    document.getElementById('submitBtn').classList.remove('d-none');
-    document.getElementById('retryBtn').classList.add('d-none');
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('resultOverlay').classList.remove('show');
     buildAndRender();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({top:0, behavior:'smooth'});
 }
+
+function closeResult() {
+    document.getElementById('resultOverlay').classList.remove('show');
+    window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.getElementById('resultOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeResult();
+});
 
 buildAndRender();
 </script>

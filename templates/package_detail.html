@@ -14,7 +14,7 @@
 }
 .study-mode-card {
     border-radius: 14px;
-    padding: 20px 14px 16px;
+    padding: 22px 14px 18px;
     text-align: center;
     text-decoration: none !important;
     color: white !important;
@@ -32,25 +32,22 @@
 .study-mode-card.mode-quiz   { background: linear-gradient(135deg, #0d7a5f, #1ec99a); }
 .study-mode-card.mode-test   { background: linear-gradient(135deg, #7b2d8b, #b45cc9); }
 .study-mode-card.mode-match  { background: linear-gradient(135deg, #b5451b, #f07d44); }
-.study-mode-icon { font-size: 1.8rem; margin-bottom: 8px; }
-.study-mode-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
-.study-mode-desc { font-size: 0.76rem; opacity: 0.85; }
-
-/* Save button */
-.btn-save {
-    background: white;
-    color: var(--navy);
-    border: 2px solid var(--navy);
-    border-radius: 10px;
-    font-weight: 700;
-    padding: 7px 16px;
-    font-size: 0.88rem;
-    transition: all 0.15s;
-    cursor: pointer;
-    white-space: nowrap;
+.study-mode-icon {
+    font-size: 1.6rem;
+    margin-bottom: 10px;
+    opacity: 0.95;
 }
-.btn-save:hover        { background: var(--navy); color: white; }
-.btn-save.saved-state  { background: var(--navy); color: white; }
+.study-mode-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
+.study-mode-desc { font-size: 0.76rem; opacity: 0.82; }
+
+.btn-save {
+    background: white; color: var(--navy);
+    border: 2px solid var(--navy); border-radius: 10px;
+    font-weight: 700; padding: 7px 16px; font-size: 0.88rem;
+    transition: all 0.15s; cursor: pointer; white-space: nowrap;
+}
+.btn-save:hover       { background: var(--navy); color: white; }
+.btn-save.saved-state { background: var(--navy); color: white; }
 .btn-save.saved-state:hover { background: #c0392b; border-color: #c0392b; }
 </style>
 {% endblock %}
@@ -61,30 +58,28 @@
     <div>
         <div class="page-title mb-1">{{ package.package_name }}</div>
         <div style="font-size:0.85rem;color:var(--muted);font-weight:600;">
-            by {{ package.user.username if package.user else 'Unknown' }}
+            <i class="fas fa-user me-1"></i>{{ package.user.username if package.user else 'Unknown' }}
             {% if package.is_public %}
-                · <span style="color:#27ae60;">🌍 Public</span>
+                &nbsp;·&nbsp;<span style="color:#27ae60;"><i class="fas fa-globe me-1"></i>Public</span>
             {% else %}
-                · <span>🔒 Private</span>
+                &nbsp;·&nbsp;<span><i class="fas fa-lock me-1"></i>Private</span>
             {% endif %}
-            · {{ package.vocabularies | length }} từ
+            &nbsp;·&nbsp;<i class="fas fa-layer-group me-1"></i>{{ package.vocabularies | length }} từ
         </div>
     </div>
 
     <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
         {% if not is_owner %}
             {% if is_saved %}
-            <!-- Already saved → show unsave -->
             <form method="POST" action="{{ url_for('unsave_package', package_id=package.id) }}" style="margin:0;">
-                <button type="submit" class="btn-save saved-state" title="Xoá khỏi thư viện">
-                    ✓ Đã lưu
+                <button type="submit" class="btn-save saved-state">
+                    <i class="fas fa-bookmark me-1"></i>Đã lưu
                 </button>
             </form>
             {% else %}
-            <!-- Not saved yet -->
             <form method="POST" action="{{ url_for('save_package', package_id=package.id) }}" style="margin:0;">
                 <button type="submit" class="btn-save">
-                    <i class="fas fa-bookmark me-1"></i>Lưu vào thư viện
+                    <i class="far fa-bookmark me-1"></i>Lưu vào thư viện
                 </button>
             </form>
             {% endif %}
@@ -123,22 +118,22 @@
 <div class="section-header">Chế độ học</div>
 <div class="study-modes-grid">
     <a href="{{ url_for('flashcard', package_id=package.id) }}" class="study-mode-card mode-flash">
-        <div class="study-mode-icon">🃏</div>
+        <div class="study-mode-icon"><i class="fas fa-clone"></i></div>
         <div class="study-mode-name">Flashcard</div>
         <div class="study-mode-desc">Lật thẻ ôn từ</div>
     </a>
     <a href="{{ url_for('quiz', package_id=package.id) }}" class="study-mode-card mode-quiz">
-        <div class="study-mode-icon">📝</div>
+        <div class="study-mode-icon"><i class="fas fa-list-ul"></i></div>
         <div class="study-mode-name">Trắc nghiệm</div>
         <div class="study-mode-desc">Chọn đáp án đúng</div>
     </a>
     <a href="{{ url_for('test_mode', package_id=package.id) }}" class="study-mode-card mode-test">
-        <div class="study-mode-icon">✍️</div>
+        <div class="study-mode-icon"><i class="fas fa-pencil-alt"></i></div>
         <div class="study-mode-name">Kiểm tra</div>
         <div class="study-mode-desc">Gõ đáp án</div>
     </a>
     <a href="{{ url_for('match_mode', package_id=package.id) }}" class="study-mode-card mode-match">
-        <div class="study-mode-icon">🔗</div>
+        <div class="study-mode-icon"><i class="fas fa-link"></i></div>
         <div class="study-mode-name">Ghép thẻ</div>
         <div class="study-mode-desc">Nối cặp từ</div>
     </a>
@@ -157,7 +152,9 @@
     </div>
 </div>
 {% endfor %}
-<div class="totalVocab">Tổng số từ vựng: {{ package.vocabularies|length }}</div>
+<div class="totalVocab">
+    <i class="fas fa-layer-group me-1"></i>Tổng số: {{ package.vocabularies|length }} từ
+</div>
 
 {% else %}
 <div class="rw-card text-center py-4">
@@ -165,7 +162,7 @@
     <p class="text-muted mb-2">Chưa có từ vựng nào</p>
     {% if is_owner %}
     <a href="{{ url_for('edit_package', package_id=package.id) }}" class="btn btn-navy btn-sm">
-        Thêm từ vựng
+        <i class="fas fa-plus me-1"></i>Thêm từ vựng
     </a>
     {% endif %}
 </div>
@@ -176,15 +173,21 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content p-3">
             <div class="modal-header pb-0">
-                <h5 class="modal-title fw-bold" style="color:var(--navy)">Xác nhận xóa gói từ?</h5>
+                <h5 class="modal-title fw-bold" style="color:var(--navy)">
+                    <i class="fas fa-exclamation-triangle me-2 text-danger"></i>Xác nhận xóa gói từ?
+                </h5>
             </div>
             <div class="modal-body">
                 <p class="text-danger fw-bold mb-0">Gói từ vựng sẽ bị xóa vĩnh viễn.</p>
             </div>
             <div class="modal-footer gap-2 justify-content-center">
-                <button type="button" class="btn btn-cream px-4" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-cream px-4" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Hủy
+                </button>
                 <form method="POST" action="{{ url_for('delete_package', package_id=package.id) }}">
-                    <button type="submit" class="btn btn-navy px-4">Xác nhận xóa</button>
+                    <button type="submit" class="btn btn-navy px-4">
+                        <i class="fas fa-trash me-1"></i>Xác nhận xóa
+                    </button>
                 </form>
             </div>
         </div>
@@ -193,11 +196,12 @@
 {% endif %}
 
 <div class="scroll-buttons">
-    <button class="scroll-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <button class="scroll-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Lên đầu">
         <i class="fas fa-arrow-up"></i>
     </button>
-    <button class="scroll-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})">
+    <button class="scroll-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="Xuống cuối">
         <i class="fas fa-arrow-down"></i>
     </button>
 </div>
+
 {% endblock %}

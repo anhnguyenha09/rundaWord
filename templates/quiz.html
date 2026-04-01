@@ -1,274 +1,325 @@
 {% extends "base.html" %}
-
 {% block title %}Trắc nghiệm - {{ package.package_name }}{% endblock %}
 
-{% block content %}
+{% block head_extra %}
+<style>
+.q-block {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 24px 16px;
+    margin-bottom: 18px;
+    transition: border-color 0.2s;
+}
+.q-block.answered-correct { border-color: #27ae60; }
+.q-block.answered-wrong   { border-color: #e74c3c; }
 
-<div class="d-flex align-items-center gap-2 mb-4">
-    <a href="{{ url_for('package_detail', package_id=package.id) }}"
-        style="color:var(--muted);font-size:0.85rem;font-weight:600;text-decoration:none;">
-        ← {{ package.package_name }}
-    </a>
-    <span style="color:var(--muted);">·</span>
-    <span style="font-family:'Poppins';font-weight:700;color:var(--navy);">
-        {{ package.package_name }} - Quiz
-    </span>
-</div>
+.q-num {
+    font-size: 0.76rem; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.q-dir-badge {
+    font-size: 0.7rem; font-weight: 700; padding: 2px 8px;
+    border-radius: 20px; border: 1px solid var(--border); color: var(--muted);
+}
+.q-word {
+    font-size: 1.4rem; font-weight: 800; color: var(--navy); margin-bottom: 18px;
+}
+.options-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+@media (max-width: 480px) { .options-grid { grid-template-columns: 1fr; } }
+.opt-btn {
+    padding: 12px 16px;
+    border: 2px solid var(--border); border-radius: 10px;
+    background: white; cursor: pointer;
+    font-size: 0.9rem; font-family: 'Nunito', sans-serif; font-weight: 600;
+    transition: all 0.15s; text-align: left; color: var(--navy); line-height: 1.3;
+}
+.opt-btn:hover:not(:disabled) { border-color: var(--accent); background: #eef3fb; }
+.opt-btn.correct { border-color: #27ae60 !important; background: #eafaf1 !important; color: #1e8449 !important; }
+.opt-btn.wrong   { border-color: #e74c3c !important; background: #fdf2f2 !important; color: #c0392b !important; }
+.opt-btn.reveal  { border-color: #27ae60 !important; background: #f0faf5 !important; color: #1e8449 !important; opacity: 0.7; }
 
-<div style="max-width:580px;margin:0 auto;">
+/* Sticky score bar */
+.score-bar {
+    position: sticky; top: 62px; z-index: 100;
+    background: rgba(245,247,250,0.95); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border); padding: 10px 0; margin-bottom: 24px;
+}
+.score-inner {
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 12px;
+}
+.score-pill {
+    background: white; border: 1px solid var(--border);
+    border-radius: 20px; padding: 5px 14px;
+    font-size: 0.85rem; font-weight: 700; white-space: nowrap;
+}
+/* Mastery progress bar: fills green for correct, red for wrong */
+.progress-wrap {
+    flex: 1; height: 10px; background: var(--border);
+    border-radius: 6px; overflow: hidden; position: relative;
+}
+.progress-correct {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: #27ae60; border-radius: 6px;
+    transition: width 0.4s ease;
+}
+.progress-wrong {
+    position: absolute; top: 0; bottom: 0;
+    background: #e74c3c; border-radius: 6px;
+    transition: width 0.4s ease, left 0.4s ease;
+}
 
-    <!-- SCORE -->
-    <div class="d-flex justify-content-between mb-1">
-        <span style="font-size:0.85rem;color:var(--muted);font-weight:600;">
-            Câu <span id="qNum">1</span>/<span id="qTotal">?</span>
-        </span>
-        <span style="font-size:0.85rem;font-weight:700;">
-            <span style="color:#27ae60;" id="scoreC">0</span> đúng
-            &nbsp;
-            <span style="color:#e74c3c;" id="scoreW">0</span> sai
-        </span>
-    </div>
-
-    <div style="background:var(--border);border-radius:8px;height:6px;margin-bottom:20px;">
-        <div id="progressBar"
-            style="background:var(--navy);height:100%;border-radius:8px;width:0%;transition:width 0.3s;">
-        </div>
-    </div>
-
-    <!-- QUIZ -->
-    <div id="quizArea">
-        <div class="quiz-card mb-3">
-            <div class="q-prompt">Từ này có nghĩa là gì?</div>
-            <div class="q-word" id="qWord">...</div>
-        </div>
-
-        <div id="options"></div>
-
-        <div id="nextArea" class="text-center d-none mt-2">
-            <button class="btn btn-navy px-4" onclick="nextQuestion()">
-                Câu tiếp →
-            </button>
-        </div>
-    </div>
-
-    <!-- RESULT -->
-    <div id="resultArea" class="d-none text-center">
-        <div class="score-circle" id="scoreCircle"></div>
-
-        <div style="font-weight:700;font-size:1.2rem;color:var(--navy);" id="resultTitle"></div>
-
-        <div style="color:var(--muted);margin:6px 0 20px;" id="resultDesc"></div>
-
-        <div class="d-flex gap-3 justify-content-center">
-            <button class="btn btn-navy px-4" onclick="startQuiz()">Làm lại</button>
-            <a href="{{ url_for('flashcard', package_id=package.id) }}" class="btn btn-cream px-4">
-                Flashcard
-            </a>
-        </div>
-    </div>
-
-</div>
-
+/* Result modal */
+.result-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); backdrop-filter: blur(3px);
+    z-index: 2000; align-items: center; justify-content: center;
+}
+.result-overlay.show { display: flex; }
+.result-modal {
+    background: white; border-radius: 20px;
+    max-width: 400px; width: 90%; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes popIn {
+    from { transform: scale(0.75); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+}
+.result-modal-header {
+    background: var(--navy); color: white;
+    padding: 28px 24px; text-align: center;
+}
+.result-modal-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; margin: 0 auto 14px;
+}
+.result-modal-body {
+    padding: 20px 24px 24px;
+}
+.result-stats-row {
+    display: grid; grid-template-columns: repeat(3,1fr);
+    gap: 10px; margin-bottom: 20px;
+}
+.result-stat {
+    background: var(--bg); border-radius: 12px;
+    padding: 14px 8px; text-align: center;
+}
+.result-stat-num { font-family:'Poppins',sans-serif; font-weight:800; font-size:1.5rem; }
+.result-stat-lbl { font-size:0.74rem; color:var(--muted); font-weight:600; margin-top:2px; }
+</style>
 {% endblock %}
 
+{% block content %}
+<div class="d-flex align-items-center gap-2 mb-3">
+    <a href="{{ url_for('package_detail', package_id=package.id) }}"
+       style="color:var(--muted);font-size:0.85rem;font-weight:600;text-decoration:none;">
+        <i class="fas fa-arrow-left me-1"></i>{{ package.package_name }}
+    </a>
+    <span style="color:var(--muted);">·</span>
+    <span style="font-family:'Poppins';font-weight:700;color:var(--navy);">Trắc nghiệm</span>
+</div>
+
+<!-- Sticky score/progress bar -->
+<div class="score-bar">
+    <div class="container">
+        <div class="score-inner">
+            <div class="score-pill">
+                <i class="fas fa-check" style="color:#27ae60;margin-right:4px;"></i><span id="scoreC">0</span>
+                &nbsp;·&nbsp;
+                <i class="fas fa-times" style="color:#e74c3c;margin-right:4px;"></i><span id="scoreW">0</span>
+            </div>
+            <div class="progress-wrap">
+                <div class="progress-correct" id="progCorrect" style="width:0%;"></div>
+                <div class="progress-wrong"   id="progWrong"   style="width:0%;left:0%;"></div>
+            </div>
+            <div class="score-pill" id="scoreTotal">0/<span id="totalQ">?</span></div>
+        </div>
+    </div>
+</div>
+
+<div id="questionsContainer"></div>
+
+<!-- Result modal -->
+<div class="result-overlay" id="resultOverlay">
+    <div class="result-modal">
+        <div class="result-modal-header">
+            <div class="result-modal-icon" id="resultIcon"></div>
+            <div style="font-family:'Poppins';font-weight:800;font-size:1.3rem;" id="resultTitle"></div>
+            <div style="opacity:0.8;font-size:0.9rem;margin-top:4px;" id="resultSub"></div>
+        </div>
+        <div class="result-modal-body">
+            <div class="result-stats-row">
+                <div class="result-stat">
+                    <div class="result-stat-num" id="rCorrect" style="color:#27ae60;">–</div>
+                    <div class="result-stat-lbl">Đúng</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-stat-num" id="rWrong" style="color:#e74c3c;">–</div>
+                    <div class="result-stat-lbl">Sai</div>
+                </div>
+                <div class="result-stat">
+                    <div class="result-stat-num" id="rPct" style="color:var(--navy);">–</div>
+                    <div class="result-stat-lbl">Điểm</div>
+                </div>
+            </div>
+            <div class="d-flex gap-2 justify-content-center">
+                <button class="btn btn-cream px-4" onclick="restartQuiz()">
+                    <i class="fas fa-redo me-1"></i>Làm lại
+                </button>
+                <a href="{{ url_for('flashcard', package_id=package.id) }}" class="btn btn-navy px-4">
+                    <i class="fas fa-layer-group me-1"></i>Flashcard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
 {% block scripts %}
 <script>
-const allWords = {{ package.vocabularies | map(attribute='word_en') | list | tojson | safe }};
+const allWords    = {{ package.vocabularies | map(attribute='word_en') | list | tojson | safe }};
 const allMeanings = {{ package.vocabularies | map(attribute='word_vi') | list | tojson | safe }};
 
-const SESSION_SIZE = 5;
-const MAX_ATTEMPTS = 3;
-
-let words = allWords.map((w, i) => ({
-    word: w,
-    meaning: allMeanings[i],
-    nextSession: 0,
-    streak: 0,
-    mastered: false,
-    attempts: 0
-}));
-
-let sessionIndex = 0;
-let sessionWords = [];
-let questions = [], cur = 0, correct = 0, wrong = 0, answered = false;
+let questions = [];
+let correct = 0, wrong = 0, answered = 0;
 
 function shuffle(a) {
     const b = [...a];
-    for (let i = b.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [b[i], b[j]] = [b[j], b[i]];
+    for (let i = b.length-1; i>0; i--) {
+        const j = Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]];
     }
     return b;
 }
+function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
-function buildSession() {
-    const due = words.filter(w => !w.mastered && w.nextSession <= sessionIndex);
-    const shuffled = shuffle(due);
-
-    sessionWords = shuffled.slice(0, SESSION_SIZE);
-
-    if (sessionWords.length === 0) {
-        showResult();
-        return;
-    }
-
-    questions = sessionWords.map(q => {
-        const wrong3 = shuffle(allMeanings.filter(m => m !== q.meaning)).slice(0, 3);
+function buildQuestions() {
+    const indices = shuffle([...Array(allWords.length).keys()]);
+    questions = indices.map(i => {
+        // Randomly decide direction: EN→VI or VI→EN
+        const enToVi = Math.random() < 0.5;
+        const prompt  = enToVi ? allWords[i]    : allMeanings[i];
+        const answer  = enToVi ? allMeanings[i] : allWords[i];
+        const pool    = enToVi
+            ? allMeanings.filter((_,idx) => idx !== i)
+            : allWords.filter((_,idx) => idx !== i);
+        const wrongs  = shuffle(pool).slice(0,3);
         return {
-            ref: q,
-            word: q.word,
-            correct: q.meaning,
-            options: shuffle([q.meaning, ...wrong3])
+            prompt, answer, enToVi,
+            options: shuffle([answer, ...wrongs])
         };
     });
 }
 
-function startQuiz() {
-    sessionIndex = 0;
-    correct = 0;
-    wrong = 0;
+function renderQuestions() {
+    const container = document.getElementById('questionsContainer');
+    container.innerHTML = '';
+    document.getElementById('totalQ').textContent = questions.length;
 
-    buildSession();
-    cur = 0;
-
-    document.getElementById('resultArea').classList.add('d-none');
-    document.getElementById('quizArea').classList.remove('d-none');
-
-    document.getElementById('qTotal').textContent = questions.length;
-
-    showQ();
-}
-
-function showQ() {
-    if (cur >= questions.length) {
-        showResult();
-        return;
-    }
-
-    answered = false;
-
-    const q = questions[cur];
-
-    document.getElementById('qNum').textContent = cur + 1;
-    document.getElementById('qWord').textContent = q.word;
-
-    document.getElementById('progressBar').style.width =
-        Math.round(cur / questions.length * 100) + '%';
-
-    document.getElementById('nextArea').classList.add('d-none');
-
-    const opts = document.getElementById('options');
-    opts.innerHTML = '';
-
-    q.options.forEach(o => {
-        const b = document.createElement('button');
-        b.className = 'option-btn';
-        b.textContent = o;
-        b.onclick = () => answer(b, o, q.correct);
-        opts.appendChild(b);
+    questions.forEach((q, qi) => {
+        const block = document.createElement('div');
+        block.className = 'q-block';
+        block.id = 'qblock-' + qi;
+        const dirLabel = q.enToVi ? 'EN → VI' : 'VI → EN';
+        const optBtns = q.options.map((opt,oi) => `
+            <button class="opt-btn" id="opt-${qi}-${oi}"
+                onclick="answer(${qi},${oi},${JSON.stringify(opt)===JSON.stringify(q.answer)})">
+                ${escHtml(opt)}
+            </button>
+        `).join('');
+        block.innerHTML = `
+            <div class="q-num">
+                <span>Câu ${qi+1}</span>
+                <span class="q-dir-badge">${dirLabel}</span>
+            </div>
+            <div class="q-word">${escHtml(q.prompt)}</div>
+            <div class="options-grid">${optBtns}</div>
+        `;
+        container.appendChild(block);
     });
 }
 
-function answer(btn, sel, cor) {
-    if (answered) return;
-    answered = true;
+function answer(qi, oi, isCorrect) {
+    const block = document.getElementById('qblock-'+qi);
+    if (block.classList.contains('answered-correct') || block.classList.contains('answered-wrong')) return;
 
-    const q = questions[cur];
-
-    document.querySelectorAll('.option-btn').forEach(b => {
-        b.disabled = true;
-        if (b.textContent === cor) b.classList.add('correct');
+    const q = questions[qi];
+    block.querySelectorAll('.opt-btn').forEach((btn,i) => {
+        btn.disabled = true;
+        if (q.options[i] === q.answer) btn.classList.add(isCorrect ? 'correct' : 'reveal');
     });
+    const clicked = document.getElementById(`opt-${qi}-${oi}`);
+    if (isCorrect) { clicked.classList.add('correct'); block.classList.add('answered-correct'); correct++; }
+    else           { clicked.classList.add('wrong');   block.classList.add('answered-wrong');   wrong++;   }
 
-    q.ref.attempts++;
-
-    if (sel === cor) {
-        btn.classList.add('correct');
-        correct++;
-
-        q.ref.streak++;
-
-        if (q.ref.streak >= 2) {
-            q.ref.mastered = true;
-        } else {
-            q.ref.nextSession = sessionIndex + 2;
-        }
-
-    } else {
-        btn.classList.add('wrong');
-        wrong++;
-
-        q.ref.streak = 0;
-
-        if (q.ref.attempts >= MAX_ATTEMPTS) {
-            q.ref.mastered = true;
-        } else {
-            q.ref.nextSession = sessionIndex + 1;
-        }
-    }
-
-    document.getElementById('scoreC').textContent = correct;
-    document.getElementById('scoreW').textContent = wrong;
-
-    document.getElementById('nextArea').classList.remove('d-none');
+    answered++;
+    updateProgress();
+    if (answered === questions.length) setTimeout(showResult, 700);
 }
 
-function nextQuestion() {
-    cur++;
-
-    if (cur >= questions.length) {
-        sessionIndex++;
-
-        const remaining = words.filter(w => !w.mastered);
-
-        if (remaining.length === 0) {
-            showResult();
-            return;
-        }
-
-        buildSession();
-        cur = 0;
-
-        document.getElementById('qTotal').textContent = questions.length;
-    }
-
-    showQ();
+function updateProgress() {
+    const total = questions.length;
+    const pctC  = (correct / total) * 100;
+    const pctW  = (wrong   / total) * 100;
+    document.getElementById('progCorrect').style.width = pctC + '%';
+    document.getElementById('progWrong').style.width   = pctW + '%';
+    // Wrong bar starts after the correct bar
+    document.getElementById('progWrong').style.left    = pctC + '%';
+    document.getElementById('scoreC').textContent  = correct;
+    document.getElementById('scoreW').textContent  = wrong;
+    document.getElementById('scoreTotal').innerHTML = answered + '/<span id="totalQ">' + total + '</span>';
 }
 
 function showResult() {
-    document.getElementById('quizArea').classList.add('d-none');
-    document.getElementById('resultArea').classList.remove('d-none');
+    const pct = Math.round(correct / questions.length * 100);
+    const overlay = document.getElementById('resultOverlay');
+    overlay.classList.add('show');
 
-    const total = correct + wrong;
-    const pct = total > 0 ? Math.round(correct / total * 100) : 0;
-
-    const c = document.getElementById('scoreCircle');
-    c.textContent = pct + '%';
-
-    document.getElementById('progressBar').style.width = '100%';
-
+    const iconEl = document.getElementById('resultIcon');
     if (pct >= 80) {
-        c.style.borderColor = '#27ae60';
-        c.style.color = '#27ae60';
+        iconEl.innerHTML = '<i class="fas fa-trophy"></i>';
+        iconEl.style.background = 'rgba(39,174,96,0.3)';
         document.getElementById('resultTitle').textContent = 'Xuất sắc!';
-        document.getElementById('resultDesc').textContent =
-            correct + '/' + total + ' câu đúng. Rất tốt!';
     } else if (pct >= 60) {
-        c.style.borderColor = '#f39c12';
-        c.style.color = '#f39c12';
+        iconEl.innerHTML = '<i class="fas fa-thumbs-up"></i>';
+        iconEl.style.background = 'rgba(243,156,18,0.3)';
         document.getElementById('resultTitle').textContent = 'Khá tốt!';
-        document.getElementById('resultDesc').textContent =
-            correct + '/' + total + ' câu đúng. Ôn thêm nhé!';
     } else {
-        c.style.borderColor = '#e74c3c';
-        c.style.color = '#e74c3c';
+        iconEl.innerHTML = '<i class="fas fa-dumbbell"></i>';
+        iconEl.style.background = 'rgba(231,76,60,0.3)';
         document.getElementById('resultTitle').textContent = 'Cần cố gắng thêm!';
-        document.getElementById('resultDesc').textContent =
-            correct + '/' + total + ' câu đúng. Ôn lại flashcard nhé!';
     }
+    document.getElementById('resultSub').textContent = `Đúng ${correct}/${questions.length} câu`;
+    document.getElementById('rCorrect').textContent  = correct;
+    document.getElementById('rWrong').textContent    = wrong;
+    document.getElementById('rPct').textContent      = pct + '%';
 }
 
-startQuiz();
+function restartQuiz() {
+    correct=0; wrong=0; answered=0;
+    document.getElementById('resultOverlay').classList.remove('show');
+    document.getElementById('progCorrect').style.width = '0%';
+    document.getElementById('progWrong').style.width   = '0%';
+    document.getElementById('progWrong').style.left    = '0%';
+    document.getElementById('scoreC').textContent = '0';
+    document.getElementById('scoreW').textContent = '0';
+    buildQuestions(); renderQuestions(); updateProgress();
+    window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// Close modal on backdrop click
+document.getElementById('resultOverlay').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('show');
+});
+
+buildQuestions(); renderQuestions(); updateProgress();
 </script>
 {% endblock %}
