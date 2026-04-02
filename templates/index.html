@@ -1,156 +1,186 @@
 {% extends "base.html" %}
-{% block title %}Dashboard - RundaWord{% endblock %}
+{% block title %}Dashboard — RundaWord{% endblock %}
 
 {% block content %}
+<div class="container dashboard-wrap">
 
-<div class="welcome-banner">
-    <h2>Welcome, {{ current_user.name or current_user.username }}!</h2>
-    <p>Time for some lessons today!</p>
-</div>
-
-<!-- SEARCH stays on dashboard -->
-<div class="search-box-wrapper mb-4">
-    <form method="GET" action="{{ url_for('dashboard') }}" class="search-box">
-        <i class="fas fa-search search-icon"></i>
-        <input type="text" name="q" placeholder="Tìm gói từ vựng hoặc tên người dùng..."
-            value="{{ search_query or '' }}" class="search-input">
-        <button type="submit" class="search-btn">Search</button>
-    </form>
-</div>
-
-{% if search_query %}
-<!-- ── SEARCH RESULTS ── -->
-<div class="section-header mb-2">
-    🔍 Kết quả cho "<strong>{{ search_query }}</strong>"
-    <a href="{{ url_for('dashboard') }}"
-       style="font-size:0.8rem;font-weight:600;color:var(--muted);margin-left:12px;">✕ Xoá</a>
-</div>
-
-{% if search_results %}
-<div class="row g-3 mb-5">
+  {% if search_query %}
+  <!-- ── SEARCH RESULTS ── -->
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--navy);">
+      Results for "{{ search_query }}"
+    </div>
+    <a href="{{ url_for('dashboard') }}" style="font-size:0.82rem;color:var(--text-muted);text-decoration:none;font-weight:600;">✕ Clear</a>
+  </div>
+  {% if search_results %}
+  <div class="row g-3 mb-5">
     {% for package in search_results %}
-    <div class="col-6 col-md-2">
-        <a href="{{ url_for('package_detail', package_id=package.id) }}"
-           class="pkg-card pkg-card-{{ loop.index0 % 12 }}">
-            <div class="pkg-card-name">{{ package.package_name }}</div>
-            <div class="pkg-card-meta">
-                {{ package.user.username if package.user else '' }} · {{ package.vocabularies | length }} từ
-            </div>
-        </a>
+    <div class="col-6 col-md-3 col-lg-2">
+      <a href="{{ url_for('package_detail', package_id=package.id) }}" class="pkg-card" style="min-height:130px;">
+        <div class="pkg-card-top">
+          <span class="pkg-badge {% if package.is_public %}public{% else %}private{% endif %}">
+            {% if package.is_public %}Public{% else %}Private{% endif %}
+          </span>
+        </div>
+        <div class="pkg-name">{{ package.package_name }}</div>
+        <div class="pkg-meta">
+          <span class="pkg-word-count"><i class="fas fa-layer-group" style="font-size:0.7rem;"></i> {{ package.vocabularies|length }} words</span>
+          <span class="pkg-play-btn"><i class="fas fa-play"></i></span>
+        </div>
+      </a>
     </div>
     {% endfor %}
-</div>
-{% else %}
-<div class="rw-card text-center py-4 mb-5">
-    <p class="text-muted mb-0">Không tìm thấy gói từ nào phù hợp.</p>
-</div>
-{% endif %}
+  </div>
+  {% else %}
+  <div class="rw-card text-center py-5 mb-4">
+    <i class="fas fa-search fa-2x mb-3" style="color:var(--border);"></i>
+    <p style="color:var(--text-muted);margin:0;font-size:0.88rem;">No packages matched your search.</p>
+  </div>
+  {% endif %}
 
-{% else %}
+  {% else %}
 
-<!-- ── CONTINUE LEARNING (own packages) ── -->
-<div class="section-header mb-2">Continue learning</div>
-<div class="row g-3 mb-5">
-    {% if recent_packages %}
-        {% for package in recent_packages %}
-        <div class="col-6 col-md-3">
-            <a href="{{ url_for('package_detail', package_id=package.id) }}"
-               class="pkg-card pkg-card-{{ loop.index0 % 12 }}">
-                <div class="pkg-card-name">{{ package.package_name }}</div>
-                <div class="pkg-card-meta">{{ package.vocabularies | length }} từ · Học tiếp →</div>
-            </a>
-        </div>
-        {% endfor %}
-    {% else %}
-    <div class="col-12">
-        <div class="rw-card text-center py-4">
-            <p class="text-muted mb-2">Bạn chưa có gói từ nào.</p>
-            <a href="{{ url_for('create_package') }}" class="btn btn-navy btn-sm">Tạo gói từ đầu tiên</a>
-        </div>
-    </div>
-    {% endif %}
-</div>
-
-<!-- ── SAVED PACKAGES (from others) ── -->
-{% if saved_recent %}
-<div class="section-header mb-2">
-    🔖 Gói từ đã lưu
-    <a href="{{ url_for('packages', tab='saved') }}"
-       style="font-size:0.8rem;font-weight:600;color:var(--accent);margin-left:10px;">
-        Xem tất cả →
-    </a>
-</div>
-<div class="row g-3 mb-5">
-    {% for package in saved_recent %}
-    <div class="col-6 col-md-3">
-        <a href="{{ url_for('package_detail', package_id=package.id) }}"
-           class="pkg-card pkg-card-{{ (loop.index0 + 6) % 12 }}">
-            <div class="pkg-card-name">{{ package.package_name }}</div>
-            <div class="pkg-card-meta">
-                {{ package.user.username if package.user else '' }} · {{ package.vocabularies | length }} từ
+  <!-- ── ROW 1: Hero banner + Quiz widget ── -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-7">
+      <div class="hero-banner" style="min-height:220px;">
+        <div class="hero-content">
+          <div class="hero-title">Chào mừng bạn,<br>{{ current_user.name or current_user.username }}!</div>
+          <p class="hero-sub">Your linguistic journey continues. Ready for your next curator's challenge?</p>
+          <form method="GET" action="{{ url_for('dashboard') }}">
+            <div class="hero-search">
+              <input type="text" name="q" placeholder="Search packages…" value="{{ search_query or '' }}">
+              <button type="submit">Search</button>
             </div>
-        </a>
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
-
-<!-- ── EXPLORE ── -->
-<div class="section-header mb-2">Explore</div>
-<div class="row g-3 mb-5">
-    {% if public_packages %}
-        {% for package in public_packages %}
-        <div class="col-6 col-md-2">
-            <a href="{{ url_for('package_detail', package_id=package.id) }}"
-               class="pkg-card pkg-card-{{ (loop.index0 + 3) % 12 }}">
-                <div class="pkg-card-name">{{ package.package_name }}</div>
-                <div class="pkg-card-meta">
-                    {{ package.user.username if package.user else '' }} · {{ package.vocabularies | length }} từ
-                </div>
-            </a>
+          </form>
         </div>
-        {% endfor %}
-    {% else %}
-        <p class="text-muted">Chưa có gói từ công khai.</p>
-    {% endif %}
-</div>
-
-<!-- ── QUICK QUIZ ── -->
-{% if quiz_words %}
-<div class="section-header mb-2">Quick quiz</div>
-<div style="max-width:500px;margin:0 auto 32px;">
-    <div class="quiz-card mb-3">
-        <div class="q-prompt">Bạn có nhớ từ này không?</div>
-        <div class="q-word">{{ quiz_words[0].word }}</div>
+      </div>
     </div>
-    <div id="quickOptions">
-        {% for opt in quiz_words[0].options %}
-        <button class="option-btn"
+    <div class="col-lg-5">
+      {% if quiz_words %}
+      <div class="quiz-widget">
+        <div class="quiz-widget-header">
+          <span class="quiz-widget-title">Quick Quiz</span>
+          <span class="quiz-daily-badge">Daily Scholar</span>
+        </div>
+        <div class="quiz-question">{{ quiz_words[0].word }}</div>
+        <div class="quiz-options-grid" id="quickOptions">
+          {% for opt in quiz_words[0].options %}
+          <button class="quiz-opt"
             onclick="checkQuickAnswer(this, '{{ opt | e }}', '{{ quiz_words[0].correct | e }}')">
             {{ opt }}
-        </button>
-        {% endfor %}
-    </div>
-    <div class="text-center mt-3">
-        <a href="{{ url_for('quiz', package_id=quiz_package.id) }}" class="btn btn-navy">
-            Làm full quiz →
+          </button>
+          {% endfor %}
+        </div>
+        <a href="{{ url_for('quiz', package_id=quiz_package.id) }}" class="btn-daily-quiz">
+          Start Daily Quiz <i class="fas fa-arrow-right" style="font-size:0.76rem;"></i>
         </a>
+      </div>
+      {% else %}
+      <div class="quiz-widget" style="align-items:center;justify-content:center;">
+        <i class="fas fa-book-open fa-2x mb-3" style="color:var(--border);"></i>
+        <p style="color:var(--text-muted);text-align:center;font-size:0.88rem;">Create a package to unlock daily quizzes.</p>
+        <a href="{{ url_for('create_package') }}" class="btn-daily-quiz mt-2">Create package</a>
+      </div>
+      {% endif %}
     </div>
+  </div>
+
+  <!-- ── CONTINUE LEARNING ── -->
+  <div class="section-label">
+    Continue Learning
+    <a href="{{ url_for('packages') }}">View All</a>
+  </div>
+  <div class="cards-row">
+    {% if recent_packages %}
+      {% set icons = ['📚','🔤','📖','✏️'] %}
+      {% set percents = [65, 20, 85, 40] %}
+      {% for pkg in recent_packages %}
+      <a href="{{ url_for('package_detail', package_id=pkg.id) }}" class="continue-card">
+        <div class="continue-icon">{{ icons[loop.index0 % 4] }}</div>
+        <div class="continue-name">{{ pkg.package_name }}</div>
+        <div class="continue-desc">
+          {{ pkg.package_description[:48] ~ '…' if pkg.package_description and pkg.package_description|length > 48 else (pkg.package_description or pkg.vocabularies|length|string ~ ' words') }}
+        </div>
+        <div class="continue-progress-bar">
+          <div class="continue-progress-fill" style="width:{{ percents[loop.index0 % 4] }}%;"></div>
+        </div>
+        <div class="continue-pct">{{ percents[loop.index0 % 4] }}% Completed</div>
+      </a>
+      {% endfor %}
+    {% else %}
+    <div class="col-12" style="grid-column:1/-1;">
+      <div class="rw-card text-center py-4" style="border-style:dashed;">
+        <p style="color:var(--text-muted);margin-bottom:14px;font-size:0.88rem;">No packages yet.</p>
+        <a href="{{ url_for('create_package') }}" class="btn-navy" style="font-size:0.84rem;padding:9px 20px;">Create first package</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── SAVED COLLECTIONS + EXPLORE ── -->
+  <div class="row g-4">
+    {% if saved_recent %}
+    <div class="col-md-4">
+      <div class="section-label mb-3">
+        Saved Collections
+        <a href="{{ url_for('packages', tab='saved') }}">See all</a>
+      </div>
+      <div class="saved-list">
+        {% for pkg in saved_recent %}
+        <a href="{{ url_for('package_detail', package_id=pkg.id) }}" class="saved-item">
+          <div class="saved-thumb">
+            <i class="fas fa-book"></i>
+          </div>
+          <div>
+            <div class="saved-item-name">{{ pkg.package_name }}</div>
+            <div class="saved-item-from">Saved from @{{ pkg.user.username if pkg.user else '—' }}</div>
+          </div>
+          <i class="fas fa-bookmark saved-bookmark"></i>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-md-8">
+    {% else %}
+    <div class="col-12">
+    {% endif %}
+      <div class="section-label mb-3">
+        Explore the Library
+        <a href="{{ url_for('packages') }}">See Global Picks</a>
+      </div>
+      {% if public_packages %}
+      <div class="explore-grid">
+        {% set bg_colors = ['#1a3a7a','#0d5c3a','#6a1a1a','#2a3a5c','#4a2a0a','#1a4a1a'] %}
+        {% for pkg in public_packages %}
+        <a href="{{ url_for('package_detail', package_id=pkg.id) }}" class="explore-card">
+          <div class="explore-card-bg" style="background-color:{{ bg_colors[loop.index0 % 6] }};"></div>
+          <div class="explore-card-overlay"></div>
+          <div class="explore-card-content">
+            <div class="explore-card-cat">{{ pkg.user.username if pkg.user else '' }}</div>
+            <div class="explore-card-name">{{ pkg.package_name }}</div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p style="color:var(--text-muted);font-size:0.88rem;">No public packages yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {% endif %}
 </div>
-{% endif %}
-
-{% endif %}{# end search toggle #}
-
 {% endblock %}
 
 {% block scripts %}
 <script>
 function checkQuickAnswer(btn, selected, correct) {
-    document.querySelectorAll('#quickOptions .option-btn').forEach(b => {
-        b.disabled = true;
-        if (b.textContent.trim() === correct.trim()) b.classList.add('correct');
-    });
-    if (selected.trim() !== correct.trim()) btn.classList.add('wrong');
+  document.querySelectorAll('#quickOptions .quiz-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent.trim() === correct.trim()) b.classList.add('correct');
+  });
+  if (selected.trim() !== correct.trim()) btn.classList.add('wrong');
 }
 </script>
 {% endblock %}

@@ -1,31 +1,53 @@
 {% extends "base.html" %}
-{% block title %}Đăng nhập - RundaWord{% endblock %}
+{% block title %}Sign in — RundaWord{% endblock %}
+
 {% block content %}
-<!-- thêm ảnh ở đây -->
-<div style="min-height:60vh;display:flex;align-items:center;justify-content:center;">
-    <div
-        style="background:white;border-radius:20px;padding:40px 36px;width:100%;max-width:440px;box-shadow:0 8px 40px rgba(13,33,55,0.12);">
-        <h2
-            style="font-family:'Poppins',sans-serif;font-weight:700;color:var(--navy);text-align:center;margin-bottom:28px;">
-            Đăng nhập</h2>
+<div class="auth-bg">
+  <div class="login-card">
+    <div class="login-brand">RundaWord</div>
+    <div class="login-brand-sub">The Academic Curator</div>
 
-        <form method="POST">
-            <div class="mb-3">
-                <label class="rw-label">Email/ Username</label>
-                <input type="text" class="rw-input" name="email" placeholder="Nhập email hoặc tên người dùng" required>
-            </div>
-            <div class="mb-4">
-                <label class="rw-label">Mật khẩu</label>
-                <input type="password" class="rw-input" name="password" placeholder="Nhập mật khẩu" required>
-            </div>
-            <button type="submit" class="btn btn-navy w-100 py-3" style="font-size:1rem;">Đăng nhập</button>
-        </form>
+    <div class="login-title">Welcome Back</div>
+    <div class="login-sub">Please enter your credentials to access your library.</div>
 
-        <div class="text-center mt-3">
-            <a href="{{ url_for('register') }}"
-                style="color:var(--accent);font-weight:700;text-decoration:none;font-size:0.95rem;">Đăng ký</a>
+    <form method="POST">
+      <div style="margin-bottom:18px;">
+        <label class="login-label">Email or Username</label>
+        <div class="login-input-wrap">
+          <i class="fas fa-user login-input-icon"></i>
+          <input type="text" class="login-input" name="email"
+            placeholder="e.g. curator@scholar.edu" required autocomplete="username">
         </div>
-    </div>
-</div>
+      </div>
+      <div style="margin-bottom:24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <label class="login-label" style="margin:0;">Password</label>
+          <a href="#" class="login-link" style="font-size:0.77rem;">Forgot Password?</a>
+        </div>
+        <div class="login-input-wrap">
+          <i class="fas fa-lock login-input-icon"></i>
+          <input type="password" class="login-input" name="password"
+            placeholder="••••••••" required autocomplete="current-password">
+        </div>
+      </div>
 
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">
+        <input type="checkbox" id="remember" style="width:16px;height:16px;accent-color:white;">
+        <label for="remember" style="font-size:0.8rem;color:rgba(255,255,255,0.45);cursor:pointer;margin:0;">
+          Remember me for 7 days
+        </label>
+      </div>
+
+      <button type="submit" class="login-btn">
+        Access Library <i class="fas fa-arrow-right" style="font-size:0.8rem;"></i>
+      </button>
+    </form>
+
+    <div style="margin-top:24px;text-align:center;">
+      <a href="{{ url_for('register') }}" class="login-link">
+        New to the curriculum? <strong>Register Here</strong>
+      </a>
+    </div>
+  </div>
+</div>
 {% endblock %}

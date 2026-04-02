@@ -1,207 +1,182 @@
 {% extends "base.html" %}
-{% block title %}{{ package.package_name }} - RundaWord{% endblock %}
-
-{% block head_extra %}
-<style>
-.study-modes-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 28px;
-}
-@media (max-width: 576px) {
-    .study-modes-grid { grid-template-columns: repeat(2, 1fr); }
-}
-.study-mode-card {
-    border-radius: 14px;
-    padding: 22px 14px 18px;
-    text-align: center;
-    text-decoration: none !important;
-    color: white !important;
-    transition: transform 0.18s, box-shadow 0.18s;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    min-height: 110px;
-}
-.study-mode-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 28px rgba(0,0,0,0.18);
-    color: white !important;
-}
-.study-mode-card.mode-flash  { background: linear-gradient(135deg, #1565a8, #38a4e0); }
-.study-mode-card.mode-quiz   { background: linear-gradient(135deg, #0d7a5f, #1ec99a); }
-.study-mode-card.mode-test   { background: linear-gradient(135deg, #7b2d8b, #b45cc9); }
-.study-mode-card.mode-match  { background: linear-gradient(135deg, #b5451b, #f07d44); }
-.study-mode-icon {
-    font-size: 1.6rem;
-    margin-bottom: 10px;
-    opacity: 0.95;
-}
-.study-mode-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
-.study-mode-desc { font-size: 0.76rem; opacity: 0.82; }
-
-.btn-save {
-    background: white; color: var(--navy);
-    border: 2px solid var(--navy); border-radius: 10px;
-    font-weight: 700; padding: 7px 16px; font-size: 0.88rem;
-    transition: all 0.15s; cursor: pointer; white-space: nowrap;
-}
-.btn-save:hover       { background: var(--navy); color: white; }
-.btn-save.saved-state { background: var(--navy); color: white; }
-.btn-save.saved-state:hover { background: #c0392b; border-color: #c0392b; }
-</style>
-{% endblock %}
+{% block title %}{{ package.package_name }} — RundaWord{% endblock %}
 
 {% block content %}
+<div class="container" style="padding-top:32px;padding-bottom:64px;">
 
-<div class="d-flex justify-content-between align-items-start mb-3">
-    <div>
-        <div class="page-title mb-1">{{ package.package_name }}</div>
-        <div style="font-size:0.85rem;color:var(--muted);font-weight:600;">
-            <i class="fas fa-user me-1"></i>{{ package.user.username if package.user else 'Unknown' }}
-            {% if package.is_public %}
-                &nbsp;·&nbsp;<span style="color:#27ae60;"><i class="fas fa-globe me-1"></i>Public</span>
-            {% else %}
-                &nbsp;·&nbsp;<span><i class="fas fa-lock me-1"></i>Private</span>
-            {% endif %}
-            &nbsp;·&nbsp;<i class="fas fa-layer-group me-1"></i>{{ package.vocabularies | length }} từ
+  <!-- BREADCRUMB -->
+  <div class="d-flex align-items-center gap-2 mb-4" style="font-size:0.83rem;">
+    <a href="{{ url_for('packages') }}" style="color:var(--text-muted);text-decoration:none;font-weight:500;">
+      <i class="fas fa-arrow-left me-1" style="font-size:0.72rem;"></i>Library
+    </a>
+    <span style="color:var(--border);">/</span>
+    <span style="font-weight:600;color:var(--navy);">{{ package.package_name }}</span>
+  </div>
+
+  <!-- PACKAGE HEADER — matches PDF Page 4 -->
+  <div class="pkg-detail-header mb-4">
+    <div class="d-flex justify-content-between align-items-start gap-3">
+      <div style="flex:1;">
+        <div class="pkg-detail-meta">
+          <span class="pkg-badge {% if package.is_public %}public{% else %}private{% endif %}">
+            {% if package.is_public %}PUBLIC{% else %}PRIVATE{% endif %}
+          </span>
+          <span class="pkg-badge" style="background:#f0f2f6;color:var(--text-muted);border:1px solid var(--border);">
+            {{ package.vocabularies|length }} words
+          </span>
         </div>
-    </div>
+        <div class="pkg-detail-title">{{ package.package_name }}</div>
+        <div class="pkg-detail-author">
+          Curated by <strong style="color:var(--navy);">{{ package.user.username if package.user else 'Unknown' }}</strong>
+        </div>
+        {% if package.package_description %}
+        <p style="font-size:0.84rem;color:var(--text-muted);margin-top:12px;margin-bottom:0;max-width:560px;line-height:1.7;">
+          {{ package.package_description }}
+        </p>
+        {% endif %}
+      </div>
 
-    <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+      <!-- Actions -->
+      <div class="d-flex align-items-center gap-2 flex-shrink-0">
         {% if not is_owner %}
-            {% if is_saved %}
-            <form method="POST" action="{{ url_for('unsave_package', package_id=package.id) }}" style="margin:0;">
-                <button type="submit" class="btn-save saved-state">
-                    <i class="fas fa-bookmark me-1"></i>Đã lưu
-                </button>
-            </form>
-            {% else %}
-            <form method="POST" action="{{ url_for('save_package', package_id=package.id) }}" style="margin:0;">
-                <button type="submit" class="btn-save">
-                    <i class="far fa-bookmark me-1"></i>Lưu vào thư viện
-                </button>
-            </form>
-            {% endif %}
+          {% if is_saved %}
+          <form method="POST" action="{{ url_for('unsave_package', package_id=package.id) }}" style="margin:0;">
+            <button type="submit" class="btn-save saved-state">
+              <i class="fas fa-bookmark me-1"></i>Saved
+            </button>
+          </form>
+          {% else %}
+          <form method="POST" action="{{ url_for('save_package', package_id=package.id) }}" style="margin:0;">
+            <button type="submit" class="btn-save">
+              <i class="far fa-bookmark me-1"></i>Save Package
+            </button>
+          </form>
+          {% endif %}
         {% endif %}
 
         {% if is_owner %}
         <div class="dropdown">
-            <button class="settings-btn" data-bs-toggle="dropdown">
-                <i class="fas fa-cog"></i>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                    <a class="dropdown-item" href="{{ url_for('edit_package', package_id=package.id) }}">
-                        <i class="fas fa-edit me-2 text-muted"></i>Edit Package
-                    </a>
-                </li>
-                <li>
-                    <button class="dropdown-item text-danger"
-                        data-bs-toggle="modal" data-bs-target="#deleteModal">
-                        <i class="fas fa-trash me-2"></i>Delete Package
-                    </button>
-                </li>
-            </ul>
+          <button class="settings-btn" data-bs-toggle="dropdown">
+            <i class="fas fa-ellipsis-v"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{{ url_for('edit_package', package_id=package.id) }}">
+              <i class="fas fa-edit me-2" style="color:var(--text-muted);width:14px;"></i>Edit Package
+            </a></li>
+            <li><button class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+              <i class="fas fa-trash me-2" style="width:14px;"></i>Delete Package
+            </button></li>
+          </ul>
         </div>
         {% endif %}
+      </div>
     </div>
-</div>
+  </div>
 
-{% if package.package_description %}
-<p style="color:var(--muted);font-size:0.92rem;line-height:1.6;margin-bottom:24px;">
-    {{ package.package_description }}
-</p>
-{% endif %}
+  <!-- MASTERY PATHWAYS — PDF Page 4: 4 colored cards -->
+  <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">
+    Mastery Pathways
+  </div>
+  <div class="mastery-grid">
+    <a href="{{ url_for('flashcard', package_id=package.id) }}" class="mastery-card mode-flash">
+      <div class="mastery-icon"><i class="fas fa-clone"></i></div>
+      <div class="mastery-name">Flashcard</div>
+      <div class="mastery-desc">Spaced repetition for focus</div>
+    </a>
+    <a href="{{ url_for('quiz', package_id=package.id) }}" class="mastery-card mode-quiz">
+      <div class="mastery-icon"><i class="fas fa-list-ul"></i></div>
+      <div class="mastery-name">Quiz</div>
+      <div class="mastery-desc">Dynamic multiple choice</div>
+    </a>
+    <a href="{{ url_for('test_mode', package_id=package.id) }}" class="mastery-card mode-test">
+      <div class="mastery-icon"><i class="fas fa-pencil-alt"></i></div>
+      <div class="mastery-name">Test</div>
+      <div class="mastery-desc">Full proficiency assessment</div>
+    </a>
+    <a href="{{ url_for('match_mode', package_id=package.id) }}" class="mastery-card mode-match">
+      <div class="mastery-icon"><i class="fas fa-link"></i></div>
+      <div class="mastery-name">Match</div>
+      <div class="mastery-desc">Rapid cognitive association</div>
+    </a>
+  </div>
 
-<!-- STUDY MODES -->
-<div class="section-header">Chế độ học</div>
-<div class="study-modes-grid">
-    <a href="{{ url_for('flashcard', package_id=package.id) }}" class="study-mode-card mode-flash">
-        <div class="study-mode-icon"><i class="fas fa-clone"></i></div>
-        <div class="study-mode-name">Flashcard</div>
-        <div class="study-mode-desc">Lật thẻ ôn từ</div>
-    </a>
-    <a href="{{ url_for('quiz', package_id=package.id) }}" class="study-mode-card mode-quiz">
-        <div class="study-mode-icon"><i class="fas fa-list-ul"></i></div>
-        <div class="study-mode-name">Trắc nghiệm</div>
-        <div class="study-mode-desc">Chọn đáp án đúng</div>
-    </a>
-    <a href="{{ url_for('test_mode', package_id=package.id) }}" class="study-mode-card mode-test">
-        <div class="study-mode-icon"><i class="fas fa-pencil-alt"></i></div>
-        <div class="study-mode-name">Kiểm tra</div>
-        <div class="study-mode-desc">Gõ đáp án</div>
-    </a>
-    <a href="{{ url_for('match_mode', package_id=package.id) }}" class="study-mode-card mode-match">
-        <div class="study-mode-icon"><i class="fas fa-link"></i></div>
-        <div class="study-mode-name">Ghép thẻ</div>
-        <div class="study-mode-desc">Nối cặp từ</div>
-    </a>
-</div>
-
-<!-- VOCAB LIST -->
-<div class="section-header">Danh sách từ vựng</div>
-
-{% if package.vocabularies %}
-{% for vocab in package.vocabularies %}
-<div class="vocab-row">
-    <div class="vocab-num">{{ loop.index }}</div>
-    <div class="row g-2">
-        <div class="col-6"><div class="vocab-field">{{ vocab.word_en }}</div></div>
-        <div class="col-6"><div class="vocab-field">{{ vocab.word_vi }}</div></div>
+  <!-- VOCABULARY LEDGER — PDF Page 4 -->
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;">
+      Vocabulary Ledger
     </div>
-</div>
-{% endfor %}
-<div class="totalVocab">
-    <i class="fas fa-layer-group me-1"></i>Tổng số: {{ package.vocabularies|length }} từ
-</div>
+    <div style="font-size:0.78rem;color:var(--text-muted);font-weight:500;">
+      {{ package.vocabularies|length }} terms
+    </div>
+  </div>
 
-{% else %}
-<div class="rw-card text-center py-4">
-    <i class="fas fa-inbox fa-2x mb-2" style="color:var(--muted)"></i>
-    <p class="text-muted mb-2">Chưa có từ vựng nào</p>
-    {% if is_owner %}
-    <a href="{{ url_for('edit_package', package_id=package.id) }}" class="btn btn-navy btn-sm">
-        <i class="fas fa-plus me-1"></i>Thêm từ vựng
-    </a>
+  {% if package.vocabularies %}
+  <div class="vocab-ledger">
+    <div class="ledger-header">
+      <span class="ledger-title">Vocabulary Ledger</span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button class="ledger-audio" title="Sort A-Z"><i class="fas fa-sort-alpha-down"></i></button>
+        <button class="ledger-audio" title="Search"><i class="fas fa-search"></i></button>
+      </div>
+    </div>
+    {% for vocab in package.vocabularies %}
+    <div class="ledger-row">
+      <div>
+        <div class="ledger-en">{{ vocab.word_en }}</div>
+        <div class="ledger-pos">Noun</div>
+      </div>
+      <div class="ledger-vi">{{ vocab.word_vi }}</div>
+      <div class="ledger-def" style="color:var(--text-muted);font-size:0.81rem;">—</div>
+      <button class="ledger-audio"><i class="fas fa-volume-up"></i></button>
+    </div>
+    {% endfor %}
+    {% if package.vocabularies|length > 4 %}
+    <div style="padding:16px;text-align:center;">
+      <button style="background:var(--off-white);border:1.5px solid var(--border);border-radius:var(--r-md);padding:10px 28px;font-size:0.84rem;font-weight:600;color:var(--navy);cursor:pointer;" onclick="this.closest('.vocab-ledger').querySelectorAll('.ledger-row').forEach(r=>r.style.display='grid');this.style.display='none';">
+        Load More Terms
+      </button>
+    </div>
     {% endif %}
-</div>
-{% endif %}
+  </div>
+  {% else %}
+  <div class="rw-card text-center py-5">
+    <i class="fas fa-inbox fa-2x mb-3" style="color:var(--border);"></i>
+    <p style="color:var(--text-muted);margin-bottom:14px;font-size:0.88rem;">No vocabulary added yet.</p>
+    {% if is_owner %}
+    <a href="{{ url_for('edit_package', package_id=package.id) }}" class="btn-navy" style="font-size:0.84rem;padding:9px 20px;">Add vocabulary</a>
+    {% endif %}
+  </div>
+  {% endif %}
 
-{% if is_owner %}
-<div class="modal fade" id="deleteModal" tabindex="-1">
+  {% if is_owner %}
+  <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content p-3">
-            <div class="modal-header pb-0">
-                <h5 class="modal-title fw-bold" style="color:var(--navy)">
-                    <i class="fas fa-exclamation-triangle me-2 text-danger"></i>Xác nhận xóa gói từ?
-                </h5>
-            </div>
-            <div class="modal-body">
-                <p class="text-danger fw-bold mb-0">Gói từ vựng sẽ bị xóa vĩnh viễn.</p>
-            </div>
-            <div class="modal-footer gap-2 justify-content-center">
-                <button type="button" class="btn btn-cream px-4" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i>Hủy
-                </button>
-                <form method="POST" action="{{ url_for('delete_package', package_id=package.id) }}">
-                    <button type="submit" class="btn btn-navy px-4">
-                        <i class="fas fa-trash me-1"></i>Xác nhận xóa
-                    </button>
-                </form>
-            </div>
+      <div class="modal-content p-3">
+        <div class="modal-header pb-0">
+          <h5 class="modal-title" style="font-size:1rem;font-weight:700;color:var(--navy);">Delete this package?</h5>
         </div>
+        <div class="modal-body">
+          <p style="color:var(--text-muted);font-size:0.86rem;margin:0;">
+            <strong style="color:var(--red);">{{ package.package_name }}</strong> will be permanently removed.
+          </p>
+        </div>
+        <div class="modal-footer gap-2 justify-content-end">
+          <button type="button" class="btn-cream" data-bs-dismiss="modal">Cancel</button>
+          <form method="POST" action="{{ url_for('delete_package', package_id=package.id) }}">
+            <button type="submit" class="btn-navy" style="background:#c0392b;">
+              <i class="fas fa-trash me-1"></i>Delete
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
-</div>
-{% endif %}
+  </div>
+  {% endif %}
 
-<div class="scroll-buttons">
-    <button class="scroll-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Lên đầu">
-        <i class="fas fa-arrow-up"></i>
-    </button>
-    <button class="scroll-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="Xuống cuối">
-        <i class="fas fa-arrow-down"></i>
-    </button>
-</div>
+  <div class="scroll-buttons">
+    <button class="scroll-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-arrow-up"></i></button>
+    <button class="scroll-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})"><i class="fas fa-arrow-down"></i></button>
+  </div>
 
+</div>
 {% endblock %}

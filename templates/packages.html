@@ -1,135 +1,174 @@
 {% extends "base.html" %}
-{% block title %}Thư viện - RundaWord{% endblock %}
+{% block title %}Library — RundaWord{% endblock %}
 
 {% block content %}
+<div class="library-layout">
 
-{% set action_url = url_for('packages') %}
-{% set placeholder = "Tìm theo tên gói, tên người dùng..." %}
-{% include "components/search_box.html" %}
+  <!-- SIDEBAR — matches PDF Page 1 -->
+  <aside class="library-sidebar d-none d-lg-flex">
+    <div class="sidebar-profile">
+      <div class="sidebar-avatar">
+        <i class="fas fa-user"></i>
+      </div>
+      <div class="sidebar-name">{{ current_user.name or current_user.username }}</div>
+      <div class="sidebar-role">
+        {% if current_user.saved_packages.count() > 0 %}Premium Scholar{% else %}Scholar{% endif %}
+      </div>
+    </div>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div class="page-title mb-0">Vocabulary Packages</div>
-    <a href="{{ url_for('create_package') }}" class="btn btn-navy">+ Create new</a>
-</div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-nav-item" href="{{ url_for('dashboard') }}">
+        <i class="fas fa-th-large"></i> Dashboard
+      </a>
+      <a class="sidebar-nav-item active" href="{{ url_for('packages') }}">
+        <i class="fas fa-book"></i> Library
+      </a>
+      <a class="sidebar-nav-item" href="{{ url_for('profile') }}">
+        <i class="fas fa-chart-bar"></i> Stats
+      </a>
+      <a class="sidebar-nav-item" href="{{ url_for('edit_profile') }}">
+        <i class="fas fa-cog"></i> Settings
+      </a>
+    </nav>
 
-{% if not search_query %}
-<!-- Tab switcher: My packages / Saved -->
-<div class="pkg-tabs mb-4">
-    <a href="{{ url_for('packages', tab='mine') }}"
-       class="pkg-tab {% if tab == 'mine' %}active{% endif %}">
-        📦 Của tôi
+    <a href="{{ url_for('dashboard') }}#quiz" class="sidebar-quiz-btn">
+      Start Daily Quiz
     </a>
-    <a href="{{ url_for('packages', tab='saved') }}"
-       class="pkg-tab {% if tab == 'saved' %}active{% endif %}">
-        🔖 Đã lưu
-    </a>
-</div>
-{% endif %}
+  </aside>
 
-{% if search_query %}
-<!-- ── SEARCH RESULTS ── -->
-<div style="font-size:0.88rem;color:var(--muted);margin-bottom:16px;font-weight:600;">
-    Kết quả cho "<strong style="color:var(--navy)">{{ search_query }}</strong>"
-    <a href="{{ url_for('packages') }}" style="margin-left:10px;color:var(--muted);">✕ Xoá</a>
-</div>
+  <!-- MAIN CONTENT -->
+  <div class="library-main">
 
-{% if packages %}
-<div class="row g-3">
-    {% for pkg in packages %}
-    <div class="col-6 col-md-3">
-        <a href="{{ url_for('package_detail', package_id=pkg.id) }}"
-           class="pkg-card pkg-card-{{ loop.index0 % 12 }}">
-            <div class="pkg-card-name">{{ pkg.package_name }}</div>
-            <div class="pkg-card-meta">
-                {{ pkg.user.username if pkg.user else '' }} · {{ pkg.vocabularies | length }} từ
-            </div>
-        </a>
+    <!-- Header -->
+    <div class="library-header">
+      <div>
+        <div class="library-title">My Library</div>
+        <div class="library-subtitle">Organise your academic journey through curated word packages and personal collections.</div>
+      </div>
+      <a href="{{ url_for('create_package') }}" class="btn-navy" style="white-space:nowrap;margin-top:4px;">
+        <i class="fas fa-plus" style="font-size:0.74rem;"></i> Create New
+      </a>
     </div>
-    {% endfor %}
-</div>
-{% else %}
-<div class="rw-card text-center py-5">
-    <i class="fas fa-search fa-2x mb-3" style="color:var(--muted)"></i>
-    <p class="text-muted mb-0">Không tìm thấy kết quả nào.</p>
-</div>
-{% endif %}
 
-{% elif tab == 'saved' %}
-<!-- ── SAVED TAB ── -->
-{% if saved_packages %}
-<div class="row g-3">
-    {% for pkg in saved_packages %}
-    <div class="col-6 col-md-3">
-        <a href="{{ url_for('package_detail', package_id=pkg.id) }}"
-           class="pkg-card pkg-card-{{ loop.index0 % 12 }}">
-            <div class="pkg-card-name">{{ pkg.package_name }}</div>
-            <div class="pkg-card-meta">
-                {{ pkg.user.username if pkg.user else '' }} · {{ pkg.vocabularies | length }} từ
-            </div>
-        </a>
+    <!-- Tab row + search -->
+    <div class="lib-tab-row">
+      {% if not search_query %}
+      <a href="{{ url_for('packages', tab='mine') }}"
+         class="lib-tab {% if tab == 'mine' %}active{% endif %}">Của tôi</a>
+      <a href="{{ url_for('packages', tab='saved') }}"
+         class="lib-tab {% if tab == 'saved' %}active{% endif %}">Đã lưu</a>
+      {% endif %}
+      <form method="GET" action="{{ url_for('packages') }}" class="lib-search">
+        <i class="fas fa-search si"></i>
+        <input type="text" name="q" placeholder="Search your packages…" value="{{ search_query or '' }}">
+      </form>
     </div>
-    {% endfor %}
-</div>
-{% else %}
-<div class="rw-card text-center py-5">
-    <i class="fas fa-bookmark fa-2x mb-3" style="color:var(--muted)"></i>
-    <p class="text-muted mb-3">Bạn chưa lưu gói từ nào từ cộng đồng.</p>
-    <a href="{{ url_for('dashboard') }}" class="btn btn-navy btn-sm">Khám phá gói từ</a>
-</div>
-{% endif %}
 
-{% else %}
-<!-- ── MY PACKAGES TAB ── -->
-{% if packages %}
-<div class="row g-3">
-    {% for pkg in packages %}
-    <div class="col-6 col-md-3">
-        <a href="{{ url_for('package_detail', package_id=pkg.id) }}"
-           class="pkg-card pkg-card-{{ loop.index0 % 12 }}">
-            <div class="pkg-card-name">{{ pkg.package_name }}</div>
-            <div class="pkg-card-meta">
-                {{ pkg.vocabularies | length }} từ
-                {% if not pkg.is_public %} · 🔒{% endif %}
-            </div>
-        </a>
+    {% if search_query %}
+    <!-- Search results -->
+    <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:16px;font-weight:500;">
+      Results for "<strong style="color:var(--navy);">{{ search_query }}</strong>"
+      <a href="{{ url_for('packages') }}" style="margin-left:10px;color:var(--text-muted);text-decoration:none;">✕ Clear</a>
     </div>
-    {% endfor %}
-</div>
-{% else %}
-<div class="rw-card text-center py-5">
-    <i class="fas fa-box-open fa-2x mb-3" style="color:var(--muted)"></i>
-    <p class="text-muted mb-3">Bạn chưa có gói từ nào</p>
-    <a href="{{ url_for('create_package') }}" class="btn btn-navy">Tạo gói từ đầu tiên</a>
-</div>
-{% endif %}
-{% endif %}
+    {% if packages %}
+    <div class="pkg-grid">
+      {% for pkg in packages %}
+      <a href="{{ url_for('package_detail', package_id=pkg.id) }}" class="pkg-card">
+        <div class="pkg-card-top">
+          <span class="pkg-badge {% if pkg.is_public %}public{% else %}private{% endif %}">
+            {% if pkg.is_public %}Public{% else %}Private{% endif %}
+          </span>
+          <div class="pkg-author-avatar"><i class="fas fa-user" style="font-size:0.65rem;"></i></div>
+        </div>
+        <div class="pkg-name">{{ pkg.package_name }}</div>
+        <div class="pkg-author">Authored by <strong>{{ pkg.user.username if pkg.user else '—' }}</strong></div>
+        <div class="pkg-meta">
+          <span class="pkg-word-count"><i class="fas fa-layer-group" style="font-size:0.7rem;"></i> {{ pkg.vocabularies|length }} Words</span>
+          <span class="pkg-play-btn"><i class="fas fa-play"></i></span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="rw-card text-center py-5">
+      <i class="fas fa-search fa-2x mb-3" style="color:var(--border);"></i>
+      <p style="color:var(--text-muted);margin:0;">No packages found.</p>
+    </div>
+    {% endif %}
 
-{% endblock %}
+    {% elif tab == 'saved' %}
+    <!-- Saved tab -->
+    {% if saved_packages %}
+    <div class="pkg-grid">
+      {% for pkg in saved_packages %}
+      <a href="{{ url_for('package_detail', package_id=pkg.id) }}" class="pkg-card">
+        <div class="pkg-card-top">
+          <span class="pkg-badge public">Public</span>
+          <div class="pkg-author-avatar"><i class="fas fa-user" style="font-size:0.65rem;"></i></div>
+        </div>
+        <div class="pkg-name">{{ pkg.package_name }}</div>
+        <div class="pkg-author">Authored by <strong>{{ pkg.user.username if pkg.user else '—' }}</strong></div>
+        <div class="pkg-meta">
+          <span class="pkg-word-count"><i class="fas fa-layer-group" style="font-size:0.7rem;"></i> {{ pkg.vocabularies|length }} Words</span>
+          <span class="pkg-play-btn"><i class="fas fa-play"></i></span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="rw-card text-center py-5" style="border-style:dashed;">
+      <i class="fas fa-bookmark fa-2x mb-3" style="color:var(--border);"></i>
+      <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.88rem;">No saved collections yet.</p>
+      <a href="{{ url_for('dashboard') }}" class="btn-navy" style="font-size:0.84rem;padding:9px 20px;">Explore packages</a>
+    </div>
+    {% endif %}
 
-{% block head_extra %}
-<style>
-.pkg-tabs {
-    display: flex;
-    gap: 4px;
-    background: var(--border);
-    border-radius: 12px;
-    padding: 4px;
-    width: fit-content;
-}
-.pkg-tab {
-    padding: 7px 18px;
-    border-radius: 9px;
-    font-weight: 700;
-    font-size: 0.88rem;
-    text-decoration: none;
-    color: var(--muted);
-    transition: all 0.15s;
-}
-.pkg-tab.active {
-    background: white;
-    color: var(--navy);
-    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
-}
-.pkg-tab:hover:not(.active) { color: var(--navy); }
-</style>
+    {% else %}
+    <!-- My packages tab -->
+    {% if packages %}
+    <div class="pkg-grid">
+      {% for pkg in packages %}
+      <!-- Make second card featured (navy) to match PDF layout -->
+      <a href="{{ url_for('package_detail', package_id=pkg.id) }}"
+         class="pkg-card {% if loop.index == 2 %}featured{% endif %}">
+        <div class="pkg-card-top">
+          <span class="pkg-badge {% if pkg.is_public %}public{% else %}private{% endif %} {% if loop.index == 2 %}on-dark{% endif %}">
+            {% if pkg.is_public %}PUBLIC{% else %}PRIVATE{% endif %}
+          </span>
+          {% if loop.index != 2 %}
+          <div class="pkg-author-avatar"><i class="fas fa-user" style="font-size:0.65rem;"></i></div>
+          {% endif %}
+        </div>
+        <div class="pkg-name">{{ pkg.package_name }}</div>
+        {% if loop.index == 2 %}
+        <div class="pkg-author" style="font-style:italic;font-size:0.77rem;">Curated by You</div>
+        {% else %}
+        <div class="pkg-author">Curated by <strong>{{ current_user.username }}</strong></div>
+        {% endif %}
+        <div class="pkg-meta">
+          <span class="pkg-word-count"><i class="fas fa-layer-group" style="font-size:0.7rem;"></i> {{ pkg.vocabularies|length }} Words</span>
+          {% if loop.index == 2 %}
+          <a href="{{ url_for('flashcard', package_id=pkg.id) }}"
+             style="background:white;color:var(--navy);border:none;border-radius:var(--r-md);padding:5px 14px;font-size:0.75rem;font-weight:700;text-decoration:none;"
+             onclick="event.preventDefault();window.location='{{ url_for('flashcard', package_id=pkg.id) }}';">
+            STUDY NOW
+          </a>
+          {% else %}
+          <span class="pkg-play-btn"><i class="fas fa-play"></i></span>
+          {% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="rw-card text-center py-5" style="border-style:dashed;">
+      <i class="fas fa-layer-group fa-2x mb-3" style="color:var(--border);"></i>
+      <p style="color:var(--text-muted);margin-bottom:16px;font-size:0.88rem;">Your library is empty.</p>
+      <a href="{{ url_for('create_package') }}" class="btn-navy" style="font-size:0.84rem;padding:9px 20px;">Create first package</a>
+    </div>
+    {% endif %}
+    {% endif %}
+
+  </div><!-- /library-main -->
+</div><!-- /library-layout -->
 {% endblock %}
