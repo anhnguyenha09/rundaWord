@@ -1,0 +1,100 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ 'Tạo' if action=='create' else 'Sửa' }} người dùng - Admin{% endblock %}
+{% block topbar_title %}{{ 'Tạo người dùng mới' if action=='create' else 'Chỉnh sửa: ' + user.username }}{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a href="{{ url_for('admin_users') }}" class="btn btn-cream btn-sm px-3">
+        <i class="fas fa-arrow-left me-1"></i>Danh sách
+    </a>
+    <div class="page-title mb-0">
+        {% if action == 'create' %}
+            <i class="fas fa-user-plus me-2"></i>Tạo người dùng mới
+        {% else %}
+            <i class="fas fa-user-edit me-2"></i>Chỉnh sửa: {{ user.username }}
+        {% endif %}
+    </div>
+</div>
+
+<div class="rw-card" style="max-width:560px;">
+    <form method="POST">
+
+        <div class="mb-3">
+            <label class="rw-label">Username <span class="text-danger">*</span></label>
+            <input type="text" class="rw-input" name="username" required
+                value="{{ user.username if user else '' }}" placeholder="Nhập username">
+        </div>
+
+        <div class="mb-3">
+            <label class="rw-label">Tên hiển thị</label>
+            <input type="text" class="rw-input" name="name"
+                value="{{ user.name if user else '' }}" placeholder="Nhập tên">
+        </div>
+
+        <div class="mb-3">
+            <label class="rw-label">Email <span class="text-danger">*</span></label>
+            <input type="email" class="rw-input" name="email" required
+                value="{{ user.email if user else '' }}" placeholder="email@example.com">
+        </div>
+
+        {% if action == 'create' %}
+        <div class="mb-3">
+            <label class="rw-label">Mật khẩu <span class="text-danger">*</span></label>
+            <input type="password" class="rw-input" name="password" required
+                placeholder="Nhập mật khẩu" minlength="6">
+        </div>
+        {% else %}
+        <div class="mb-3">
+            <label class="rw-label">Mật khẩu mới <span style="font-weight:400;color:var(--muted);">(bỏ trống = giữ nguyên)</span></label>
+            <input type="password" class="rw-input" name="new_password"
+                placeholder="Để trống nếu không đổi" minlength="6">
+        </div>
+        {% endif %}
+
+        <div class="mb-4">
+            <label class="rw-label">Role</label>
+            <div class="d-flex gap-3 mt-2">
+                <label class="visibility-option">
+                    <input type="radio" name="role" value="0"
+                        {% if not user or user.role == 0 %}checked{% endif %}>
+                    <div class="option-box">
+                        <i class="fas fa-user me-1"></i>User
+                        <div class="small-text">Người dùng thường</div>
+                    </div>
+                </label>
+                <label class="visibility-option">
+                    <input type="radio" name="role" value="1"
+                        {% if user and user.role == 1 %}checked{% endif %}>
+                    <div class="option-box">
+                        <i class="fas fa-shield-alt me-1"></i>Admin
+                        <div class="small-text">Toàn quyền quản lý</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-navy px-4">
+                <i class="fas fa-save me-1"></i>
+                {{ 'Tạo người dùng' if action == 'create' else 'Lưu thay đổi' }}
+            </button>
+            <a href="{{ url_for('admin_users') }}" class="btn btn-cream px-4">Hủy</a>
+        </div>
+
+    </form>
+</div>
+
+{% block head_extra %}
+<style>
+.visibility-option input { display:none; }
+.option-box {
+    border:2px solid var(--border); border-radius:12px;
+    padding:12px 16px; cursor:pointer; transition:.2s; font-weight:600;
+}
+.small-text { font-size:.75rem; color:var(--muted); font-weight:500; }
+.visibility-option input:checked + .option-box {
+    border-color:var(--navy); background:#eef3fb;
+}
+</style>
+{% endblock %}
+{% endblock %}

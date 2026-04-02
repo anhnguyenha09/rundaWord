@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}403 - Không có quyền truy cập{% endblock %}
+{% block content %}
+<div class="text-center py-5">
+    <div style="font-size:4rem;margin-bottom:16px;color:var(--muted);">
+        <i class="fas fa-shield-alt"></i>
+    </div>
+    <div class="page-title mb-2">403 — Không có quyền</div>
+    <p style="color:var(--muted);margin-bottom:24px;">
+        Bạn không có quyền truy cập trang này.
+    </p>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-navy px-4">
+        <i class="fas fa-home me-1"></i>Về Dashboard
+    </a>
+</div>
+{% endblock %}

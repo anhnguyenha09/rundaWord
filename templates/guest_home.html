@@ -1,0 +1,55 @@
+{% extends "base_guest.html" %}
+{% block title %}RundaWord - Học từ vựng tiếng Anh{% endblock %}
+
+{% block content %}
+
+<div class="welcome-banner" style="text-align:center;padding:48px 36px;">
+    <h2 style="font-size:2rem;">Học từ vựng tiếng Anh hiệu quả</h2>
+    <p style="font-size:1.05rem;opacity:0.85;margin:10px 0 24px;">
+        Flashcard · Trắc nghiệm · Kiểm tra · Ghép thẻ
+    </p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+        <a href="{{ url_for('register') }}" class="btn btn-cream px-5" style="font-size:1rem;">
+            <i class="fas fa-user-plus me-2"></i>Đăng ký miễn phí
+        </a>
+        <a href="{{ url_for('login') }}" class="btn" style="background:rgba(255,255,255,0.15);color:white;border:2px solid rgba(255,255,255,0.4);border-radius:10px;padding:10px 28px;font-weight:700;font-size:1rem;">
+            <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
+        </a>
+    </div>
+</div>
+
+<!-- Public packages -->
+<div class="section-header mb-3">
+    <i class="fas fa-globe me-2"></i>Gói từ công khai
+</div>
+
+{% if public_packages %}
+<div class="row g-3 mb-4">
+    {% for package in public_packages %}
+    <div class="col-6 col-md-2">
+        <a href="{{ url_for('guest_package_detail', package_id=package.id) }}"
+           class="pkg-card pkg-card-{{ loop.index0 % 12 }}">
+            <div class="pkg-card-name">{{ package.package_name }}</div>
+            <div class="pkg-card-meta">
+                <i class="fas fa-user me-1"></i>{{ package.user.username if package.user else '' }}
+                &nbsp;·&nbsp;{{ package.vocabularies | length }} từ
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-muted">Chưa có gói từ công khai.</p>
+{% endif %}
+
+<div class="text-center py-4">
+    <p style="color:var(--muted);font-size:0.92rem;">
+        <i class="fas fa-lock me-1"></i>
+        Đăng nhập để học bằng Flashcard, Trắc nghiệm, Kiểm tra và Ghép thẻ
+    </p>
+    <a href="{{ url_for('register') }}" class="btn btn-navy px-5 mt-2">
+        Bắt đầu ngay — miễn phí
+    </a>
+</div>
+
+{% endblock %}

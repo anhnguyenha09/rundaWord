@@ -1,0 +1,69 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Admin Dashboard - RundaWord{% endblock %}
+
+{% block content %}
+<div class="page-title mb-4">
+    <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+</div>
+
+<!-- Stats cards -->
+<div class="row g-3 mb-5">
+    <div class="col-6 col-md-4">
+        <div class="admin-stat-card" style="border-left:4px solid #1565a8;">
+            <div class="admin-stat-num" style="color:#1565a8;">{{ total_users }}</div>
+            <div class="admin-stat-lbl"><i class="fas fa-users me-1"></i>Người dùng</div>
+            <a href="{{ url_for('admin_users') }}" class="admin-stat-link">Quản lý →</a>
+        </div>
+    </div>
+    <div class="col-6 col-md-4">
+        <div class="admin-stat-card" style="border-left:4px solid #0d7a5f;">
+            <div class="admin-stat-num" style="color:#0d7a5f;">{{ total_packages }}</div>
+            <div class="admin-stat-lbl"><i class="fas fa-layer-group me-1"></i>Gói từ</div>
+            <a href="{{ url_for('admin_packages') }}" class="admin-stat-link">Quản lý →</a>
+        </div>
+    </div>
+    <div class="col-6 col-md-4">
+        <div class="admin-stat-card" style="border-left:4px solid #7b2d8b;">
+            <div class="admin-stat-num" style="color:#7b2d8b;">{{ total_words }}</div>
+            <div class="admin-stat-lbl"><i class="fas fa-font me-1"></i>Từ vựng</div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent users -->
+<div class="section-header mb-3"><i class="fas fa-user-clock me-2"></i>Người dùng mới nhất</div>
+<div class="rw-card">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Ngày tạo</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in recent_users %}
+            <tr>
+                <td><strong>{{ user.username }}</strong></td>
+                <td>{{ user.email }}</td>
+                <td>
+                    {% if user.role == 1 %}
+                    <span class="admin-badge admin-badge-admin">Admin</span>
+                    {% else %}
+                    <span class="admin-badge admin-badge-user">User</span>
+                    {% endif %}
+                </td>
+                <td>{{ user.created_at.strftime('%d/%m/%Y') }}</td>
+                <td>
+                    <a href="{{ url_for('admin_edit_user', user_id=user.id) }}" class="admin-action-btn">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin - RundaWord{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+    <style>
+        body { background: #f0f2f5; }
+
+        /* ── Admin shell ── */
+        .admin-shell { display: flex; min-height: 100vh; }
+
+        /* ── Sidebar ── */
+        .admin-sidebar {
+            width: 240px; flex-shrink: 0;
+            background: var(--navy);
+            display: flex; flex-direction: column;
+            position: fixed; top: 0; left: 0; bottom: 0;
+            z-index: 200;
+        }
+        .admin-sidebar-brand {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .admin-sidebar-brand a {
+            font-family: 'Poppins', sans-serif; font-weight: 800;
+            font-size: 1.15rem; color: white; text-decoration: none;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .admin-badge-label {
+            background: rgba(255,255,255,0.15);
+            border-radius: 6px; padding: 1px 8px;
+            font-size: 0.7rem; font-weight: 700; color: rgba(255,255,255,0.8);
+            letter-spacing: .05em;
+        }
+        .admin-nav { padding: 12px 0; flex: 1; overflow-y: auto; }
+        .admin-nav-section {
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .1em; color: rgba(255,255,255,0.4);
+            padding: 10px 20px 4px;
+        }
+        .admin-nav a {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 20px; color: rgba(255,255,255,0.75);
+            text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            transition: background .15s, color .15s;
+            border-left: 3px solid transparent;
+        }
+        .admin-nav a:hover  { background: rgba(255,255,255,0.08); color: white; }
+        .admin-nav a.active { background: rgba(255,255,255,0.12); color: white; border-left-color: white; }
+        .admin-nav a i      { width: 18px; text-align: center; font-size: 0.95rem; }
+        .admin-sidebar-footer {
+            padding: 14px 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .admin-sidebar-footer a {
+            color: rgba(255,255,255,0.6); font-size: 0.85rem; font-weight:600; text-decoration:none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .admin-sidebar-footer a:hover { color: white; }
+
+        /* ── Main area ── */
+        .admin-main {
+            margin-left: 240px; flex: 1;
+            display: flex; flex-direction: column; min-height: 100vh;
+        }
+        .admin-topbar {
+            background: white; border-bottom: 1px solid #e2e8f0;
+            padding: 12px 28px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .admin-topbar-title { font-family:'Poppins',sans-serif; font-weight:700; font-size:1rem; color:var(--navy); }
+        .admin-topbar-user  { font-size:0.85rem; font-weight:700; color:var(--muted); }
+        .admin-content { padding: 28px; flex: 1; }
+
+        /* ── Tables ── */
+        .admin-table {
+            width: 100%; border-collapse: collapse; font-size: 0.9rem;
+        }
+        .admin-table th {
+            background: var(--bg); padding: 10px 14px;
+            font-weight: 700; font-size: 0.78rem; text-transform: uppercase;
+            letter-spacing: .04em; color: var(--muted);
+            border-bottom: 2px solid var(--border); text-align: left;
+        }
+        .admin-table td {
+            padding: 12px 14px; border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        .admin-table tr:hover td { background: #f9fafb; }
+        .admin-table tr:last-child td { border-bottom: none; }
+
+        /* ── Badges ── */
+        .admin-badge {
+            display: inline-block; padding: 2px 10px; border-radius: 20px;
+            font-size: 0.74rem; font-weight: 700;
+        }
+        .admin-badge-admin { background: #fde8d8; color: #b5451b; }
+        .admin-badge-user  { background: #e8f0fe; color: #1565a8; }
+        .admin-badge-public  { background: #e0faf1; color: #0d7a5f; }
+        .admin-badge-private { background: #f0f0f0; color: #666; }
+
+        /* ── Action buttons ── */
+        .admin-action-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; border-radius: 8px;
+            border: 1px solid var(--border); background: white;
+            color: var(--muted); text-decoration: none;
+            transition: all .15s; font-size: 0.85rem; margin: 0 2px;
+        }
+        .admin-action-btn:hover       { border-color: var(--accent); color: var(--accent); background: #eef3fb; }
+        .admin-action-btn.danger:hover { border-color: #e74c3c; color: #e74c3c; background: #fdf2f2; }
+        .admin-action-btn.success:hover { border-color: #27ae60; color: #27ae60; background: #eafaf1; }
+
+        /* ── Stat cards ── */
+        .admin-stat-card {
+            background: white; border-radius: 14px; padding: 20px;
+            border: 1px solid var(--border); border-left-width: 4px;
+        }
+        .admin-stat-num   { font-family:'Poppins',sans-serif; font-weight:800; font-size:2rem; margin-bottom:2px; }
+        .admin-stat-lbl   { font-size:0.85rem; color:var(--muted); font-weight:600; }
+        .admin-stat-link  { font-size:0.8rem; font-weight:700; color:var(--accent); text-decoration:none; display:block; margin-top:8px; }
+        .admin-stat-link:hover { text-decoration: underline; }
+
+        /* ── Search bar in admin ── */
+        .admin-search { display:flex; gap:8px; }
+        .admin-search input {
+            border:1px solid var(--border); border-radius:8px;
+            padding:8px 14px; font-size:0.9rem; font-family:'Nunito',sans-serif;
+            outline:none; min-width:240px;
+        }
+        .admin-search input:focus { border-color:var(--accent); }
+
+        @media (max-width: 768px) {
+            .admin-sidebar { width: 200px; }
+            .admin-main    { margin-left: 200px; }
+            .admin-content { padding: 16px; }
+        }
+    </style>
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+<div class="admin-shell">
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-brand">
+            <a href="{{ url_for('admin_dashboard') }}">
+                <i class="fas fa-shield-alt" style="font-size:1.3rem;"></i>
+                <div>
+                    RundaWord
+                    <div class="admin-badge-label">ADMIN</div>
+                </div>
+            </a>
+        </div>
+
+        <nav class="admin-nav">
+            <div class="admin-nav-section">Tổng quan</div>
+            <a href="{{ url_for('admin_dashboard') }}"
+               class="{{ 'active' if request.endpoint == 'admin_dashboard' }}">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+
+            <div class="admin-nav-section">Quản lý</div>
+            <a href="{{ url_for('admin_users') }}"
+               class="{{ 'active' if 'admin_user' in request.endpoint }}">
+                <i class="fas fa-users"></i> Người dùng
+            </a>
+            <a href="{{ url_for('admin_packages') }}"
+               class="{{ 'active' if 'admin_package' in request.endpoint }}">
+                <i class="fas fa-layer-group"></i> Gói từ vựng
+            </a>
+        </nav>
+
+        <div class="admin-sidebar-footer">
+            <a href="{{ url_for('dashboard') }}">
+                <i class="fas fa-arrow-left"></i> Về Dashboard
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="admin-main">
+        <div class="admin-topbar">
+            <div class="admin-topbar-title">{% block topbar_title %}Admin Panel{% endblock %}</div>
+            <div class="admin-topbar-user">
+                <i class="fas fa-user-shield me-1"></i>{{ current_user.username }}
+            </div>
+        </div>
+
+        <!-- Flash messages -->
+        <div style="padding:0 28px;">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'danger' else ('warning' if category == 'warning' else ('info' if category == 'info' else 'success')) }} alert-dismissible fade show mt-3" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="admin-content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

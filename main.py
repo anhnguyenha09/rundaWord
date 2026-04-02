@@ -3,9 +3,13 @@ import csv
 import io
 import unicodedata
 import re
-from flask import Flask, render_template, request, redirect, url_for, flash, send_file
+from functools import wraps
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file, abort
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask_login import (
+    LoginManager, UserMixin, login_user, logout_user,
+    login_required, current_user
+)
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
@@ -17,16 +21,19 @@ load_dotenv()
 app = Flask(__name__)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'dev-secret-key-rundaword-2025'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'rundaword.db')
+app.config['SECRET_KEY']                = os.environ.get('SECRET_KEY') or 'dev-secret-key-rundaword-2025'
+app.config['SQLALCHEMY_DATABASE_URI']   = 'sqlite:///' + os.path.join(basedir, 'rundaword.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'uploads')
+app.config['UPLOAD_FOLDER']             = os.path.join(basedir, 'uploads')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH']        = 5 * 1024 * 1024
 
 ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xls'}
 
-db = SQLAlchemy(app)
+ROLE_USER  = 0
+ROLE_ADMIN = 1
+
+db           = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
@@ -36,46 +43,38 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 # ==================== HELPERS ====================
 
 def normalize_text(text: str) -> str:
-    """
-    Normalize Vietnamese text for fuzzy search:
-    - Lowercase
-    - Strip accents / diacritics (NFD → remove combining chars)
-    - Collapse whitespace
-    """
     text = text.lower().strip()
-    # NFD decomposition then remove combining diacritical marks
     nfd = unicodedata.normalize('NFD', text)
     stripped = ''.join(c for c in nfd if unicodedata.category(c) != 'Mn')
-    # Collapse multiple spaces
     return re.sub(r'\s+', ' ', stripped)
 
 
-def search_packages(q: str, user_id_exclude=None):
-    """
-    Full search across package names AND owner usernames.
-    Matches both accented and unaccented queries.
-    Returns public packages sorted by updated_at desc.
-    """
-    q_norm = normalize_text(q)
-    # Fetch all public packages with their owners loaded
-    base = VocabPackage.query.filter(VocabPackage.is_public == True)
-    if user_id_exclude:
-        # still include own packages in search so user can find their own
-        pass
-    all_pkgs = base.order_by(VocabPackage.updated_at.desc()).all()
-
+def search_packages(q: str):
+    q_norm   = normalize_text(q)
+    all_pkgs = VocabPackage.query \
+        .filter(VocabPackage.is_public == True) \
+        .order_by(VocabPackage.updated_at.desc()).all()
     results = []
     for pkg in all_pkgs:
-        name_norm = normalize_text(pkg.package_name)
+        name_norm  = normalize_text(pkg.package_name)
         owner_norm = normalize_text(pkg.user.username) if pkg.user else ''
         if q_norm in name_norm or q_norm in owner_norm:
             results.append(pkg)
     return results[:20]
 
 
+def admin_required(f):
+    """Decorator: route only accessible to logged-in admins."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != ROLE_ADMIN:
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated
+
+
 # ==================== MODELS ====================
 
-# Association table: user bookmarks a public package (no data copy)
 user_saved_packages = db.Table(
     'user_saved_packages',
     db.Column('user_id',    db.Integer, db.ForeignKey('users.id'),          nullable=False),
@@ -91,6 +90,7 @@ class User(UserMixin, db.Model):
     name          = db.Column(db.String(100))
     email         = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+    role          = db.Column(db.Integer, default=ROLE_USER, nullable=False)  # 0=user, 1=admin
     created_at    = db.Column(db.DateTime, default=datetime.utcnow)
 
     packages = db.relationship(
@@ -112,6 +112,10 @@ class User(UserMixin, db.Model):
         return self.saved_packages.filter(
             user_saved_packages.c.package_id == package.id
         ).count() > 0
+
+    @property
+    def is_admin(self):
+        return self.role == ROLE_ADMIN
 
 
 class VocabPackage(db.Model):
@@ -154,8 +158,8 @@ def parse_vocab_file(file_content, filename):
         except UnicodeDecodeError:
             text = file_content.decode('latin-1')
         reader = csv.reader(io.StringIO(text))
-        rows = list(reader)
-        start = 0
+        rows   = list(reader)
+        start  = 0
         if rows and rows[0] and rows[0][0].strip().lower() in [
             'english', 'tiếng anh', 'word_en', 'từ tiếng anh', 'en'
         ]:
@@ -195,65 +199,40 @@ def parse_vocab_file(file_content, filename):
 def index():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-    return redirect(url_for('login'))
+    # Guest: show public dashboard
+    return redirect(url_for('guest_home'))
 
 
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    q = request.args.get('q', '').strip()
-    search_results = None
-    if q:
-        search_results = search_packages(q)
+# ──────────────────────────────────────────────
+# GUEST ROUTES (no login required)
+# ──────────────────────────────────────────────
 
-    recent_packages = VocabPackage.query \
-        .filter_by(user_id=current_user.id) \
-        .order_by(VocabPackage.updated_at.desc()) \
-        .limit(4).all()
-
-    # Also show saved (bookmarked) packages in "continue learning"
-    saved_recent = current_user.saved_packages \
-        .order_by(VocabPackage.updated_at.desc()) \
-        .limit(4).all()
+@app.route('/home')
+def guest_home():
+    """Public landing page - visible to guests and logged-in users."""
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
 
     public_packages = VocabPackage.query \
-        .filter(
-            VocabPackage.is_public == True,
-            VocabPackage.user_id != current_user.id
-        ) \
+        .filter(VocabPackage.is_public == True) \
         .order_by(func.random()) \
-        .limit(6).all()
+        .limit(12).all()
 
-    # Quick quiz: pick from own packages only
-    user_packages = VocabPackage.query.filter_by(user_id=current_user.id).all()
-    quiz_package = random.choice(user_packages) if user_packages else None
-    quiz_words = []
-    if quiz_package:
-        vocabs = list(quiz_package.vocabularies)
-        if len(vocabs) >= 2:
-            sample = random.sample(vocabs, min(5, len(vocabs)))
-            for v in sample:
-                wrong_pool = [x.word_vi for x in vocabs if x.id != v.id]
-                wrong = random.sample(wrong_pool, min(3, len(wrong_pool)))
-                options = wrong + [v.word_vi]
-                random.shuffle(options)
-                quiz_words.append({
-                    "word": v.word_en,
-                    "correct": v.word_vi,
-                    "options": options
-                })
+    return render_template('guest_home.html', public_packages=public_packages)
 
-    return render_template(
-        'index.html',
-        recent_packages=recent_packages,
-        saved_recent=saved_recent,
-        public_packages=public_packages,
-        quiz_words=quiz_words,
-        quiz_package=quiz_package,
-        search_results=search_results,
-        search_query=q
-    )
 
+@app.route('/public/package/<int:package_id>')
+def guest_package_detail(package_id):
+    """Public package detail — guests can view vocab list but not study modes."""
+    package = VocabPackage.query.get_or_404(package_id)
+    if not package.is_public:
+        abort(404)
+    return render_template('guest_package_detail.html', package=package)
+
+
+# ──────────────────────────────────────────────
+# AUTH
+# ──────────────────────────────────────────────
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -267,7 +246,8 @@ def login():
         ).first()
         if user and user.check_password(password):
             login_user(user)
-            return redirect(url_for('dashboard'))
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('dashboard'))
         else:
             flash('Email/username hoặc mật khẩu không đúng!', 'danger')
     return render_template('login.html')
@@ -292,7 +272,7 @@ def register():
         if User.query.filter_by(username=username).first():
             flash('Username đã được sử dụng!', 'danger')
             return render_template('register.html')
-        user = User(username=username, email=email, name=name)
+        user = User(username=username, email=email, name=name, role=ROLE_USER)
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
@@ -305,8 +285,66 @@ def register():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('login'))
+    return redirect(url_for('guest_home'))
 
+
+# ──────────────────────────────────────────────
+# DASHBOARD (logged-in users)
+# ──────────────────────────────────────────────
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    q = request.args.get('q', '').strip()
+    search_results = None
+    if q:
+        search_results = search_packages(q)
+
+    recent_packages = VocabPackage.query \
+        .filter_by(user_id=current_user.id) \
+        .order_by(VocabPackage.updated_at.desc()) \
+        .limit(4).all()
+
+    saved_recent = current_user.saved_packages \
+        .order_by(VocabPackage.updated_at.desc()) \
+        .limit(4).all()
+
+    public_packages = VocabPackage.query \
+        .filter(VocabPackage.is_public == True, VocabPackage.user_id != current_user.id) \
+        .order_by(func.random()) \
+        .limit(6).all()
+
+    user_packages = VocabPackage.query.filter_by(user_id=current_user.id).all()
+    quiz_package  = random.choice(user_packages) if user_packages else None
+    quiz_words    = []
+    if quiz_package:
+        vocabs = list(quiz_package.vocabularies)
+        if len(vocabs) >= 2:
+            sample = random.sample(vocabs, min(5, len(vocabs)))
+            for v in sample:
+                wrong_pool = [x.word_vi for x in vocabs if x.id != v.id]
+                wrong      = random.sample(wrong_pool, min(3, len(wrong_pool)))
+                options    = wrong + [v.word_vi]
+                random.shuffle(options)
+                quiz_words.append({
+                    "word": v.word_en, "correct": v.word_vi, "options": options
+                })
+
+    return render_template(
+        'index.html',
+        recent_packages=recent_packages,
+        saved_recent=saved_recent,
+        public_packages=public_packages,
+        quiz_words=quiz_words,
+        quiz_package=quiz_package,
+        search_results=search_results,
+        search_query=q
+    )
+
+
+# ──────────────────────────────────────────────
+# PROFILE
+# ──────────────────────────────────────────────
 
 @app.route('/profile')
 @login_required
@@ -336,22 +374,24 @@ def edit_profile():
     return render_template('edit_profile.html')
 
 
+# ──────────────────────────────────────────────
+# PACKAGES (library)
+# ──────────────────────────────────────────────
+
 @app.route('/packages')
 @login_required
 def packages():
-    """My library: own packages + saved (bookmarked) packages."""
-    q = request.args.get('q', '').strip()
-    tab = request.args.get('tab', 'mine')  # 'mine' | 'saved'
+    q   = request.args.get('q', '').strip()
+    tab = request.args.get('tab', 'mine')
 
     if q:
-        # Search across all public packages
-        pkgs = search_packages(q)
+        pkgs       = search_packages(q)
         saved_pkgs = []
         if not pkgs:
             flash('Không tìm thấy gói từ phù hợp.', 'warning')
     else:
         if tab == 'saved':
-            pkgs = []
+            pkgs       = []
             saved_pkgs = current_user.saved_packages \
                 .order_by(VocabPackage.updated_at.desc()).all()
         else:
@@ -360,11 +400,9 @@ def packages():
             saved_pkgs = []
 
     return render_template(
-        'packages.html',
-        packages=pkgs,
-        saved_packages=saved_pkgs,
-        tab=tab,
-        search_query=q
+        'admin_packages.html',
+        packages=pkgs, saved_packages=saved_pkgs,
+        tab=tab, search_query=q
     )
 
 
@@ -373,18 +411,12 @@ def packages():
 def package_detail(package_id):
     package  = VocabPackage.query.get_or_404(package_id)
     is_owner = (package.user_id == current_user.id)
-
-    # Access control: only owner or public
-    if not is_owner and not package.is_public:
+    if not is_owner and not package.is_public and not current_user.is_admin:
         flash('Bạn không có quyền truy cập gói từ này!', 'danger')
         return redirect(url_for('packages'))
-
     is_saved = current_user.has_saved(package) if not is_owner else False
     return render_template(
-        'package_detail.html',
-        package=package,
-        is_owner=is_owner,
-        is_saved=is_saved
+        'package_detail.html', package=package, is_owner=is_owner, is_saved=is_saved
     )
 
 
@@ -430,7 +462,8 @@ def create_package():
 def edit_package(package_id):
     package = VocabPackage.query.get_or_404(package_id)
 
-    if package.user_id != current_user.id:
+    # Admin can edit any package
+    if package.user_id != current_user.id and not current_user.is_admin:
         flash('Bạn không có quyền chỉnh sửa gói từ này!', 'danger')
         return redirect(url_for('packages'))
 
@@ -486,26 +519,19 @@ def edit_package(package_id):
     return render_template('edit_package.html', package=package)
 
 
-# ── SAVE / UNSAVE (bookmark) ──────────────────────────────────────────────────
-
 @app.route('/package/<int:package_id>/save', methods=['POST'])
 @login_required
 def save_package(package_id):
-    """Bookmark another user's public package — no data is copied."""
     package = VocabPackage.query.get_or_404(package_id)
-
     if not package.is_public:
         flash('Gói từ này không công khai!', 'danger')
         return redirect(url_for('dashboard'))
-
     if package.user_id == current_user.id:
         flash('Đây là gói từ của bạn!', 'info')
         return redirect(url_for('package_detail', package_id=package_id))
-
     if current_user.has_saved(package):
         flash('Bạn đã lưu gói từ này rồi!', 'info')
         return redirect(url_for('package_detail', package_id=package_id))
-
     current_user.saved_packages.append(package)
     db.session.commit()
     flash(f'Đã lưu "{package.package_name}" vào thư viện!', 'success')
@@ -515,7 +541,6 @@ def save_package(package_id):
 @app.route('/package/<int:package_id>/unsave', methods=['POST'])
 @login_required
 def unsave_package(package_id):
-    """Remove bookmark."""
     package = VocabPackage.query.get_or_404(package_id)
     if current_user.has_saved(package):
         current_user.saved_packages.remove(package)
@@ -524,26 +549,25 @@ def unsave_package(package_id):
     return redirect(url_for('package_detail', package_id=package_id))
 
 
-# ── LEGACY CLONE REDIRECT (keep URL working) ─────────────────────────────────
-
 @app.route('/package/<int:package_id>/clone', methods=['POST'])
 @login_required
 def clone_package(package_id):
-    """Redirect old clone calls to save."""
     return redirect(url_for('save_package', package_id=package_id), code=307)
 
-
-# ── DELETE ────────────────────────────────────────────────────────────────────
 
 @app.route('/delete_package/<int:package_id>', methods=['POST'])
 @login_required
 def delete_package(package_id):
     package = VocabPackage.query.get_or_404(package_id)
-    if package.user_id != current_user.id:
+    if package.user_id != current_user.id and not current_user.is_admin:
+        flash('Không có quyền xóa gói từ này!', 'danger')
         return redirect(url_for('packages'))
     db.session.delete(package)
     db.session.commit()
     flash(f'Đã xóa gói từ "{package.package_name}".', 'success')
+    # Admin redirects back to admin panel if coming from there
+    if current_user.is_admin and request.referrer and '/admin' in request.referrer:
+        return redirect(url_for('admin_packages'))
     return redirect(url_for('packages'))
 
 
@@ -551,7 +575,7 @@ def delete_package(package_id):
 @login_required
 def delete_word(word_id):
     vocab = Vocabulary.query.get_or_404(word_id)
-    if vocab.package.user_id != current_user.id:
+    if vocab.package.user_id != current_user.id and not current_user.is_admin:
         return redirect(url_for('packages'))
     package_id = vocab.package_id
     db.session.delete(vocab)
@@ -559,16 +583,20 @@ def delete_word(word_id):
     return redirect(url_for('edit_package', package_id=package_id))
 
 
-# ── STUDY MODES ───────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────
+# STUDY MODES
+# ──────────────────────────────────────────────
 
 def _get_study_package(package_id):
-    """Shared guard for all study routes."""
-    package = VocabPackage.query.get_or_404(package_id)
+    package  = VocabPackage.query.get_or_404(package_id)
     is_owner = (package.user_id == current_user.id)
-    has_access = is_owner or package.is_public or current_user.has_saved(package)
-    if not has_access:
-        return None, None
-    return package, is_owner
+    has_access = (
+        is_owner
+        or package.is_public
+        or current_user.has_saved(package)
+        or current_user.is_admin
+    )
+    return (package, is_owner) if has_access else (None, None)
 
 
 @app.route('/package/<int:package_id>/flashcard')
@@ -635,9 +663,190 @@ def download_template():
     )
 
 
+# ══════════════════════════════════════════════
+# ADMIN PANEL
+# ══════════════════════════════════════════════
+
+@app.route('/admin')
+@admin_required
+def admin_dashboard():
+    total_users    = User.query.count()
+    total_packages = VocabPackage.query.count()
+    total_words    = Vocabulary.query.count()
+    recent_users   = User.query.order_by(User.created_at.desc()).limit(5).all()
+    return render_template(
+        'admin/dashboard.html',
+        total_users=total_users,
+        total_packages=total_packages,
+        total_words=total_words,
+        recent_users=recent_users
+    )
+
+
+# ── Admin: Users ────────────────────────────────────────────
+
+@app.route('/admin/users')
+@admin_required
+def admin_users():
+    q     = request.args.get('q', '').strip()
+    query = User.query
+    if q:
+        query = query.filter(
+            (User.username.ilike(f'%{q}%')) | (User.email.ilike(f'%{q}%')) | (User.name.ilike(f'%{q}%'))
+        )
+    users = query.order_by(User.created_at.desc()).all()
+    return render_template('admin/users.html', users=users, search_query=q)
+
+
+@app.route('/admin/users/create', methods=['GET', 'POST'])
+@admin_required
+def admin_create_user():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        email    = request.form.get('email', '').strip()
+        name     = request.form.get('name', '').strip()
+        password = request.form.get('password', '')
+        role     = int(request.form.get('role', ROLE_USER))
+
+        if User.query.filter_by(username=username).first():
+            flash('Username đã tồn tại!', 'danger')
+            return render_template('admin/user_form.html', action='create')
+        if User.query.filter_by(email=email).first():
+            flash('Email đã tồn tại!', 'danger')
+            return render_template('admin/user_form.html', action='create')
+
+        user = User(username=username, email=email, name=name, role=role)
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+        flash(f'Đã tạo người dùng "{username}".', 'success')
+        return redirect(url_for('admin_users'))
+
+    return render_template('admin/user_form.html', action='create')
+
+
+@app.route('/admin/users/<int:user_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def admin_edit_user(user_id):
+    user = User.query.get_or_404(user_id)
+
+    if request.method == 'POST':
+        username     = request.form.get('username', '').strip()
+        email        = request.form.get('email', '').strip()
+        name         = request.form.get('name', '').strip()
+        role         = int(request.form.get('role', ROLE_USER))
+        new_password = request.form.get('new_password', '').strip()
+
+        # Uniqueness checks (excluding self)
+        existing_u = User.query.filter_by(username=username).first()
+        if existing_u and existing_u.id != user_id:
+            flash('Username đã được sử dụng!', 'danger')
+            return render_template('admin/user_form.html', action='edit', user=user)
+        existing_e = User.query.filter_by(email=email).first()
+        if existing_e and existing_e.id != user_id:
+            flash('Email đã được sử dụng!', 'danger')
+            return render_template('admin/user_form.html', action='edit', user=user)
+
+        user.username = username
+        user.email    = email
+        user.name     = name
+        user.role     = role
+        if new_password:
+            user.set_password(new_password)
+
+        db.session.commit()
+        flash(f'Đã cập nhật người dùng "{username}".', 'success')
+        return redirect(url_for('admin_users'))
+
+    return render_template('admin/user_form.html', action='edit', user=user)
+
+
+@app.route('/admin/users/<int:user_id>/delete', methods=['POST'])
+@admin_required
+def admin_delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash('Không thể xóa tài khoản đang đăng nhập!', 'danger')
+        return redirect(url_for('admin_users'))
+    db.session.delete(user)
+    db.session.commit()
+    flash(f'Đã xóa người dùng "{user.username}".', 'success')
+    return redirect(url_for('admin_users'))
+
+
+# ── Admin: Packages ─────────────────────────────────────────
+
+@app.route('/admin/packages')
+@admin_required
+def admin_packages():
+    q     = request.args.get('q', '').strip()
+    query = VocabPackage.query
+    if q:
+        q_norm = normalize_text(q)
+        # SQLite: fetch all then filter (normalize on Python side)
+        all_pkgs = query.order_by(VocabPackage.updated_at.desc()).all()
+        pkgs = [
+            p for p in all_pkgs
+            if q_norm in normalize_text(p.package_name)
+            or (p.user and q_norm in normalize_text(p.user.username))
+        ]
+    else:
+        pkgs = query.order_by(VocabPackage.updated_at.desc()).all()
+
+    return render_template('admin/packages.html', packages=pkgs, search_query=q)
+
+
+@app.route('/admin/packages/<int:package_id>/toggle_public', methods=['POST'])
+@admin_required
+def admin_toggle_public(package_id):
+    package = VocabPackage.query.get_or_404(package_id)
+    package.is_public  = not package.is_public
+    package.updated_at = datetime.utcnow()
+    db.session.commit()
+    state = 'công khai' if package.is_public else 'riêng tư'
+    flash(f'Đã chuyển "{package.package_name}" sang {state}.', 'info')
+    return redirect(url_for('admin_packages'))
+
+
+@app.route('/admin/packages/<int:package_id>/delete', methods=['POST'])
+@admin_required
+def admin_delete_package(package_id):
+    package = VocabPackage.query.get_or_404(package_id)
+    name    = package.package_name
+    db.session.delete(package)
+    db.session.commit()
+    flash(f'Đã xóa gói từ "{name}".', 'success')
+    return redirect(url_for('admin_packages'))
+
+
+# ── 403 error handler ───────────────────────────────────────
+
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template('403.html'), 403
+
+
+# ══════════════════════════════════════════════
+# STARTUP
+# ══════════════════════════════════════════════
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+
+        # Create default admin if none exists
+        if not User.query.filter_by(role=ROLE_ADMIN).first():
+            admin = User(
+                username='admin',
+                email='admin@rundaword.local',
+                name='Administrator',
+                role=ROLE_ADMIN
+            )
+            admin.set_password('admin123')
+            db.session.add(admin)
+            db.session.commit()
+            print("✓ Default admin created  →  admin / admin123")
+
         print("✓ Database initialized!")
     print("Access at: http://localhost:5000")
     app.run(debug=True, host='0.0.0.0', port=5000)
