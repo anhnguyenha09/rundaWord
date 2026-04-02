@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+{% block title %}Thư viện Gói từ vựng — RundaWord{% endblock %}
+
+{% block head_extra %}
+<style>
+  /* Override base navbar for guest explore page */
+  .rw-navbar { display: none; }
+
+  /* Custom navbar for this page (matches screenshot 2) */
+  .exp-nav {
+    background: #fff; border-bottom: 1px solid var(--border);
+    height: 58px; display: flex; align-items: center;
+    position: sticky; top: 0; z-index: 200;
+  }
+  .exp-nav .inner {
+    max-width: 1100px; margin: 0 auto; padding: 0 32px;
+    width: 100%; display: flex; align-items: center; gap: 0;
+  }
+  .exp-logo {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700; font-size: 0.98rem; color: var(--navy);
+    text-decoration: none; margin-right: 32px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .exp-nav-links { display: flex; align-items: center; gap: 4px; }
+  .exp-nav-link {
+    font-size: 0.87rem; font-weight: 500; color: var(--text-muted);
+    text-decoration: none; padding: 6px 14px; border-radius: 8px; transition: color 0.15s;
+  }
+  .exp-nav-link:hover { color: var(--navy); }
+  .exp-nav-link.active {
+    color: var(--navy); font-weight: 700;
+    border-bottom: 2px solid var(--navy); border-radius: 0; padding-bottom: 4px;
+  }
+  .exp-nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .exp-icon-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1.5px solid var(--border); background: var(--off-white);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 0.9rem; cursor: pointer;
+    text-decoration: none; transition: all 0.15s;
+  }
+  .exp-icon-btn:hover { border-color: var(--navy); color: var(--navy); }
+
+  /* Page */
+  .exp-page { max-width: 1100px; margin: 0 auto; padding: 56px 32px 80px; }
+
+  /* Header */
+  .exp-hero { text-align: center; margin-bottom: 40px; }
+  .exp-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem; font-weight: 700; color: var(--navy);
+    letter-spacing: -0.03em; margin-bottom: 14px;
+  }
+  .exp-hero p { font-size: 0.95rem; color: var(--text-muted); max-width: 480px; margin: 0 auto; line-height: 1.75; }
+
+  /* Search */
+  .exp-search-wrap { max-width: 600px; margin: 32px auto; position: relative; }
+  .exp-search-wrap i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.84rem; }
+  .exp-search-wrap input {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 14px;
+    padding: 14px 18px 14px 44px; font-size: 0.9rem; font-family: 'Inter', sans-serif;
+    background: white; color: var(--text); outline: none;
+    box-shadow: var(--shadow-sm); transition: border-color 0.15s;
+  }
+  .exp-search-wrap input:focus { border-color: var(--navy); }
+  .exp-search-wrap input::placeholder { color: #b0bcc8; }
+
+  /* Filter tabs */
+  .exp-filters {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; flex-wrap: wrap; margin-bottom: 40px;
+  }
+  .exp-filter {
+    padding: 8px 20px; border-radius: 30px;
+    font-size: 0.84rem; font-weight: 600; cursor: pointer;
+    border: 1.5px solid var(--border); background: white; color: var(--text-muted);
+    transition: all 0.15s; font-family: 'Inter', sans-serif;
+  }
+  .exp-filter:hover { border-color: var(--navy); color: var(--navy); }
+  .exp-filter.active-dark { background: var(--navy); color: white; border-color: var(--navy); }
+  .exp-filter.active-green { background: var(--green); color: white; border-color: var(--green); }
+
+  /* Package grid — 3 cols with image cards */
+  .exp-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 48px;
+  }
+  @media (max-width: 860px) { .exp-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .exp-grid { grid-template-columns: 1fr; } }
+
+  .exp-card { background: white; border-radius: var(--r-xl); overflow: hidden; border: 1px solid var(--border); transition: box-shadow 0.2s, transform 0.15s; }
+  .exp-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+
+  .exp-card-img {
+    width: 100%; aspect-ratio: 3/2; object-fit: cover;
+    display: block; position: relative; overflow: hidden;
+  }
+  .exp-card-img-wrap { position: relative; }
+  .exp-card-img-bg {
+    width: 100%; aspect-ratio: 3/2;
+    background-size: cover; background-position: center;
+  }
+  .exp-cat-badge {
+    position: absolute; top: 12px; left: 12px;
+    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.09em;
+    text-transform: uppercase; color: white;
+    padding: 4px 10px; border-radius: 20px; z-index: 1;
+  }
+  .exp-cat-badge.academic     { background: rgba(30,120,70,0.92); }
+  .exp-cat-badge.business     { background: rgba(190,100,20,0.92); }
+  .exp-cat-badge.standardized { background: rgba(100,40,160,0.92); }
+  .exp-cat-badge.daily-life   { background: rgba(30,90,180,0.92); }
+  .exp-cat-badge.technology   { background: rgba(20,130,160,0.92); }
+
+  .exp-card-body { padding: 18px 20px 16px; }
+  .exp-card-name {
+    font-size: 1.05rem; font-weight: 700; color: var(--navy);
+    margin-bottom: 4px; letter-spacing: -0.01em; line-height: 1.3;
+  }
+  .exp-card-meta {
+    font-size: 0.78rem; color: var(--text-muted); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .exp-card-meta span { font-weight: 600; color: var(--text-muted); }
+  .exp-card-actions { display: flex; align-items: center; gap: 10px; }
+  .btn-learn-dark {
+    flex: 1; background: var(--navy); color: white; border: none;
+    border-radius: var(--r-md); padding: 10px 0; font-size: 0.85rem;
+    font-weight: 600; cursor: pointer; text-align: center;
+    font-family: 'Inter', sans-serif; transition: opacity 0.15s;
+  }
+  .btn-learn-dark:hover { opacity: 0.88; }
+  .btn-bookmark {
+    width: 40px; height: 40px; border-radius: var(--r-md);
+    border: 1.5px solid var(--border); background: white;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-bookmark:hover { border-color: var(--navy); color: var(--navy); }
+  .btn-bookmark.saved { background: var(--navy); color: white; border-color: var(--navy); }
+
+  /* Pagination */
+  .exp-pagination {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .pag-btn {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 1.5px solid var(--border); background: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.88rem; font-weight: 600; color: var(--text-muted);
+    cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif;
+  }
+  .pag-btn:hover { border-color: var(--navy); color: var(--navy); }
+  .pag-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
+  .pag-btn.arrow { font-size: 0.78rem; }
+  .pag-dots { color: var(--text-muted); padding: 0 4px; font-weight: 600; }
+
+  /* Footer override */
+  footer { background: white !important; border-top: 1px solid var(--border); }
+  footer .footer-logo-text { color: var(--navy) !important; font-size: 0.82rem !important; font-weight: 700 !important; letter-spacing: 0.08em; text-transform: uppercase; }
+  footer p, footer small, footer a { color: var(--text-muted) !important; opacity: 1 !important; }
+  footer a:hover { color: var(--navy) !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Custom nav (overrides hidden base nav) -->
+<nav class="exp-nav">
+  <div class="inner">
+    <a href="{{ url_for('index') }}" class="exp-logo">
+      <i class="fas fa-book-open" style="font-size:0.9rem;"></i>
+      Academic Curator
+    </a>
+    <div class="exp-nav-links">
+      <a href="{{ url_for('index') }}" class="exp-nav-link">Trang chủ</a>
+      <a href="{{ url_for('explore') }}" class="exp-nav-link active">Gói từ vựng</a>
+    </div>
+    <div class="exp-nav-right">
+      <a href="{{ url_for('login') }}" class="exp-icon-btn" title="Thông báo">
+        <i class="fas fa-bell"></i>
+      </a>
+      <a href="{{ url_for('login') }}" class="exp-icon-btn" title="Đăng nhập">
+        <i class="fas fa-user"></i>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div class="exp-page">
+
+  <!-- HEADER -->
+  <div class="exp-hero">
+    <h1>Thư viện Gói từ vựng</h1>
+    <p>Khám phá hàng nghìn bộ từ vựng được chia sẻ bởi cộng đồng RundaWord, được biên soạn tỉ mỉ cho mọi nhu cầu học tập.</p>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="exp-search-wrap">
+    <i class="fas fa-search"></i>
+    <form method="GET" action="{{ url_for('explore') }}">
+      <input type="text" name="q" placeholder="Tìm kiếm gói từ vựng, chủ đề hoặc tác giả…"
+        value="{{ search_query or '' }}">
+    </form>
+  </div>
+
+  <!-- FILTER TABS -->
+  <div class="exp-filters">
+    <button class="exp-filter {% if not active_filter or active_filter == 'all' %}active-dark{% endif %}"
+      onclick="filterPackages('all')">Tất cả</button>
+    <button class="exp-filter {% if active_filter == 'academic' %}active-green{% endif %}"
+      onclick="filterPackages('academic')">Academic</button>
+    <button class="exp-filter {% if active_filter == 'business' %}active-green{% endif %}"
+      onclick="filterPackages('business')">Business</button>
+    <button class="exp-filter {% if active_filter == 'standardized' %}active-green{% endif %}"
+      onclick="filterPackages('standardized')">Standardized</button>
+    <button class="exp-filter {% if active_filter == 'daily' %}active-green{% endif %}"
+      onclick="filterPackages('daily')">Daily Life</button>
+    <button class="exp-filter {% if active_filter == 'technology' %}active-green{% endif %}"
+      onclick="filterPackages('technology')">Technology</button>
+  </div>
+
+  <!-- PACKAGE GRID -->
+  {% set bg_colors = [
+    'linear-gradient(135deg,#1a3060,#2a5ccf)',
+    'linear-gradient(135deg,#0d3a6a,#1a7ac0)',
+    'linear-gradient(135deg,#1a1a3a,#2a2a7a)',
+    'linear-gradient(135deg,#3a1a1a,#8a2a2a)',
+    'linear-gradient(135deg,#0d3a20,#1a8a4a)',
+    'linear-gradient(135deg,#2a1a3a,#6a2a9a)'
+  ] %}
+  {% set cats = ['academic','business','technology','standardized','daily-life','academic'] %}
+  {% set cat_labels = ['ACADEMIC','BUSINESS','TECHNOLOGY','STANDARDIZED','DAILY LIFE','ACADEMIC'] %}
+
+  {% if public_packages %}
+  <div class="exp-grid" id="pkgGrid">
+    {% for pkg in public_packages %}
+    <div class="exp-card">
+      <div class="exp-card-img-wrap">
+        <div class="exp-card-img-bg" style="background: {{ bg_colors[loop.index0 % 6] }};"></div>
+        <span class="exp-cat-badge {{ cats[loop.index0 % 6] }}">{{ cat_labels[loop.index0 % 6] }}</span>
+      </div>
+      <div class="exp-card-body">
+        <div class="exp-card-name">{{ pkg.package_name }}</div>
+        <div class="exp-card-meta">
+          by <span>@{{ pkg.user.username if pkg.user else 'unknown' }}</span>
+          &nbsp;·&nbsp;{{ pkg.vocabularies|length }} từ
+        </div>
+        <div class="exp-card-actions">
+          <a href="{{ url_for('login') }}" class="btn-learn-dark">Học ngay</a>
+          <button class="btn-bookmark" title="Lưu" onclick="toggleBookmark(this)">
+            <i class="far fa-bookmark"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <!-- Demo cards for guests when no packages exist -->
+  <div class="exp-grid" id="pkgGrid">
+    {% set demo = [
+      ('IELTS 8.0+ Essential Vocab', 'curator_jane', 450, 'academic', 0),
+      ('Corporate Strategy & Finance', 'expert_lex', 320, 'business', 1),
+      ('Artificial Intelligence & ML', 'tech_wizard', 150, 'technology', 2),
+      ('SAT Verbal Masterclass', 'academic_pro', 600, 'standardized', 3),
+      ('Nature & Environment Terms', 'green_earth', 210, 'daily-life', 4),
+      ('Advanced Literature Analysis', 'scholar_mind', 380, 'academic', 5),
+    ] %}
+    {% for name, author, count, cat, idx in demo %}
+    <div class="exp-card">
+      <div class="exp-card-img-wrap">
+        <div class="exp-card-img-bg" style="background: {{ bg_colors[idx % 6] }}; aspect-ratio:3/2;"></div>
+        <span class="exp-cat-badge {{ cat }}">{{ cat.upper().replace('-',' ') }}</span>
+      </div>
+      <div class="exp-card-body">
+        <div class="exp-card-name">{{ name }}</div>
+        <div class="exp-card-meta">
+          by <span>@{{ author }}</span> &nbsp;·&nbsp; {{ count }} từ
+        </div>
+        <div class="exp-card-actions">
+          <a href="{{ url_for('login') }}" class="btn-learn-dark">Học ngay</a>
+          <button class="btn-bookmark" title="Lưu" onclick="toggleBookmark(this)">
+            <i class="far fa-bookmark"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- PAGINATION -->
+  <div class="exp-pagination">
+    <button class="pag-btn arrow"><i class="fas fa-chevron-left"></i></button>
+    <button class="pag-btn active">1</button>
+    <button class="pag-btn">2</button>
+    <button class="pag-btn">3</button>
+    <span class="pag-dots">…</span>
+    <button class="pag-btn">12</button>
+    <button class="pag-btn arrow"><i class="fas fa-chevron-right"></i></button>
+  </div>
+
+</div><!-- /exp-page -->
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterPackages(cat) {
+  // Update active state
+  document.querySelectorAll('.exp-filter').forEach(btn => {
+    btn.classList.remove('active-dark','active-green');
+  });
+  const clicked = event.target;
+  clicked.classList.add(cat === 'all' ? 'active-dark' : 'active-green');
+}
+
+function toggleBookmark(btn) {
+  const isAuth = false; // guest
+  if (!isAuth) {
+    // Redirect to login
+    window.location.href = "{{ url_for('login') }}";
+    return;
+  }
+  btn.classList.toggle('saved');
+  const icon = btn.querySelector('i');
+  icon.className = btn.classList.contains('saved') ? 'fas fa-bookmark' : 'far fa-bookmark';
+}
+</script>
+{% endblock %}

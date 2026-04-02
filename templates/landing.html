@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RundaWord — Nền tảng học từ vựng chuyên nghiệp</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy:       #0d1f3c;
+      --navy-deep:  #071020;
+      --green:      #27ae60;
+      --green-dark: #1e8a4a;
+      --white:      #ffffff;
+      --off-white:  #f5f6f8;
+      --border:     #e3e7ed;
+      --text:       #0d1f3c;
+      --muted:      #6b7a8d;
+      --r-md:       12px;
+      --r-lg:       16px;
+      --r-xl:       20px;
+      --shadow-sm:  0 2px 8px rgba(13,31,60,0.08);
+      --shadow-md:  0 4px 20px rgba(13,31,60,0.10);
+      --shadow-lg:  0 8px 40px rgba(13,31,60,0.14);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      background: #fff;
+    }
+
+    /* ── NAVBAR ── */
+    .lp-nav {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      height: 58px;
+      display: flex; align-items: center;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .lp-nav .inner {
+      max-width: 1100px; margin: 0 auto; padding: 0 24px;
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+    }
+    .lp-logo {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700; font-size: 1.1rem; color: var(--navy);
+      text-decoration: none;
+    }
+    .lp-nav-links { display: flex; align-items: center; gap: 4px; }
+    .lp-nav-link {
+      font-size: 0.87rem; font-weight: 500; color: var(--muted);
+      text-decoration: none; padding: 6px 14px; border-radius: 8px;
+      transition: color 0.15s;
+    }
+    .lp-nav-link:hover { color: var(--navy); }
+    .lp-nav-link.active {
+      color: var(--navy); font-weight: 600;
+      border-bottom: 2px solid var(--navy); border-radius: 0; padding-bottom: 4px;
+    }
+    .btn-start {
+      background: var(--navy); color: white;
+      border: none; border-radius: 30px;
+      padding: 9px 22px; font-size: 0.87rem; font-weight: 600;
+      cursor: pointer; text-decoration: none; transition: opacity 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-start:hover { opacity: 0.88; color: white; }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 72px 24px 0;
+      max-width: 700px; margin: 0 auto;
+    }
+    .hero-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--off-white); border: 1px solid var(--border);
+      border-radius: 30px; padding: 5px 14px;
+      font-size: 0.74rem; font-weight: 700;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 24px;
+    }
+    .hero-pill span { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem; font-weight: 700; line-height: 1.15;
+      color: var(--navy); letter-spacing: -0.03em; margin-bottom: 18px;
+    }
+    .hero-sub {
+      font-size: 0.96rem; color: var(--muted); line-height: 1.75;
+      max-width: 480px; margin: 0 auto 32px;
+    }
+    .hero-search {
+      display: flex; align-items: center;
+      border: 1.5px solid var(--border); border-radius: 40px;
+      padding: 6px 6px 6px 20px; max-width: 460px; margin: 0 auto 48px;
+      background: white; box-shadow: var(--shadow-sm);
+    }
+    .hero-search i { color: var(--muted); font-size: 0.88rem; margin-right: 10px; }
+    .hero-search input {
+      flex: 1; border: none; outline: none; font-size: 0.9rem;
+      font-family: 'Inter', sans-serif; color: var(--text);
+    }
+    .hero-search input::placeholder { color: #b0b8c4; }
+    .hero-search button {
+      background: var(--navy); color: white; border: none; border-radius: 30px;
+      padding: 10px 24px; font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; white-space: nowrap; font-family: 'Inter', sans-serif;
+      transition: opacity 0.15s;
+    }
+    .hero-search button:hover { opacity: 0.88; }
+
+    /* Hero image */
+    .hero-img-wrap {
+      max-width: 840px; margin: 0 auto;
+      border-radius: 24px; overflow: hidden;
+      box-shadow: 0 24px 80px rgba(13,31,60,0.14);
+      position: relative;
+    }
+    .hero-img-wrap img {
+      width: 100%; display: block;
+      aspect-ratio: 16/9; object-fit: cover;
+      background: linear-gradient(135deg, #e8edf5, #c8d5e8);
+    }
+    /* Floating stat card */
+    .hero-float-card {
+      position: absolute; bottom: 24px; left: 24px;
+      background: white; border-radius: var(--r-lg);
+      padding: 14px 18px; box-shadow: var(--shadow-lg);
+      display: flex; align-items: flex-start; gap: 10px;
+      max-width: 260px;
+    }
+    .hfc-badge {
+      background: var(--green); color: white;
+      border-radius: 8px; padding: 4px 10px;
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.06em; white-space: nowrap; flex-shrink: 0;
+    }
+    .hfc-badge i { margin-right: 4px; }
+    .hfc-text { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+    /* Floating avatars */
+    .hero-float-avatars {
+      position: absolute; bottom: 24px; right: 24px;
+      display: flex; align-items: center;
+    }
+    .hero-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 2px solid white; background: var(--navy);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 0.7rem; font-weight: 700;
+      margin-left: -10px;
+    }
+    .hero-avatar:first-child { margin-left: 0; }
+    .hero-avatar-count {
+      background: var(--green); color: white; font-size: 0.68rem; font-weight: 700;
+    }
+
+    /* ── SECTIONS ── */
+    .section { max-width: 1100px; margin: 0 auto; padding: 80px 24px 0; }
+
+    /* ── METHODS ── */
+    .methods-header { margin-bottom: 40px; }
+    .methods-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem; font-weight: 700; color: var(--navy);
+      letter-spacing: -0.02em; margin-bottom: 8px;
+    }
+    .methods-header p { font-size: 0.9rem; color: var(--muted); max-width: 480px; }
+    .methods-nav {
+      display: flex; gap: 8px;
+    }
+    .methods-nav-btn {
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 1.5px solid var(--border); background: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.82rem; color: var(--muted); cursor: pointer;
+      transition: all 0.15s;
+    }
+    .methods-nav-btn.active, .methods-nav-btn:hover {
+      background: var(--navy); color: white; border-color: var(--navy);
+    }
+    .methods-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    }
+    @media (max-width: 768px) { .methods-grid { grid-template-columns: repeat(2, 1fr); } }
+    .method-card {
+      background: white; border: 1px solid var(--border);
+      border-radius: var(--r-xl); padding: 24px 20px 20px;
+      transition: box-shadow 0.2s, transform 0.15s;
+    }
+    .method-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .method-icon {
+      width: 44px; height: 44px; border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; margin-bottom: 16px;
+    }
+    .method-icon.green  { background: #e8f8f0; }
+    .method-icon.blue   { background: #e8f0fb; }
+    .method-icon.purple { background: #f0e8fb; }
+    .method-icon.orange { background: #fdf0e8; }
+    .method-name {
+      font-weight: 700; font-size: 0.97rem; color: var(--navy);
+      margin-bottom: 8px;
+    }
+    .method-desc {
+      font-size: 0.82rem; color: var(--muted); line-height: 1.6; margin-bottom: 16px;
+    }
+    .method-try {
+      font-size: 0.82rem; font-weight: 600; color: var(--navy);
+      text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+      transition: gap 0.15s;
+    }
+    .method-try:hover { gap: 8px; color: var(--navy); }
+
+    /* ── POPULAR PACKAGES ── */
+    .pop-header { margin-bottom: 28px; }
+    .pop-tag {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.09em;
+      text-transform: uppercase; color: var(--green); margin-bottom: 10px;
+    }
+    .pop-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem; font-weight: 700; color: var(--navy); letter-spacing: -0.02em;
+    }
+    .pop-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    }
+    @media (max-width: 768px) { .pop-grid { grid-template-columns: 1fr; } }
+    .pop-card {
+      border-radius: var(--r-xl); overflow: hidden;
+      text-decoration: none !important; color: white !important;
+      position: relative; display: flex; flex-direction: column;
+      min-height: 220px; transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .pop-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .pop-card-bg {
+      position: absolute; inset: 0;
+      background-size: cover; background-position: center;
+    }
+    .pop-card-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.20) 100%);
+    }
+    .pop-card-content {
+      position: relative; z-index: 1;
+      padding: 16px; display: flex; flex-direction: column; height: 100%;
+    }
+    .pop-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .pop-cat-badge {
+      font-size: 0.64rem; font-weight: 700; letter-spacing: 0.09em;
+      text-transform: uppercase; background: var(--green);
+      color: white; padding: 4px 10px; border-radius: 20px;
+    }
+    .pop-cat-badge.business { background: #e67e22; }
+    .pop-cat-badge.standardized { background: #8e44ad; }
+    .pop-word-count {
+      font-size: 0.73rem; color: rgba(255,255,255,0.7); font-weight: 500;
+    }
+    .pop-card-bottom { margin-top: auto; }
+    .pop-card-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem; font-weight: 700; line-height: 1.3;
+      margin-bottom: 6px; color: white;
+    }
+    .pop-card-desc {
+      font-size: 0.78rem; color: rgba(255,255,255,0.70); line-height: 1.5;
+      margin-bottom: 14px;
+    }
+    .pop-learners {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .pop-learner-avatars { display: flex; }
+    .pop-learner-av {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.3);
+      margin-left: -6px; font-size: 0.6rem;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 700;
+    }
+    .pop-learner-av:first-child { margin-left: 0; }
+    .pop-learner-count { font-size: 0.74rem; color: rgba(255,255,255,0.65); }
+    .btn-learn {
+      background: white; color: var(--navy);
+      border: none; border-radius: 30px;
+      padding: 9px 20px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; width: 100%; margin-top: 14px;
+      font-family: 'Inter', sans-serif; transition: opacity 0.15s;
+    }
+    .btn-learn:hover { opacity: 0.88; }
+
+    /* ── CTA SECTION ── */
+    .cta-section {
+      background: var(--navy); border-radius: 24px;
+      padding: 64px 48px; margin: 80px auto 0;
+      max-width: 1100px; margin-left: 24px; margin-right: 24px;
+      position: relative; overflow: hidden;
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400"><rect width="800" height="400" fill="%230d1f3c"/><circle cx="650" cy="50" r="200" fill="%23132340" opacity="0.5"/><circle cx="100" cy="350" r="150" fill="%23132340" opacity="0.4"/></svg>');
+      background-size: cover;
+    }
+    .cta-section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem; font-weight: 700; color: white;
+      letter-spacing: -0.02em; margin-bottom: 16px; max-width: 480px; line-height: 1.25;
+    }
+    .cta-section p { font-size: 0.92rem; color: rgba(255,255,255,0.6); max-width: 460px; line-height: 1.75; margin-bottom: 32px; }
+    .cta-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-cta-primary {
+      background: var(--green); color: white; border: none; border-radius: 30px;
+      padding: 13px 28px; font-size: 0.92rem; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      font-family: 'Inter', sans-serif; transition: background 0.15s;
+    }
+    .btn-cta-primary:hover { background: var(--green-dark); color: white; }
+    .btn-cta-outline {
+      background: transparent; color: white;
+      border: 1.5px solid rgba(255,255,255,0.30); border-radius: 30px;
+      padding: 13px 28px; font-size: 0.92rem; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      font-family: 'Inter', sans-serif; transition: border-color 0.15s;
+    }
+    .btn-cta-outline:hover { border-color: rgba(255,255,255,0.65); color: white; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #fff; border-top: 1px solid var(--border);
+      padding: 32px 24px; margin-top: 80px;
+    }
+    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
+    .footer-brand { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1rem; color: var(--navy); margin-bottom: 4px; }
+    .footer-tagline { font-size: 0.78rem; color: var(--muted); }
+    .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
+    .footer-link { font-size: 0.78rem; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+    .footer-link:hover { color: var(--navy); }
+    .footer-copy { font-size: 0.74rem; color: #b0b8c4; margin-top: 4px; }
+
+    /* ── AUTH MODAL ── */
+    .auth-overlay {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(7,16,32,0.55); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center;
+    }
+    .auth-overlay.open { display: flex; }
+    .auth-modal {
+      background: white; border-radius: 24px;
+      width: 100%; max-width: 440px; margin: 16px;
+      box-shadow: 0 24px 80px rgba(7,16,32,0.22);
+      overflow: hidden;
+      animation: modalIn 0.28s cubic-bezier(0.34,1.2,0.64,1);
+    }
+    @keyframes modalIn { from { transform: scale(0.88) translateY(20px); opacity: 0; } }
+
+    /* Tabs */
+    .auth-tabs {
+      display: flex; border-bottom: 1px solid var(--border);
+    }
+    .auth-tab {
+      flex: 1; padding: 16px; text-align: center;
+      font-size: 0.9rem; font-weight: 600; color: var(--muted);
+      cursor: pointer; border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s; background: none; border-top: none; border-left: none; border-right: none;
+      font-family: 'Inter', sans-serif;
+    }
+    .auth-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
+
+    .auth-body { padding: 28px 32px 32px; }
+    .auth-panel { display: none; }
+    .auth-panel.active { display: block; }
+
+    .auth-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .auth-sub { font-size: 0.83rem; color: var(--muted); margin-bottom: 24px; }
+    .field-label { font-size: 0.69rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; display: block; }
+    .field-input {
+      width: 100%; border: 1.5px solid var(--border); border-radius: var(--r-md);
+      padding: 11px 15px; font-size: 0.88rem; font-family: 'Inter', sans-serif;
+      background: white; color: var(--text); outline: none; transition: border-color 0.15s;
+      margin-bottom: 14px;
+    }
+    .field-input:focus { border-color: var(--navy); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn-auth {
+      width: 100%; background: var(--navy); color: white; border: none;
+      border-radius: var(--r-md); padding: 13px; font-size: 0.92rem; font-weight: 700;
+      cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.15s;
+      margin-top: 4px;
+    }
+    .btn-auth:hover { opacity: 0.88; }
+    .auth-close {
+      position: absolute; top: 16px; right: 16px;
+      background: none; border: none; font-size: 1.1rem; color: var(--muted);
+      cursor: pointer; width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s; z-index: 1;
+    }
+    .auth-close:hover { background: var(--off-white); color: var(--navy); }
+    .auth-modal-wrap { position: relative; }
+
+    /* Placeholder hero image */
+    .hero-placeholder {
+      width: 100%; aspect-ratio: 16/9;
+      background: linear-gradient(135deg, #d8e4f0 0%, #e8edf5 50%, #d0dcea 100%);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hero-placeholder i { font-size: 4rem; color: #a0b0c5; }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="lp-nav">
+  <div class="inner">
+    <a href="#" class="lp-logo">RundaWord</a>
+    <div class="lp-nav-links">
+      <a href="#" class="lp-nav-link active">Trang chủ</a>
+      <a href="{{ url_for('explore') }}" class="lp-nav-link">Gói từ vựng</a>
+    </div>
+    <button class="btn-start" onclick="openAuth('login')">Bắt đầu học</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div style="padding-bottom: 0; overflow: hidden;">
+  <div class="hero">
+    <div class="hero-pill">
+      <span></span> Nền tảng học tập chuyên nghiệp
+    </div>
+    <h1 class="hero-title">Khám phá chân trời<br>tri thức mới</h1>
+    <p class="hero-sub">
+      Học từ vựng tiếng Anh theo cách chuyên nghiệp nhất với RundaWord.<br>
+      Nền tảng dựa trên phương pháp khoa học cho hiệu quả tối ưu.
+    </p>
+    <form class="hero-search" onsubmit="openAuth('login');return false;">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Tìm kiếm bộ từ vựng (IELTS, Business, TOEFL…)">
+      <button type="submit">Khám phá</button>
+    </form>
+  </div>
+
+  <!-- Hero image block -->
+  <div style="max-width:900px;margin:0 auto;padding:0 24px;">
+    <div class="hero-img-wrap">
+      <div class="hero-placeholder">
+        <i class="fas fa-laptop-code"></i>
+      </div>
+      <!-- Floating card bottom-left -->
+      <div class="hero-float-card">
+        <div>
+          <div class="hfc-badge"><i class="fas fa-bolt"></i> TĂNG 40% HIỆU QUẢ</div>
+          <p class="hfc-text" style="margin-top:8px;">
+            Phương pháp Spaced Repetition giúp ghi nhớ từ vựng vĩnh viễn trong thời gian ngắn nhất.
+          </p>
+        </div>
+      </div>
+      <!-- Floating avatars bottom-right -->
+      <div class="hero-float-avatars">
+        <div class="hero-avatar">A</div>
+        <div class="hero-avatar">B</div>
+        <div class="hero-avatar">C</div>
+        <div class="hero-avatar hero-avatar-count">+1k</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- METHODS SECTION -->
+<div class="section">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:36px;">
+    <div class="methods-header" style="margin-bottom:0;">
+      <h2>Phương pháp học đa chiều</h2>
+      <p>Chúng tôi cung cấp 4 chế độ học chuyên sâu để đảm bảo bạn không chỉ thuộc mặt chữ mà còn hiểu sâu cách dùng</p>
+    </div>
+    <div class="methods-nav">
+      <button class="methods-nav-btn"><i class="fas fa-chevron-left"></i></button>
+      <button class="methods-nav-btn active"><i class="fas fa-chevron-right"></i></button>
+    </div>
+  </div>
+  <div class="methods-grid">
+    <div class="method-card">
+      <div class="method-icon green"><span style="font-size:1.3rem;">🃏</span></div>
+      <div class="method-name">Lật thẻ (Flashcard)</div>
+      <p class="method-desc">Ghi nhớ nhanh mặt chữ và ý nghĩa thông qua thẻ lật hai mặt trực quan thông minh.</p>
+      <a href="#" class="method-try" onclick="openAuth('login');return false;">Thử ngay <i class="fas fa-arrow-right" style="font-size:0.75rem;"></i></a>
+    </div>
+    <div class="method-card">
+      <div class="method-icon blue"><span style="font-size:1.3rem;">📝</span></div>
+      <div class="method-name">Trắc nghiệm (Quiz)</div>
+      <p class="method-desc">Kiểm tra khả năng nhận diện từ vựng qua các câu hỏi đa lựa chọn thông minh.</p>
+      <a href="#" class="method-try" onclick="openAuth('login');return false;">Thử ngay <i class="fas fa-arrow-right" style="font-size:0.75rem;"></i></a>
+    </div>
+    <div class="method-card">
+      <div class="method-icon purple"><span style="font-size:1.3rem;">✍️</span></div>
+      <div class="method-name">Kiểm tra (Test)</div>
+      <p class="method-desc">Rèn luyện kỹ năng viết chính tả và sử dụng từ trong ngữ cảnh thực tế.</p>
+      <a href="#" class="method-try" onclick="openAuth('login');return false;">Thử ngay <i class="fas fa-arrow-right" style="font-size:0.75rem;"></i></a>
+    </div>
+    <div class="method-card">
+      <div class="method-icon orange"><span style="font-size:1.3rem;">🎯</span></div>
+      <div class="method-name">Ghép thẻ (Match)</div>
+      <p class="method-desc">Trò chơi tốc độ giúp củng cố phản xạ kết nối từ và nghĩa trong tích tắc.</p>
+      <a href="#" class="method-try" onclick="openAuth('login');return false;">Thử ngay <i class="fas fa-arrow-right" style="font-size:0.75rem;"></i></a>
+    </div>
+  </div>
+</div>
+
+<!-- POPULAR PACKAGES -->
+<div class="section">
+  <div class="pop-header">
+    <div class="pop-tag">Cộng đồng tin dùng</div>
+    <h2>Gói từ vựng phổ biến</h2>
+  </div>
+  <div class="pop-grid">
+    <div class="pop-card" onclick="openAuth('login')">
+      <div class="pop-card-bg" style="background: linear-gradient(135deg,#1a3a7a,#2d5fcf);"></div>
+      <div class="pop-card-overlay"></div>
+      <div class="pop-card-content">
+        <div class="pop-card-top">
+          <span class="pop-cat-badge">Academic</span>
+          <span class="pop-word-count">5.800+ học viên</span>
+        </div>
+        <div class="pop-card-bottom">
+          <div class="pop-card-name">Academic IELTS 8.0+</div>
+          <p class="pop-card-desc">5.800 từ vựng cho chứng chỉ điểm cao các môn.</p>
+          <button class="btn-learn" onclick="event.stopPropagation();openAuth('login')">Học ngay</button>
+        </div>
+      </div>
+    </div>
+    <div class="pop-card" onclick="openAuth('login')">
+      <div class="pop-card-bg" style="background: linear-gradient(135deg,#0d5c3a,#1ebc82);"></div>
+      <div class="pop-card-overlay"></div>
+      <div class="pop-card-content">
+        <div class="pop-card-top">
+          <span class="pop-cat-badge business">Business</span>
+          <span class="pop-word-count">3.200+ học viên</span>
+        </div>
+        <div class="pop-card-bottom">
+          <div class="pop-card-name">Advanced Business</div>
+          <p class="pop-card-desc">Chinh phục môi trường làm việc quốc tế với bộ từ lĩnh doanh.</p>
+          <button class="btn-learn" onclick="event.stopPropagation();openAuth('login')">Học ngay</button>
+        </div>
+      </div>
+    </div>
+    <div class="pop-card" onclick="openAuth('login')">
+      <div class="pop-card-bg" style="background: linear-gradient(135deg,#6a1a1a,#bb3a3a);"></div>
+      <div class="pop-card-overlay"></div>
+      <div class="pop-card-content">
+        <div class="pop-card-top">
+          <span class="pop-cat-badge standardized">Standardized</span>
+          <span class="pop-word-count">4 học viên</span>
+        </div>
+        <div class="pop-card-bottom">
+          <div class="pop-card-name">TOEFL Mastery</div>
+          <p class="pop-card-desc">Trọn bộ từ vựng học thuật cho kỳ thi TOEFL iBT mới nhất.</p>
+          <button class="btn-learn" onclick="event.stopPropagation();openAuth('login')">Học ngay</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA SECTION -->
+<div style="padding: 0 24px; max-width:1148px; margin: 0 auto;">
+  <div class="cta-section">
+    <h2>Sẵn sàng để nâng tầm tri thức của bạn?</h2>
+    <p>Tham gia cùng hàng nghìn học viên khác và bắt đầu lộ trình học từ vựng khoa học ngay hôm nay. Hoàn toàn miễn phí để bắt đầu.</p>
+    <div class="cta-btns">
+      <a href="#" class="btn-cta-primary" onclick="openAuth('register');return false;">
+        Bắt đầu học ngay
+      </a>
+      <a href="#" class="btn-cta-outline" onclick="openAuth('register');return false;">
+        Đăng ký tài khoản
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">RundaWord</div>
+      <div class="footer-tagline">Nền tảng từ vựng dựa trên khoa học não bộ.</div>
+      <div class="footer-copy">© 2024 RundaWord. Hàng tâm tri thức ngôn ngữ.</div>
+    </div>
+    <div class="footer-links">
+      <a href="#" class="footer-link">Điều khoản</a>
+      <a href="#" class="footer-link">Bảo mật</a>
+      <a href="{{ url_for('login') }}" class="footer-link">Login</a>
+      <a href="{{ url_for('register') }}" class="footer-link">Đăng ký</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ── AUTH MODAL ── -->
+<div class="auth-overlay" id="authOverlay" onclick="closeAuthOnBg(event)">
+  <div class="auth-modal-wrap">
+    <div class="auth-modal">
+      <button class="auth-close" onclick="closeAuth()"><i class="fas fa-times"></i></button>
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Đăng nhập</button>
+        <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Đăng ký</button>
+      </div>
+
+      <div class="auth-body">
+
+        <!-- LOGIN PANEL -->
+        <div class="auth-panel active" id="panelLogin">
+          <div class="auth-title">Chào mừng trở lại</div>
+          <div class="auth-sub">Đăng nhập để tiếp tục hành trình học của bạn.</div>
+          <form method="POST" action="{{ url_for('login') }}">
+            <label class="field-label">Email hoặc Username</label>
+            <input type="text" name="email" class="field-input" placeholder="curator@scholar.edu" required>
+            <label class="field-label">Mật khẩu</label>
+            <input type="password" name="password" class="field-input" placeholder="••••••••" required>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;margin-top:-4px;">
+              <label style="display:flex;align-items:center;gap:7px;font-size:0.8rem;color:var(--muted);cursor:pointer;">
+                <input type="checkbox" style="accent-color:var(--navy);"> Ghi nhớ 7 ngày
+              </label>
+              <a href="#" style="font-size:0.8rem;color:var(--navy);text-decoration:none;font-weight:600;">Quên mật khẩu?</a>
+            </div>
+            <button type="submit" class="btn-auth">Đăng nhập</button>
+          </form>
+          <p style="text-align:center;margin-top:16px;font-size:0.82rem;color:var(--muted);">
+            Chưa có tài khoản?
+            <a href="#" onclick="switchTab('register');return false;" style="color:var(--navy);font-weight:700;text-decoration:none;">Đăng ký ngay</a>
+          </p>
+        </div>
+
+        <!-- REGISTER PANEL -->
+        <div class="auth-panel" id="panelRegister">
+          <div class="auth-title">Tạo tài khoản</div>
+          <div class="auth-sub">Bắt đầu hành trình từ vựng của bạn ngay hôm nay.</div>
+          <form method="POST" action="{{ url_for('register') }}">
+            <label class="field-label">Họ và tên</label>
+            <input type="text" name="name" class="field-input" placeholder="Julian Sterling" required>
+            <div class="field-row">
+              <div>
+                <label class="field-label">Email</label>
+                <input type="email" name="email" class="field-input" placeholder="email@domain.com" required>
+              </div>
+              <div>
+                <label class="field-label">Username</label>
+                <input type="text" name="username" class="field-input" placeholder="curator_01" required>
+              </div>
+            </div>
+            <label class="field-label">Mật khẩu</label>
+            <input type="password" name="password" class="field-input" placeholder="••••••••" required>
+            <label class="field-label">Xác nhận mật khẩu</label>
+            <input type="password" name="confirm_password" class="field-input" placeholder="••••••••" required>
+            <div style="margin-bottom:16px;">
+              <label style="display:flex;align-items:flex-start;gap:8px;font-size:0.8rem;color:var(--muted);cursor:pointer;">
+                <input type="checkbox" required style="accent-color:var(--navy);margin-top:3px;">
+                Tôi đồng ý với <a href="#" style="color:var(--navy);font-weight:600;text-decoration:none;">Điều khoản</a> và <a href="#" style="color:var(--navy);font-weight:600;text-decoration:none;">Chính sách</a>.
+              </label>
+            </div>
+            <button type="submit" class="btn-auth">Tạo tài khoản</button>
+          </form>
+          <p style="text-align:center;margin-top:16px;font-size:0.82rem;color:var(--muted);">
+            Đã có tài khoản?
+            <a href="#" onclick="switchTab('login');return false;" style="color:var(--navy);font-weight:700;text-decoration:none;">Đăng nhập</a>
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function openAuth(tab) {
+  document.getElementById('authOverlay').classList.add('open');
+  switchTab(tab || 'login');
+  document.body.style.overflow = 'hidden';
+}
+function closeAuth() {
+  document.getElementById('authOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function closeAuthOnBg(e) {
+  if (e.target === document.getElementById('authOverlay')) closeAuth();
+}
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+  document.getElementById('panel' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAuth(); });
+</script>
+</body>
+</html>

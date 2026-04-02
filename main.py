@@ -195,8 +195,31 @@ def parse_vocab_file(file_content, filename):
 def index():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-    return redirect(url_for('login'))
+    # Guest → landing page
+    return render_template('landing.html')
 
+
+# Thêm route mới cho trang Explore (public packages cho guest):
+@app.route('/explore')
+def explore():
+    q = request.args.get('q', '').strip()
+    active_filter = request.args.get('filter', 'all')
+    search_query = None
+
+    if q:
+        search_query = q
+        public_packages = search_packages(q)
+    else:
+        public_packages = VocabPackage.query.filter(
+            VocabPackage.is_public == True
+        ).order_by(VocabPackage.updated_at.desc()).limit(12).all()
+
+    return render_template(
+        'explore.html',
+        public_packages=public_packages,
+        search_query=search_query,
+        active_filter=active_filter
+    )
 
 @app.route('/dashboard')
 @login_required
