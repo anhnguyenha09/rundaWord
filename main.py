@@ -400,7 +400,7 @@ def packages():
             saved_pkgs = []
 
     return render_template(
-        'admin_packages.html',
+        'packages.html',
         packages=pkgs, saved_packages=saved_pkgs,
         tab=tab, search_query=q
     )
