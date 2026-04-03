@@ -2,7 +2,7 @@
 {% block title %}Flashcard — {{ package.package_name }}{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top:40px;padding-bottom:64px;max-width:760px;">
+<div class="study-container">
 
   <!-- Breadcrumb -->
   <div class="d-flex align-items-center gap-2 mb-4" style="font-size:0.82rem;">
@@ -12,21 +12,23 @@
     </a>
   </div>
 
-  <!-- Title + controls row — matches PDF Page 2 top -->
+  <!-- Title + controls row -->
   <div class="d-flex align-items-start justify-content-between mb-4">
     <div>
       <div style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--navy);letter-spacing:-0.02em;">
         {{ package.package_name }}
       </div>
       <div style="font-size:0.82rem;color:var(--text-muted);margin-top:2px;">
-        Unit {{ (package.vocabularies|length // 20) + 1 }}: Vocabulary
+        Academic Vocabulary
       </div>
     </div>
     <div class="d-flex align-items-center gap-2">
-      <button onclick="shuffleCards()" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border:1.5px solid var(--border);border-radius:30px;background:white;font-size:0.81rem;font-weight:600;color:var(--text);cursor:pointer;font-family:'Inter',sans-serif;">
+      <button onclick="shuffleCards()"
+        style="display:flex;align-items:center;gap:6px;padding:8px 16px;border:1.5px solid var(--border);border-radius:30px;background:white;font-size:0.81rem;font-weight:600;color:var(--text);cursor:pointer;font-family:'Inter',sans-serif;">
         <i class="fas fa-random" style="font-size:0.74rem;"></i>Shuffle
       </button>
-      <button onclick="resetCards()" style="display:flex;align-items:center;gap:6px;padding:8px 16px;border:1.5px solid var(--border);border-radius:30px;background:white;font-size:0.81rem;font-weight:600;color:var(--text);cursor:pointer;font-family:'Inter',sans-serif;">
+      <button onclick="resetCards()"
+        style="display:flex;align-items:center;gap:6px;padding:8px 16px;border:1.5px solid var(--border);border-radius:30px;background:white;font-size:0.81rem;font-weight:600;color:var(--text);cursor:pointer;font-family:'Inter',sans-serif;">
         <i class="fas fa-redo" style="font-size:0.74rem;"></i>Reset
       </button>
       <div style="background:var(--navy);color:white;border-radius:30px;padding:8px 18px;font-size:0.88rem;font-weight:700;font-family:'Playfair Display',serif;" id="counterBadge">
@@ -35,7 +37,7 @@
     </div>
   </div>
 
-  <!-- FLASHCARD — dark navy front, white back (PDF style) -->
+  <!-- FLASHCARD -->
   <div class="flashcard-area" onclick="flipCard()">
     <div class="flashcard" id="flashcard">
       <div class="fc-face fc-front">
@@ -45,12 +47,11 @@
       </div>
       <div class="fc-face fc-back">
         <div class="fc-word" id="wordBack" style="font-size:1.6rem;color:var(--navy);margin-bottom:8px;">…</div>
-        <div id="wordExampleBack" class="fc-example"></div>
       </div>
     </div>
   </div>
 
-  <!-- Nav row -->
+  <!-- Nav -->
   <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:24px;">
     <button class="nav-circle" id="btnPrev" onclick="prevCard()" disabled>
       <i class="fas fa-chevron-left"></i>
@@ -63,7 +64,7 @@
     </button>
   </div>
 
-  <!-- Keyboard shortcuts row -->
+  <!-- Keyboard shortcuts -->
   <div style="display:flex;align-items:center;justify-content:center;gap:20px;">
     <div style="display:flex;align-items:center;gap:6px;font-size:0.77rem;color:var(--text-muted);">
       <span class="fc-key">Space</span> Flip Card
@@ -102,15 +103,12 @@
 <script>
 const words    = {{ package.vocabularies | map(attribute='word_en') | list | tojson }};
 const meanings = {{ package.vocabularies | map(attribute='word_vi') | list | tojson }};
-const examples = {{ package.vocabularies | map(attribute='word_en') | list | tojson }};
-
 let order = [...Array(words.length).keys()];
 let cur = 0, flipped = false;
 
 function updateCard() {
   document.getElementById('wordFront').textContent = words[order[cur]];
   document.getElementById('wordBack').textContent  = meanings[order[cur]];
-  document.getElementById('wordExampleBack').textContent = '';
   document.getElementById('counter').textContent   = (cur + 1) + ' / ' + words.length;
   document.getElementById('counterBadge').textContent = (cur + 1) + '/' + words.length;
   document.getElementById('btnPrev').disabled = (cur === 0);
@@ -142,10 +140,10 @@ document.getElementById('doneOverlay').addEventListener('click', function(e) {
 });
 document.addEventListener('keydown', function(e) {
   if (e.target.tagName === 'INPUT') return;
-  if (e.key === 'ArrowRight') { e.preventDefault(); nextCard(); }
-  else if (e.key === 'ArrowLeft') { e.preventDefault(); prevCard(); }
-  else if (e.key === ' ') { e.preventDefault(); flipCard(); }
-  else if (e.key === 'Escape') closeDone();
+  if (e.key === 'ArrowRight')      { e.preventDefault(); nextCard(); }
+  else if (e.key === 'ArrowLeft')  { e.preventDefault(); prevCard(); }
+  else if (e.key === ' ')          { e.preventDefault(); flipCard(); }
+  else if (e.key === 'Escape')     closeDone();
 });
 updateCard();
 </script>

@@ -1,8 +1,96 @@
 {% extends "base.html" %}
 {% block title %}{{ package.package_name }} — RundaWord{% endblock %}
 
+{% block head_extra %}
+<style>
+/* Colored banner for package detail header */
+.pkg-detail-banner {
+  background: linear-gradient(135deg, var(--navy) 0%, #1c3a6e 100%);
+  border-radius: var(--r-xl);
+  padding: 32px 36px;
+  margin-bottom: 28px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.pkg-detail-banner::before {
+  content: '';
+  position: absolute; top: -40px; right: -40px;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+}
+.pkg-detail-banner::after {
+  content: '';
+  position: absolute; bottom: -60px; right: 80px;
+  width: 150px; height: 150px; border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+}
+.banner-badge {
+  display: inline-flex; align-items: center;
+  font-size: 0.64rem; font-weight: 700; letter-spacing: 0.09em;
+  text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
+}
+.banner-badge.public  { background: rgba(39,174,96,0.25); color: #7dffb0; border: 1px solid rgba(39,174,96,0.35); }
+.banner-badge.private { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.18); }
+.banner-badge.count   { background: rgba(255,255,255,0.10); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.15); }
+
+.banner-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem; font-weight: 700; color: white;
+  letter-spacing: -0.02em; margin: 12px 0 4px;
+}
+.banner-author { font-size: 0.84rem; color: rgba(255,255,255,0.55); }
+.banner-author strong { color: rgba(255,255,255,0.80); }
+.banner-desc { font-size: 0.84rem; color: rgba(255,255,255,0.50); margin-top: 10px; line-height: 1.7; max-width: 560px; }
+
+/* Banner action buttons (white style) */
+.banner-btn-save {
+  background: rgba(255,255,255,0.12); color: white;
+  border: 1.5px solid rgba(255,255,255,0.25); border-radius: var(--r-md);
+  padding: 8px 16px; font-size: 0.84rem; font-weight: 600;
+  cursor: pointer; white-space: nowrap; transition: background 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+.banner-btn-save:hover { background: rgba(255,255,255,0.20); }
+.banner-btn-save.saved { background: rgba(255,255,255,0.20); }
+.banner-menu-btn {
+  background: rgba(255,255,255,0.10); color: white;
+  border: 1.5px solid rgba(255,255,255,0.20); border-radius: var(--r-md);
+  width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 0.15s; flex-shrink: 0;
+}
+.banner-menu-btn:hover { background: rgba(255,255,255,0.20); }
+
+/* Ledger — 2 columns only (EN + VI) */
+.ledger-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--border-light);
+  gap: 16px;
+  transition: background 0.1s;
+}
+.ledger-row-2:last-child { border-bottom: none; }
+.ledger-row-2:hover { background: var(--off-white); }
+
+/* Ledger search bar */
+.ledger-search-wrap { position: relative; }
+.ledger-search-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem; }
+.ledger-search-input {
+  border: 1.5px solid var(--border); border-radius: var(--r-md);
+  padding: 8px 14px 8px 34px; font-size: 0.84rem;
+  font-family: 'Inter', sans-serif; outline: none; width: 220px;
+  transition: border-color 0.15s; background: var(--off-white);
+}
+.ledger-search-input:focus { border-color: var(--navy); background: white; }
+
+.ledger-row-2.hidden { display: none; }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container" style="padding-top:32px;padding-bottom:64px;">
+<div class="container" style="padding-top:32px;padding-bottom:72px;">
 
   <!-- BREADCRUMB -->
   <div class="d-flex align-items-center gap-2 mb-4" style="font-size:0.83rem;">
@@ -13,41 +101,37 @@
     <span style="font-weight:600;color:var(--navy);">{{ package.package_name }}</span>
   </div>
 
-  <!-- PACKAGE HEADER — matches PDF Page 4 -->
-  <div class="pkg-detail-header mb-4">
+  <!-- COLORED BANNER HEADER -->
+  <div class="pkg-detail-banner mb-4">
     <div class="d-flex justify-content-between align-items-start gap-3">
-      <div style="flex:1;">
-        <div class="pkg-detail-meta">
-          <span class="pkg-badge {% if package.is_public %}public{% else %}private{% endif %}">
-            {% if package.is_public %}PUBLIC{% else %}PRIVATE{% endif %}
+      <div style="flex:1;position:relative;z-index:1;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:0;">
+          <span class="banner-badge {% if package.is_public %}public{% else %}private{% endif %}">
+            {% if package.is_public %}Public{% else %}Private{% endif %}
           </span>
-          <span class="pkg-badge" style="background:#f0f2f6;color:var(--text-muted);border:1px solid var(--border);">
-            {{ package.vocabularies|length }} words
-          </span>
+          <span class="banner-badge count">{{ package.vocabularies|length }} words</span>
         </div>
-        <div class="pkg-detail-title">{{ package.package_name }}</div>
-        <div class="pkg-detail-author">
-          Curated by <strong style="color:var(--navy);">{{ package.user.username if package.user else 'Unknown' }}</strong>
+        <div class="banner-title">{{ package.package_name }}</div>
+        <div class="banner-author">
+          Curated by <strong>{{ package.user.username if package.user else 'Unknown' }}</strong>
         </div>
         {% if package.package_description %}
-        <p style="font-size:0.84rem;color:var(--text-muted);margin-top:12px;margin-bottom:0;max-width:560px;line-height:1.7;">
-          {{ package.package_description }}
-        </p>
+        <p class="banner-desc">{{ package.package_description }}</p>
         {% endif %}
       </div>
 
       <!-- Actions -->
-      <div class="d-flex align-items-center gap-2 flex-shrink-0">
+      <div class="d-flex align-items-center gap-2 flex-shrink-0" style="position:relative;z-index:1;">
         {% if not is_owner %}
           {% if is_saved %}
           <form method="POST" action="{{ url_for('unsave_package', package_id=package.id) }}" style="margin:0;">
-            <button type="submit" class="btn-save saved-state">
+            <button type="submit" class="banner-btn-save saved">
               <i class="fas fa-bookmark me-1"></i>Saved
             </button>
           </form>
           {% else %}
           <form method="POST" action="{{ url_for('save_package', package_id=package.id) }}" style="margin:0;">
-            <button type="submit" class="btn-save">
+            <button type="submit" class="banner-btn-save">
               <i class="far fa-bookmark me-1"></i>Save Package
             </button>
           </form>
@@ -56,8 +140,8 @@
 
         {% if is_owner %}
         <div class="dropdown">
-          <button class="settings-btn" data-bs-toggle="dropdown">
-            <i class="fas fa-ellipsis-v"></i>
+          <button class="banner-menu-btn" data-bs-toggle="dropdown">
+            <i class="fas fa-ellipsis-v" style="font-size:0.85rem;"></i>
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item" href="{{ url_for('edit_package', package_id=package.id) }}">
@@ -73,8 +157,8 @@
     </div>
   </div>
 
-  <!-- MASTERY PATHWAYS — PDF Page 4: 4 colored cards -->
-  <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">
+  <!-- MASTERY PATHWAYS -->
+  <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">
     Mastery Pathways
   </div>
   <div class="mastery-grid">
@@ -100,44 +184,48 @@
     </a>
   </div>
 
-  <!-- VOCABULARY LEDGER — PDF Page 4 -->
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;">
-      Vocabulary Ledger
+  <!-- VOCABULARY LEDGER -->
+  {% if package.vocabularies %}
+  <div class="vocab-ledger">
+    <!-- Header: title + search only (no sort button) -->
+    <div class="ledger-header">
+      <span class="ledger-title">Vocabulary Ledger
+        <span style="font-size:0.78rem;color:var(--text-muted);font-weight:500;margin-left:8px;">
+          {{ package.vocabularies|length }} terms
+        </span>
+      </span>
+      <div class="ledger-search-wrap">
+        <i class="fas fa-search"></i>
+        <input class="ledger-search-input" id="ledgerSearch"
+          placeholder="Search EN or VI…"
+          oninput="filterLedger(this.value)">
+      </div>
     </div>
-    <div style="font-size:0.78rem;color:var(--text-muted);font-weight:500;">
-      {{ package.vocabularies|length }} terms
+
+    <!-- Column headers -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;padding:10px 20px 8px;border-bottom:1px solid var(--border);">
+      <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);">English</div>
+      <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);">Vietnamese</div>
+    </div>
+
+    <!-- Rows -->
+    <div id="ledgerRows">
+      {% for vocab in package.vocabularies %}
+      <div class="ledger-row-2"
+           data-en="{{ vocab.word_en | lower }}"
+           data-vi="{{ vocab.word_vi | lower }}">
+        <div class="ledger-en">{{ vocab.word_en }}</div>
+        <div class="ledger-vi">{{ vocab.word_vi }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- No results msg -->
+    <div id="ledgerNoResult" style="display:none;padding:24px;text-align:center;color:var(--text-muted);font-size:0.87rem;">
+      No matches found.
     </div>
   </div>
 
-  {% if package.vocabularies %}
-  <div class="vocab-ledger">
-    <div class="ledger-header">
-      <span class="ledger-title">Vocabulary Ledger</span>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button class="ledger-audio" title="Sort A-Z"><i class="fas fa-sort-alpha-down"></i></button>
-        <button class="ledger-audio" title="Search"><i class="fas fa-search"></i></button>
-      </div>
-    </div>
-    {% for vocab in package.vocabularies %}
-    <div class="ledger-row">
-      <div>
-        <div class="ledger-en">{{ vocab.word_en }}</div>
-        <div class="ledger-pos">Noun</div>
-      </div>
-      <div class="ledger-vi">{{ vocab.word_vi }}</div>
-      <div class="ledger-def" style="color:var(--text-muted);font-size:0.81rem;">—</div>
-      <button class="ledger-audio"><i class="fas fa-volume-up"></i></button>
-    </div>
-    {% endfor %}
-    {% if package.vocabularies|length > 4 %}
-    <div style="padding:16px;text-align:center;">
-      <button style="background:var(--off-white);border:1.5px solid var(--border);border-radius:var(--r-md);padding:10px 28px;font-size:0.84rem;font-weight:600;color:var(--navy);cursor:pointer;" onclick="this.closest('.vocab-ledger').querySelectorAll('.ledger-row').forEach(r=>r.style.display='grid');this.style.display='none';">
-        Load More Terms
-      </button>
-    </div>
-    {% endif %}
-  </div>
   {% else %}
   <div class="rw-card text-center py-5">
     <i class="fas fa-inbox fa-2x mb-3" style="color:var(--border);"></i>
@@ -148,6 +236,7 @@
   </div>
   {% endif %}
 
+  <!-- DELETE MODAL -->
   {% if is_owner %}
   <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -179,4 +268,22 @@
   </div>
 
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterLedger(q) {
+  const term = q.trim().toLowerCase();
+  const rows  = document.querySelectorAll('#ledgerRows .ledger-row-2');
+  let visible = 0;
+  rows.forEach(row => {
+    const en = row.dataset.en || '';
+    const vi = row.dataset.vi || '';
+    const match = !term || en.includes(term) || vi.includes(term);
+    row.classList.toggle('hidden', !match);
+    if (match) visible++;
+  });
+  document.getElementById('ledgerNoResult').style.display = visible === 0 ? 'block' : 'none';
+}
+</script>
 {% endblock %}

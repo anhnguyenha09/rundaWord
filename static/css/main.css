@@ -650,3 +650,75 @@ footer .footer-legal   { font-size: 0.74rem; opacity: 0.35; }
 .pkg-tab { padding: 7px 18px; border-radius: 30px; font-weight: 600; font-size: 0.83rem; text-decoration: none; color: var(--text-muted); transition: all 0.15s; }
 .pkg-tab.active { background: var(--navy); color: white; box-shadow: 0 2px 8px rgba(13,31,60,0.18); }
 .pkg-tab:hover:not(.active) { color: var(--navy); }
+
+/* MAIN PATCH */
+/* ============================================================
+   STUDY PAGES — append these rules to the bottom of main.css
+   ============================================================ */
+
+/* Constrained content wrapper for all study modes */
+.study-container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 36px 32px 100px;
+}
+
+/* Quiz gets extra bottom padding so options don't crowd footer */
+.quiz-container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 32px 140px;
+}
+
+/* Test — long scroll */
+.test-container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 36px 32px 100px;
+}
+
+/* Match */
+.match-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 36px 32px 100px;
+}
+
+/* Score bar full-bleed strip but text stays in container */
+.score-bar-outer {
+  position: sticky;
+  top: 60px;
+  z-index: 100;
+  background: rgba(244,245,247,0.97);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
+}
+.score-bar-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Test bar same treatment */
+.test-bar-outer {
+  position: sticky;
+  top: 60px;
+  z-index: 100;
+  background: rgba(244,245,247,0.97);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.test-bar-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
