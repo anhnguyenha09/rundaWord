@@ -1,16 +1,14 @@
 {% extends "base.html" %}
-{% block title %}403 - Không có quyền truy cập{% endblock %}
+{% block title %}404 - Không tìm thấy trang{% endblock %}
 {% block content %}
 <div class="text-center py-5">
     <div style="font-size:4rem;margin-bottom:16px;color:var(--muted);">
-        <i class="fas fa-shield-alt"></i>
+        <i class="fas fa-search"></i>
     </div>
-    <div class="page-title mb-2">403 — Không có quyền</div>
+    <div class="page-title mb-2">404 — Không tìm thấy</div>
     <p style="color:var(--muted);margin-bottom:24px;">
-        Bạn không có quyền truy cập trang này.
+        Trang bạn tìm kiếm không tồn tại hoặc đã bị xóa.
     </p>
-    {# FIX: authenticated users go to dashboard, guests go to guest_home
-       (prevents redirect loop when unauthenticated user hits a @login_required + admin_required route) #}
     {% if current_user.is_authenticated %}
     <a href="{{ url_for('dashboard') }}" class="btn btn-navy px-4">
         <i class="fas fa-home me-1"></i>Về Dashboard

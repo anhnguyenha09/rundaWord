@@ -199,7 +199,6 @@ def parse_vocab_file(file_content, filename):
 def index():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-    # Guest: show public dashboard
     return redirect(url_for('guest_home'))
 
 
@@ -462,7 +461,6 @@ def create_package():
 def edit_package(package_id):
     package = VocabPackage.query.get_or_404(package_id)
 
-    # Admin can edit any package
     if package.user_id != current_user.id and not current_user.is_admin:
         flash('Bạn không có quyền chỉnh sửa gói từ này!', 'danger')
         return redirect(url_for('packages'))
@@ -549,10 +547,25 @@ def unsave_package(package_id):
     return redirect(url_for('package_detail', package_id=package_id))
 
 
+# FIX: clone_package now has its own POST handler instead of redirecting
+# to save_package with code=307 (which caused issues with CSRF and form data)
 @app.route('/package/<int:package_id>/clone', methods=['POST'])
 @login_required
 def clone_package(package_id):
-    return redirect(url_for('save_package', package_id=package_id), code=307)
+    package = VocabPackage.query.get_or_404(package_id)
+    if not package.is_public:
+        flash('Gói từ này không công khai!', 'danger')
+        return redirect(url_for('dashboard'))
+    if package.user_id == current_user.id:
+        flash('Đây là gói từ của bạn!', 'info')
+        return redirect(url_for('package_detail', package_id=package_id))
+    if current_user.has_saved(package):
+        flash('Bạn đã lưu gói từ này rồi!', 'info')
+        return redirect(url_for('package_detail', package_id=package_id))
+    current_user.saved_packages.append(package)
+    db.session.commit()
+    flash(f'Đã lưu "{package.package_name}" vào thư viện!', 'success')
+    return redirect(url_for('package_detail', package_id=package_id))
 
 
 @app.route('/delete_package/<int:package_id>', methods=['POST'])
@@ -576,6 +589,7 @@ def delete_package(package_id):
 def delete_word(word_id):
     vocab = Vocabulary.query.get_or_404(word_id)
     if vocab.package.user_id != current_user.id and not current_user.is_admin:
+        flash('Không có quyền xóa từ này!', 'danger')
         return redirect(url_for('packages'))
     package_id = vocab.package_id
     db.session.delete(vocab)
@@ -710,10 +724,10 @@ def admin_create_user():
 
         if User.query.filter_by(username=username).first():
             flash('Username đã tồn tại!', 'danger')
-            return render_template('admin/user_form.html', action='create')
+            return render_template('admin/user_form.html', action='create', user=None)
         if User.query.filter_by(email=email).first():
             flash('Email đã tồn tại!', 'danger')
-            return render_template('admin/user_form.html', action='create')
+            return render_template('admin/user_form.html', action='create', user=None)
 
         user = User(username=username, email=email, name=name, role=role)
         user.set_password(password)
@@ -722,7 +736,7 @@ def admin_create_user():
         flash(f'Đã tạo người dùng "{username}".', 'success')
         return redirect(url_for('admin_users'))
 
-    return render_template('admin/user_form.html', action='create')
+    return render_template('admin/user_form.html', action='create', user=None)
 
 
 @app.route('/admin/users/<int:user_id>/edit', methods=['GET', 'POST'])
@@ -737,7 +751,6 @@ def admin_edit_user(user_id):
         role         = int(request.form.get('role', ROLE_USER))
         new_password = request.form.get('new_password', '').strip()
 
-        # Uniqueness checks (excluding self)
         existing_u = User.query.filter_by(username=username).first()
         if existing_u and existing_u.id != user_id:
             flash('Username đã được sử dụng!', 'danger')
@@ -783,7 +796,6 @@ def admin_packages():
     query = VocabPackage.query
     if q:
         q_norm = normalize_text(q)
-        # SQLite: fetch all then filter (normalize on Python side)
         all_pkgs = query.order_by(VocabPackage.updated_at.desc()).all()
         pkgs = [
             p for p in all_pkgs
@@ -819,11 +831,15 @@ def admin_delete_package(package_id):
     return redirect(url_for('admin_packages'))
 
 
-# ── 403 error handler ───────────────────────────────────────
+# ── Error handlers ──────────────────────────────────────────
 
 @app.errorhandler(403)
 def forbidden(e):
     return render_template('403.html'), 403
+
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('404.html'), 404
 
 
 # ══════════════════════════════════════════════
@@ -834,7 +850,6 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
 
-        # Create default admin if none exists
         if not User.query.filter_by(role=ROLE_ADMIN).first():
             admin = User(
                 username='admin',

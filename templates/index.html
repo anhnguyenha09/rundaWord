@@ -121,22 +121,20 @@
 <div style="max-width:500px;margin:0 auto 32px;">
     <div class="quiz-card mb-3">
         <div class="q-prompt">Bạn có nhớ từ này không?</div>
-        <div class="q-word">{{ quiz_words[0].word }}</div>
+        <div class="q-word" id="quizWord"></div>
     </div>
-    <div id="quickOptions">
-        {% for opt in quiz_words[0].options %}
-        <button class="option-btn"
-            onclick="checkQuickAnswer(this, '{{ opt | e }}', '{{ quiz_words[0].correct | e }}')">
-            {{ opt }}
-        </button>
-        {% endfor %}
-    </div>
+    <div id="quickOptions"></div>
     <div class="text-center mt-3">
         <a href="{{ url_for('quiz', package_id=quiz_package.id) }}" class="btn btn-navy">
             Làm full quiz →
         </a>
     </div>
 </div>
+
+{# FIX: pass quiz data as JSON to avoid JS string-escape issues with special chars #}
+<script>
+    const QUIZ_DATA = {{ quiz_words | tojson | safe }};
+</script>
 {% endif %}
 
 {% endif %}{# end search toggle #}
@@ -144,13 +142,36 @@
 {% endblock %}
 
 {% block scripts %}
+{% if quiz_words %}
 <script>
-function checkQuickAnswer(btn, selected, correct) {
-    document.querySelectorAll('#quickOptions .option-btn').forEach(b => {
-        b.disabled = true;
-        if (b.textContent.trim() === correct.trim()) b.classList.add('correct');
+(function() {
+    if (!window.QUIZ_DATA || !QUIZ_DATA.length) return;
+
+    const q = QUIZ_DATA[0];
+
+    // Render word
+    document.getElementById('quizWord').textContent = q.word;
+
+    // Render options
+    const container = document.getElementById('quickOptions');
+    q.options.forEach(function(opt) {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt;
+        btn.addEventListener('click', function() {
+            checkQuickAnswer(btn, opt, q.correct);
+        });
+        container.appendChild(btn);
     });
-    if (selected.trim() !== correct.trim()) btn.classList.add('wrong');
-}
+
+    function checkQuickAnswer(clickedBtn, selected, correct) {
+        document.querySelectorAll('#quickOptions .option-btn').forEach(function(b) {
+            b.disabled = true;
+            if (b.textContent === correct) b.classList.add('correct');
+        });
+        if (selected !== correct) clickedBtn.classList.add('wrong');
+    }
+})();
 </script>
+{% endif %}
 {% endblock %}

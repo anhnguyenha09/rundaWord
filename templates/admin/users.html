@@ -72,8 +72,11 @@
                         <i class="fas fa-edit"></i>
                     </a>
                     {% if user.id != current_user.id %}
+                    {# FIX: pass url_for result via data attribute, read in JS #}
                     <button type="button" class="admin-action-btn danger" title="Xóa"
-                        onclick="confirmDelete({{ user.id }}, '{{ user.username }}')">
+                        data-username="{{ user.username }}"
+                        data-delete-url="{{ url_for('admin_delete_user', user_id=user.id) }}"
+                        onclick="confirmDelete(this)">
                         <i class="fas fa-trash"></i>
                     </button>
                     {% endif %}
@@ -105,6 +108,7 @@
             </div>
             <div class="modal-footer gap-2 justify-content-center">
                 <button type="button" class="btn btn-cream px-4" data-bs-dismiss="modal">Hủy</button>
+                {# FIX: action injected via JS from data-delete-url #}
                 <form id="deleteForm" method="POST">
                     <button type="submit" class="btn btn-navy px-4">
                         <i class="fas fa-trash me-1"></i>Xóa
@@ -118,9 +122,12 @@
 
 {% block scripts %}
 <script>
-function confirmDelete(userId, username) {
+// FIX: read URL from data attribute — no manual URL construction in JS
+function confirmDelete(btn) {
+    const username  = btn.dataset.username;
+    const deleteUrl = btn.dataset.deleteUrl;
     document.getElementById('deleteUsername').textContent = username;
-    document.getElementById('deleteForm').action = '/admin/users/' + userId + '/delete';
+    document.getElementById('deleteForm').action = deleteUrl;
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
 </script>

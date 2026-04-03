@@ -17,7 +17,12 @@
 </div>
 
 <div class="rw-card" style="max-width:560px;">
-    <form method="POST">
+    {# FIX: use correct action URL via url_for instead of empty action (relies on current URL) #}
+    {% if action == 'create' %}
+    <form method="POST" action="{{ url_for('admin_create_user') }}">
+    {% else %}
+    <form method="POST" action="{{ url_for('admin_edit_user', user_id=user.id) }}">
+    {% endif %}
 
         <div class="mb-3">
             <label class="rw-label">Username <span class="text-danger">*</span></label>
@@ -84,6 +89,8 @@
     </form>
 </div>
 
+{% endblock %}
+
 {% block head_extra %}
 <style>
 .visibility-option input { display:none; }
@@ -96,5 +103,4 @@
     border-color:var(--navy); background:#eef3fb;
 }
 </style>
-{% endblock %}
 {% endblock %}

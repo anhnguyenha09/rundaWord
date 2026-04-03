@@ -112,8 +112,9 @@
             border: 1px solid var(--border); background: white;
             color: var(--muted); text-decoration: none;
             transition: all .15s; font-size: 0.85rem; margin: 0 2px;
+            cursor: pointer;
         }
-        .admin-action-btn:hover       { border-color: var(--accent); color: var(--accent); background: #eef3fb; }
+        .admin-action-btn:hover        { border-color: var(--accent); color: var(--accent); background: #eef3fb; }
         .admin-action-btn.danger:hover { border-color: #e74c3c; color: #e74c3c; background: #fdf2f2; }
         .admin-action-btn.success:hover { border-color: #27ae60; color: #27ae60; background: #eafaf1; }
 
@@ -161,18 +162,21 @@
 
         <nav class="admin-nav">
             <div class="admin-nav-section">Tổng quan</div>
+            {# FIX: check exact endpoint name for active state #}
             <a href="{{ url_for('admin_dashboard') }}"
-               class="{{ 'active' if request.endpoint == 'admin_dashboard' }}">
+               class="{{ 'active' if request.endpoint == 'admin_dashboard' else '' }}">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </a>
 
             <div class="admin-nav-section">Quản lý</div>
+            {# FIX: match all user-related admin endpoints #}
             <a href="{{ url_for('admin_users') }}"
-               class="{{ 'active' if 'admin_user' in request.endpoint }}">
+               class="{{ 'active' if request.endpoint in ['admin_users', 'admin_create_user', 'admin_edit_user', 'admin_delete_user'] else '' }}">
                 <i class="fas fa-users"></i> Người dùng
             </a>
+            {# FIX: match all package-related admin endpoints #}
             <a href="{{ url_for('admin_packages') }}"
-               class="{{ 'active' if 'admin_package' in request.endpoint }}">
+               class="{{ 'active' if request.endpoint in ['admin_packages', 'admin_toggle_public', 'admin_delete_package'] else '' }}">
                 <i class="fas fa-layer-group"></i> Gói từ vựng
             </a>
         </nav>

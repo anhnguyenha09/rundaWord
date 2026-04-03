@@ -75,11 +75,13 @@
                     {{ pkg.updated_at.strftime('%d/%m/%Y') }}
                 </td>
                 <td style="text-align:center;white-space:nowrap;">
+                    {# Edit — opens in new tab so admin stays in panel #}
                     <a href="{{ url_for('edit_package', package_id=pkg.id) }}"
                        class="admin-action-btn" title="Chỉnh sửa" target="_blank">
                         <i class="fas fa-edit"></i>
                     </a>
-                    <!-- Toggle public/private -->
+
+                    {# FIX: use url_for instead of hardcoded URL #}
                     <form method="POST"
                           action="{{ url_for('admin_toggle_public', package_id=pkg.id) }}"
                           style="display:inline;">
@@ -88,9 +90,13 @@
                             <i class="fas {{ 'fa-eye-slash' if pkg.is_public else 'fa-eye' }}"></i>
                         </button>
                     </form>
-                    <!-- Delete -->
+
+                    {# FIX: use url_for in JS confirmDelete call via data attributes #}
                     <button type="button" class="admin-action-btn danger" title="Xóa"
-                        onclick="confirmDelete({{ pkg.id }}, '{{ pkg.package_name | replace("'","\\'")|replace('"','\\"') }}')">
+                        data-pkg-id="{{ pkg.id }}"
+                        data-pkg-name="{{ pkg.package_name | replace('"', '&quot;') }}"
+                        data-delete-url="{{ url_for('admin_delete_package', package_id=pkg.id) }}"
+                        onclick="confirmDelete(this)">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
@@ -121,6 +127,7 @@
             </div>
             <div class="modal-footer gap-2 justify-content-center">
                 <button type="button" class="btn btn-cream px-4" data-bs-dismiss="modal">Hủy</button>
+                {# FIX: action set dynamically via JS from data-delete-url attribute #}
                 <form id="deleteForm" method="POST">
                     <button type="submit" class="btn btn-navy px-4">
                         <i class="fas fa-trash me-1"></i>Xóa
@@ -134,9 +141,12 @@
 
 {% block scripts %}
 <script>
-function confirmDelete(pkgId, pkgName) {
+// FIX: read URL from data attribute instead of constructing it manually
+function confirmDelete(btn) {
+    const pkgName   = btn.dataset.pkgName;
+    const deleteUrl = btn.dataset.deleteUrl;
     document.getElementById('deletePkgName').textContent = pkgName;
-    document.getElementById('deleteForm').action = '/admin/packages/' + pkgId + '/delete';
+    document.getElementById('deleteForm').action = deleteUrl;
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
 </script>
