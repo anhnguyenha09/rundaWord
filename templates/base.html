@@ -12,7 +12,19 @@
     rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   <style>
-    body, * { font-family: 'Inter', sans-serif !important; }
+    body {
+      font-family: 'Inter', sans-serif !important;
+    }
+    /* Inter must not apply to Font Awesome icons (would replace glyph font). */
+    .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands, .fa-classic {
+      font-family: "Font Awesome 6 Free" !important;
+    }
+    .fab, .fa-brands {
+      font-family: "Font Awesome 6 Brands" !important;
+    }
+    .far, .fa-regular {
+      font-weight: 400 !important;
+    }
   </style>
   {% block head_extra %}{% endblock %}
 </head>

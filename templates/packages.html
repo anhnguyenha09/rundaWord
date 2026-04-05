@@ -45,9 +45,15 @@
         <div class="pkg-author-avatar"><i class="fas fa-user" style="font-size:0.65rem;"></i></div>
       </div>
       <div class="pkg-name">{{ pkg.package_name }}</div>
+      <div class="pkg-topic">{{ pkg.topic or 'Others' }}</div>
       <div class="pkg-author">by <strong>{{ pkg.user.username if pkg.user else '—' }}</strong></div>
       <div class="pkg-meta">
-        <span class="pkg-word-count"><i class="fas fa-layer-group" style="font-size:0.7rem;"></i> {{ pkg.vocabularies|length }} words</span>
+        <div class="pkg-meta-stats">
+          <div class="pkg-meta-row">
+            <span class="pkg-word-count"><i class="fas fa-layer-group" style="font-size:0.7rem;"></i> {{ pkg.vocabularies|length }} words</span>
+            <span class="pkg-learners" title="Đã lưu vào thư viện"><i class="fas fa-users" style="font-size:0.68rem;"></i> {{ learner_counts.get(pkg.id, 0) }}</span>
+          </div>
+        </div>
         <span class="pkg-play-btn"><i class="fas fa-play"></i></span>
       </div>
     </a>
@@ -70,9 +76,15 @@
         <div class="pkg-author-avatar"><i class="fas fa-user" style="font-size:0.65rem;"></i></div>
       </div>
       <div class="pkg-name">{{ pkg.package_name }}</div>
+      <div class="pkg-topic">{{ pkg.topic or 'Others' }}</div>
       <div class="pkg-author">by <strong>{{ pkg.user.username if pkg.user else '—' }}</strong></div>
       <div class="pkg-meta">
-        <span class="pkg-word-count"><i class="fas fa-layer-group" style="font-size:0.7rem;"></i> {{ pkg.vocabularies|length }} words</span>
+        <div class="pkg-meta-stats">
+          <div class="pkg-meta-row">
+            <span class="pkg-word-count"><i class="fas fa-layer-group" style="font-size:0.7rem;"></i> {{ pkg.vocabularies|length }} words</span>
+            <span class="pkg-learners" title="Đã lưu vào thư viện"><i class="fas fa-users" style="font-size:0.68rem;"></i> {{ learner_counts.get(pkg.id, 0) }}</span>
+          </div>
+        </div>
         <span class="pkg-play-btn"><i class="fas fa-play"></i></span>
       </div>
     </a>
@@ -98,9 +110,15 @@
         </span>
       </div>
       <div class="pkg-name">{{ pkg.package_name }}</div>
+      <div class="pkg-topic">{{ pkg.topic or 'Others' }}</div>
       <div class="pkg-author">Curated by <strong>{{ current_user.username }}</strong></div>
       <div class="pkg-meta">
-        <span class="pkg-word-count"><i class="fas fa-layer-group" style="font-size:0.7rem;"></i> {{ pkg.vocabularies|length }} words</span>
+        <div class="pkg-meta-stats">
+          <div class="pkg-meta-row">
+            <span class="pkg-word-count"><i class="fas fa-layer-group" style="font-size:0.7rem;"></i> {{ pkg.vocabularies|length }} words</span>
+            <span class="pkg-learners" title="Đã lưu vào thư viện"><i class="fas fa-users" style="font-size:0.68rem;"></i> {{ learner_counts.get(pkg.id, 0) }}</span>
+          </div>
+        </div>
         <span class="pkg-play-btn"><i class="fas fa-play"></i></span>
       </div>
     </a>

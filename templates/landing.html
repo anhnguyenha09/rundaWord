@@ -249,6 +249,16 @@
     .pop-cat-badge.business { background: #e67e22; }
     .pop-cat-badge.standardized { background: #8e44ad; }
     .pop-card-bottom { margin-top: auto; }
+    .pop-card-learners { font-size: 0.76rem; font-weight: 600; opacity: 0.92; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+    .pop-cat-badge.topic-dynamic {
+      background: rgba(13,31,60,0.88);
+      font-size: 0.62rem;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: inline-block;
+    }
     .pop-card-name {
       font-family: 'Inter', sans-serif;
       font-size: 1.1rem; font-weight: 700; line-height: 1.3;
@@ -491,6 +501,30 @@
     <h2>Gói từ vựng phổ biến</h2>
   </div>
   <div class="pop-grid">
+    {% set pop_gradients = [
+      'linear-gradient(135deg,#1a3a7a,#2d5fcf)',
+      'linear-gradient(135deg,#0d5c3a,#1ebc82)',
+      'linear-gradient(135deg,#6a1a1a,#bb3a3a)'
+    ] %}
+    {% if public_packages %}
+      {% for pkg in public_packages[:3] %}
+      <div class="pop-card" onclick="openAuth('login')">
+        <div class="pop-card-bg" style="background: {{ pop_gradients[loop.index0 % 3] }};"></div>
+        <div class="pop-card-overlay"></div>
+        <div class="pop-card-content">
+          <div class="pop-card-top">
+            <span class="pop-cat-badge topic-dynamic" title="{{ pkg.topic or 'Others' }}">{{ pkg.topic or 'Others' }}</span>
+          </div>
+          <div class="pop-card-bottom">
+            <div class="pop-card-name">{{ pkg.package_name }}</div>
+            <p class="pop-card-desc">{% if pkg.package_description %}{{ pkg.package_description[:90] }}{% if pkg.package_description|length > 90 %}…{% endif %}{% else %}{{ pkg.vocabularies|length }} từ vựng trong gói.{% endif %}</p>
+            <div class="pop-card-learners"><i class="fas fa-users"></i> {{ learner_counts.get(pkg.id, 0) }} người học</div>
+            <button class="btn-learn" onclick="event.stopPropagation();openAuth('login')">Học ngay</button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
     <div class="pop-card" onclick="openAuth('login')">
       <div class="pop-card-bg" style="background: linear-gradient(135deg,#1a3a7a,#2d5fcf);"></div>
       <div class="pop-card-overlay"></div>
@@ -533,6 +567,7 @@
         </div>
       </div>
     </div>
+    {% endif %}
   </div>
 </div>
 

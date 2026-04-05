@@ -23,8 +23,14 @@
           </span>
         </div>
         <div class="pkg-name">{{ package.package_name }}</div>
+        <div class="pkg-topic">{{ package.topic or 'Others' }}</div>
         <div class="pkg-meta">
-          <span class="pkg-word-count"><i class="fas fa-layer-group" style="font-size:0.7rem;"></i> {{ package.vocabularies|length }} words</span>
+          <div class="pkg-meta-stats">
+            <div class="pkg-meta-row">
+              <span class="pkg-word-count"><i class="fas fa-layer-group" style="font-size:0.7rem;"></i> {{ package.vocabularies|length }} words</span>
+              <span class="pkg-learners" title="Đã lưu vào thư viện"><i class="fas fa-users" style="font-size:0.68rem;"></i> {{ learner_counts.get(package.id, 0) }}</span>
+            </div>
+          </div>
           <span class="pkg-play-btn"><i class="fas fa-play"></i></span>
         </div>
       </a>
@@ -99,6 +105,7 @@
       <a href="{{ url_for('package_detail', package_id=pkg.id) }}" class="continue-card">
         <div class="continue-icon">{{ icons[loop.index0 % 4] }}</div>
         <div class="continue-name">{{ pkg.package_name }}</div>
+        <div class="continue-topic">{{ pkg.topic or 'Others' }}</div>
         <div class="continue-desc">
           {{ pkg.package_description[:48] ~ '…' if pkg.package_description and pkg.package_description|length > 48 else (pkg.package_description or pkg.vocabularies|length|string ~ ' words') }}
         </div>
@@ -157,8 +164,9 @@
           <div class="explore-card-bg" style="background-color:{{ bg_colors[loop.index0 % 6] }};"></div>
           <div class="explore-card-overlay"></div>
           <div class="explore-card-content">
-            <div class="explore-card-cat">{{ pkg.user.username if pkg.user else '' }}</div>
+            <div class="explore-card-topic">{{ pkg.topic or 'Others' }}</div>
             <div class="explore-card-name">{{ pkg.package_name }}</div>
+            <div class="explore-card-learners"><i class="fas fa-users"></i> {{ learner_counts.get(pkg.id, 0) }} người học</div>
           </div>
         </a>
         {% endfor %}

@@ -80,6 +80,15 @@
           value="{{ package.package_description or '' }}" maxlength="70">
       </div>
 
+      <div class="mb-4">
+        <label class="rw-label">Chủ đề</label>
+        <select class="rw-input" name="topic" required style="cursor:pointer;">
+          {% for t in PACKAGE_TOPICS %}
+          <option value="{{ t }}" {% if (package.topic or 'Others') == t %}selected{% endif %}>{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
       <!-- Visibility -->
       <div class="mb-4">
         <label class="rw-label">Visibility</label>

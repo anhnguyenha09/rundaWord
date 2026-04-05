@@ -172,10 +172,12 @@
   <div class="pkg-detail-banner mb-4">
     <div class="d-flex justify-content-between align-items-start gap-3">
       <div style="flex:1;position:relative;z-index:1;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:0;flex-wrap:wrap;">
           <span class="banner-badge {% if package.is_public %}public{% else %}private{% endif %}">
             {% if package.is_public %}Public{% else %}Private{% endif %}
           </span>
+          <span class="banner-badge count">{{ package.topic or 'Others' }}</span>
+          <span class="banner-badge count"><i class="fas fa-users" style="font-size:0.65rem;opacity:0.85;"></i> {{ learner_count }} người học</span>
           <span class="banner-badge count">{{ package.vocabularies|length }} words</span>
         </div>
         <div class="banner-title">{{ package.package_name }}</div>

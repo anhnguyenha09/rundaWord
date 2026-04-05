@@ -29,7 +29,9 @@
             <tr>
                 <th>ID</th>
                 <th>Tên gói</th>
+                <th>Chủ đề</th>
                 <th>Chủ sở hữu</th>
+                <th>Người học</th>
                 <th>Từ vựng</th>
                 <th>Trạng thái</th>
                 <th>Cập nhật</th>
@@ -53,8 +55,14 @@
                     </div>
                     {% endif %}
                 </td>
+                <td style="font-size:0.82rem;max-width:180px;">
+                    {{ pkg.topic or 'Others' }}
+                </td>
                 <td>
                     <strong>{{ pkg.user.username if pkg.user else '—' }}</strong>
+                </td>
+                <td style="text-align:center;">
+                    <span style="font-weight:700;">{{ learner_counts.get(pkg.id, 0) }}</span>
                 </td>
                 <td>
                     <span style="font-weight:700;">{{ pkg.vocabularies | length }}</span>
