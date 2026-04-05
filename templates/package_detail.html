@@ -1,207 +1,289 @@
 {% extends "base.html" %}
-{% block title %}{{ package.package_name }} - RundaWord{% endblock %}
+{% block title %}{{ package.package_name }} — RundaWord{% endblock %}
 
 {% block head_extra %}
 <style>
-.study-modes-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 28px;
+/* Colored banner for package detail header */
+.pkg-detail-banner {
+  background: linear-gradient(135deg, var(--navy) 0%, #1c3a6e 100%);
+  border-radius: var(--r-xl);
+  padding: 32px 36px;
+  margin-bottom: 28px;
+  color: white;
+  position: relative;
+  overflow: hidden;
 }
-@media (max-width: 576px) {
-    .study-modes-grid { grid-template-columns: repeat(2, 1fr); }
+.pkg-detail-banner::before {
+  content: '';
+  position: absolute; top: -40px; right: -40px;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: rgba(255,255,255,0.05);
 }
-.study-mode-card {
-    border-radius: 14px;
-    padding: 22px 14px 18px;
-    text-align: center;
-    text-decoration: none !important;
-    color: white !important;
-    transition: transform 0.18s, box-shadow 0.18s;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    min-height: 110px;
+.pkg-detail-banner::after {
+  content: '';
+  position: absolute; bottom: -60px; right: 80px;
+  width: 150px; height: 150px; border-radius: 50%;
+  background: rgba(255,255,255,0.04);
 }
-.study-mode-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 28px rgba(0,0,0,0.18);
-    color: white !important;
+.banner-badge {
+  display: inline-flex; align-items: center;
+  font-size: 0.64rem; font-weight: 700; letter-spacing: 0.09em;
+  text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
 }
-.study-mode-card.mode-flash  { background: linear-gradient(135deg, #1565a8, #38a4e0); }
-.study-mode-card.mode-quiz   { background: linear-gradient(135deg, #0d7a5f, #1ec99a); }
-.study-mode-card.mode-test   { background: linear-gradient(135deg, #7b2d8b, #b45cc9); }
-.study-mode-card.mode-match  { background: linear-gradient(135deg, #b5451b, #f07d44); }
-.study-mode-icon {
-    font-size: 1.6rem;
-    margin-bottom: 10px;
-    opacity: 0.95;
-}
-.study-mode-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
-.study-mode-desc { font-size: 0.76rem; opacity: 0.82; }
+.banner-badge.public  { background: rgba(39,174,96,0.25); color: #7dffb0; border: 1px solid rgba(39,174,96,0.35); }
+.banner-badge.private { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.18); }
+.banner-badge.count   { background: rgba(255,255,255,0.10); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.15); }
 
-.btn-save {
-    background: white; color: var(--navy);
-    border: 2px solid var(--navy); border-radius: 10px;
-    font-weight: 700; padding: 7px 16px; font-size: 0.88rem;
-    transition: all 0.15s; cursor: pointer; white-space: nowrap;
+.banner-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem; font-weight: 700; color: white;
+  letter-spacing: -0.02em; margin: 12px 0 4px;
 }
-.btn-save:hover       { background: var(--navy); color: white; }
-.btn-save.saved-state { background: var(--navy); color: white; }
-.btn-save.saved-state:hover { background: #c0392b; border-color: #c0392b; }
+.banner-author { font-size: 0.84rem; color: rgba(255,255,255,0.55); }
+.banner-author strong { color: rgba(255,255,255,0.80); }
+.banner-desc { font-size: 0.84rem; color: rgba(255,255,255,0.50); margin-top: 10px; line-height: 1.7; max-width: 560px; }
+
+/* Banner action buttons (white style) */
+.banner-btn-save {
+  background: rgba(255,255,255,0.12); color: white;
+  border: 1.5px solid rgba(255,255,255,0.25); border-radius: var(--r-md);
+  padding: 8px 16px; font-size: 0.84rem; font-weight: 600;
+  cursor: pointer; white-space: nowrap; transition: background 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+.banner-btn-save:hover { background: rgba(255,255,255,0.20); }
+.banner-btn-save.saved { background: rgba(255,255,255,0.20); }
+.banner-menu-btn {
+  background: rgba(255,255,255,0.10); color: white;
+  border: 1.5px solid rgba(255,255,255,0.20); border-radius: var(--r-md);
+  width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 0.15s; flex-shrink: 0;
+}
+.banner-menu-btn:hover { background: rgba(255,255,255,0.20); }
+
+/* Ledger — 2 columns only (EN + VI) */
+.ledger-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--border-light);
+  gap: 16px;
+  transition: background 0.1s;
+}
+.ledger-row-2:last-child { border-bottom: none; }
+.ledger-row-2:hover { background: var(--off-white); }
+
+/* Ledger search bar */
+.ledger-search-wrap { position: relative; }
+.ledger-search-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.78rem; }
+.ledger-search-input {
+  border: 1.5px solid var(--border); border-radius: var(--r-md);
+  padding: 8px 14px 8px 34px; font-size: 0.84rem;
+  font-family: 'Inter', sans-serif; outline: none; width: 220px;
+  transition: border-color 0.15s; background: var(--off-white);
+}
+.ledger-search-input:focus { border-color: var(--navy); background: white; }
+
+.ledger-row-2.hidden { display: none; }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="container" style="padding-top:32px;padding-bottom:72px;">
 
-<div class="d-flex justify-content-between align-items-start mb-3">
-    <div>
-        <div class="page-title mb-1">{{ package.package_name }}</div>
-        <div style="font-size:0.85rem;color:var(--muted);font-weight:600;">
-            <i class="fas fa-user me-1"></i>{{ package.user.username if package.user else 'Unknown' }}
-            {% if package.is_public %}
-                &nbsp;·&nbsp;<span style="color:#27ae60;"><i class="fas fa-globe me-1"></i>Public</span>
-            {% else %}
-                &nbsp;·&nbsp;<span><i class="fas fa-lock me-1"></i>Private</span>
-            {% endif %}
-            &nbsp;·&nbsp;<i class="fas fa-layer-group me-1"></i>{{ package.vocabularies | length }} từ
+  <!-- BREADCRUMB -->
+  <div class="d-flex align-items-center gap-2 mb-4" style="font-size:0.83rem;">
+    <a href="{{ url_for('packages') }}" style="color:var(--text-muted);text-decoration:none;font-weight:500;">
+      <i class="fas fa-arrow-left me-1" style="font-size:0.72rem;"></i>Library
+    </a>
+    <span style="color:var(--border);">/</span>
+    <span style="font-weight:600;color:var(--navy);">{{ package.package_name }}</span>
+  </div>
+
+  <!-- COLORED BANNER HEADER -->
+  <div class="pkg-detail-banner mb-4">
+    <div class="d-flex justify-content-between align-items-start gap-3">
+      <div style="flex:1;position:relative;z-index:1;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:0;">
+          <span class="banner-badge {% if package.is_public %}public{% else %}private{% endif %}">
+            {% if package.is_public %}Public{% else %}Private{% endif %}
+          </span>
+          <span class="banner-badge count">{{ package.vocabularies|length }} words</span>
         </div>
-    </div>
+        <div class="banner-title">{{ package.package_name }}</div>
+        <div class="banner-author">
+          Curated by <strong>{{ package.user.username if package.user else 'Unknown' }}</strong>
+        </div>
+        {% if package.package_description %}
+        <p class="banner-desc">{{ package.package_description }}</p>
+        {% endif %}
+      </div>
 
-    <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+      <!-- Actions -->
+      <div class="d-flex align-items-center gap-2 flex-shrink-0" style="position:relative;z-index:1;">
         {% if not is_owner %}
-            {% if is_saved %}
-            <form method="POST" action="{{ url_for('unsave_package', package_id=package.id) }}" style="margin:0;">
-                <button type="submit" class="btn-save saved-state">
-                    <i class="fas fa-bookmark me-1"></i>Đã lưu
-                </button>
-            </form>
-            {% else %}
-            <form method="POST" action="{{ url_for('save_package', package_id=package.id) }}" style="margin:0;">
-                <button type="submit" class="btn-save">
-                    <i class="far fa-bookmark me-1"></i>Lưu vào thư viện
-                </button>
-            </form>
-            {% endif %}
+          {% if is_saved %}
+          <form method="POST" action="{{ url_for('unsave_package', package_id=package.id) }}" style="margin:0;">
+            <button type="submit" class="banner-btn-save saved">
+              <i class="fas fa-bookmark me-1"></i>Saved
+            </button>
+          </form>
+          {% else %}
+          <form method="POST" action="{{ url_for('save_package', package_id=package.id) }}" style="margin:0;">
+            <button type="submit" class="banner-btn-save">
+              <i class="far fa-bookmark me-1"></i>Save Package
+            </button>
+          </form>
+          {% endif %}
         {% endif %}
 
         {% if is_owner %}
         <div class="dropdown">
-            <button class="settings-btn" data-bs-toggle="dropdown">
-                <i class="fas fa-cog"></i>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                    <a class="dropdown-item" href="{{ url_for('edit_package', package_id=package.id) }}">
-                        <i class="fas fa-edit me-2 text-muted"></i>Edit Package
-                    </a>
-                </li>
-                <li>
-                    <button class="dropdown-item text-danger"
-                        data-bs-toggle="modal" data-bs-target="#deleteModal">
-                        <i class="fas fa-trash me-2"></i>Delete Package
-                    </button>
-                </li>
-            </ul>
+          <button class="banner-menu-btn" data-bs-toggle="dropdown">
+            <i class="fas fa-ellipsis-v" style="font-size:0.85rem;"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{{ url_for('edit_package', package_id=package.id) }}">
+              <i class="fas fa-edit me-2" style="color:var(--text-muted);width:14px;"></i>Edit Package
+            </a></li>
+            <li><button class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+              <i class="fas fa-trash me-2" style="width:14px;"></i>Delete Package
+            </button></li>
+          </ul>
         </div>
         {% endif %}
+      </div>
     </div>
-</div>
+  </div>
 
-{% if package.package_description %}
-<p style="color:var(--muted);font-size:0.92rem;line-height:1.6;margin-bottom:24px;">
-    {{ package.package_description }}
-</p>
-{% endif %}
+  <!-- MASTERY PATHWAYS -->
+  <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">
+    Mastery Pathways
+  </div>
+  <div class="mastery-grid">
+    <a href="{{ url_for('flashcard', package_id=package.id) }}" class="mastery-card mode-flash">
+      <div class="mastery-icon"><i class="fas fa-clone"></i></div>
+      <div class="mastery-name">Flashcard</div>
+      <div class="mastery-desc">Spaced repetition for focus</div>
+    </a>
+    <a href="{{ url_for('quiz', package_id=package.id) }}" class="mastery-card mode-quiz">
+      <div class="mastery-icon"><i class="fas fa-list-ul"></i></div>
+      <div class="mastery-name">Quiz</div>
+      <div class="mastery-desc">Dynamic multiple choice</div>
+    </a>
+    <a href="{{ url_for('test_mode', package_id=package.id) }}" class="mastery-card mode-test">
+      <div class="mastery-icon"><i class="fas fa-pencil-alt"></i></div>
+      <div class="mastery-name">Test</div>
+      <div class="mastery-desc">Full proficiency assessment</div>
+    </a>
+    <a href="{{ url_for('match_mode', package_id=package.id) }}" class="mastery-card mode-match">
+      <div class="mastery-icon"><i class="fas fa-link"></i></div>
+      <div class="mastery-name">Match</div>
+      <div class="mastery-desc">Rapid cognitive association</div>
+    </a>
+  </div>
 
-<!-- STUDY MODES -->
-<div class="section-header">Chế độ học</div>
-<div class="study-modes-grid">
-    <a href="{{ url_for('flashcard', package_id=package.id) }}" class="study-mode-card mode-flash">
-        <div class="study-mode-icon"><i class="fas fa-clone"></i></div>
-        <div class="study-mode-name">Flashcard</div>
-        <div class="study-mode-desc">Lật thẻ ôn từ</div>
-    </a>
-    <a href="{{ url_for('quiz', package_id=package.id) }}" class="study-mode-card mode-quiz">
-        <div class="study-mode-icon"><i class="fas fa-list-ul"></i></div>
-        <div class="study-mode-name">Trắc nghiệm</div>
-        <div class="study-mode-desc">Chọn đáp án đúng</div>
-    </a>
-    <a href="{{ url_for('test_mode', package_id=package.id) }}" class="study-mode-card mode-test">
-        <div class="study-mode-icon"><i class="fas fa-pencil-alt"></i></div>
-        <div class="study-mode-name">Kiểm tra</div>
-        <div class="study-mode-desc">Gõ đáp án</div>
-    </a>
-    <a href="{{ url_for('match_mode', package_id=package.id) }}" class="study-mode-card mode-match">
-        <div class="study-mode-icon"><i class="fas fa-link"></i></div>
-        <div class="study-mode-name">Ghép thẻ</div>
-        <div class="study-mode-desc">Nối cặp từ</div>
-    </a>
-</div>
-
-<!-- VOCAB LIST -->
-<div class="section-header">Danh sách từ vựng</div>
-
-{% if package.vocabularies %}
-{% for vocab in package.vocabularies %}
-<div class="vocab-row">
-    <div class="vocab-num">{{ loop.index }}</div>
-    <div class="row g-2">
-        <div class="col-6"><div class="vocab-field">{{ vocab.word_en }}</div></div>
-        <div class="col-6"><div class="vocab-field">{{ vocab.word_vi }}</div></div>
+  <!-- VOCABULARY LEDGER -->
+  {% if package.vocabularies %}
+  <div class="vocab-ledger">
+    <!-- Header: title + search only (no sort button) -->
+    <div class="ledger-header">
+      <span class="ledger-title">Vocabulary Ledger
+        <span style="font-size:0.78rem;color:var(--text-muted);font-weight:500;margin-left:8px;">
+          {{ package.vocabularies|length }} terms
+        </span>
+      </span>
+      <div class="ledger-search-wrap">
+        <i class="fas fa-search"></i>
+        <input class="ledger-search-input" id="ledgerSearch"
+          placeholder="Search EN or VI…"
+          oninput="filterLedger(this.value)">
+      </div>
     </div>
-</div>
-{% endfor %}
-<div class="totalVocab">
-    <i class="fas fa-layer-group me-1"></i>Tổng số: {{ package.vocabularies|length }} từ
-</div>
 
-{% else %}
-<div class="rw-card text-center py-4">
-    <i class="fas fa-inbox fa-2x mb-2" style="color:var(--muted)"></i>
-    <p class="text-muted mb-2">Chưa có từ vựng nào</p>
+    <!-- Column headers -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;padding:10px 20px 8px;border-bottom:1px solid var(--border);">
+      <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);">English</div>
+      <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);">Vietnamese</div>
+    </div>
+
+    <!-- Rows -->
+    <div id="ledgerRows">
+      {% for vocab in package.vocabularies %}
+      <div class="ledger-row-2"
+           data-en="{{ vocab.word_en | lower }}"
+           data-vi="{{ vocab.word_vi | lower }}">
+        <div class="ledger-en">{{ vocab.word_en }}</div>
+        <div class="ledger-vi">{{ vocab.word_vi }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- No results msg -->
+    <div id="ledgerNoResult" style="display:none;padding:24px;text-align:center;color:var(--text-muted);font-size:0.87rem;">
+      No matches found.
+    </div>
+  </div>
+
+  {% else %}
+  <div class="rw-card text-center py-5">
+    <i class="fas fa-inbox fa-2x mb-3" style="color:var(--border);"></i>
+    <p style="color:var(--text-muted);margin-bottom:14px;font-size:0.88rem;">No vocabulary added yet.</p>
     {% if is_owner %}
-    <a href="{{ url_for('edit_package', package_id=package.id) }}" class="btn btn-navy btn-sm">
-        <i class="fas fa-plus me-1"></i>Thêm từ vựng
-    </a>
+    <a href="{{ url_for('edit_package', package_id=package.id) }}" class="btn-navy" style="font-size:0.84rem;padding:9px 20px;">Add vocabulary</a>
     {% endif %}
-</div>
-{% endif %}
+  </div>
+  {% endif %}
 
-{% if is_owner %}
-<div class="modal fade" id="deleteModal" tabindex="-1">
+  <!-- DELETE MODAL -->
+  {% if is_owner %}
+  <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content p-3">
-            <div class="modal-header pb-0">
-                <h5 class="modal-title fw-bold" style="color:var(--navy)">
-                    <i class="fas fa-exclamation-triangle me-2 text-danger"></i>Xác nhận xóa gói từ?
-                </h5>
-            </div>
-            <div class="modal-body">
-                <p class="text-danger fw-bold mb-0">Gói từ vựng sẽ bị xóa vĩnh viễn.</p>
-            </div>
-            <div class="modal-footer gap-2 justify-content-center">
-                <button type="button" class="btn btn-cream px-4" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i>Hủy
-                </button>
-                <form method="POST" action="{{ url_for('delete_package', package_id=package.id) }}">
-                    <button type="submit" class="btn btn-navy px-4">
-                        <i class="fas fa-trash me-1"></i>Xác nhận xóa
-                    </button>
-                </form>
-            </div>
+      <div class="modal-content p-3">
+        <div class="modal-header pb-0">
+          <h5 class="modal-title" style="font-size:1rem;font-weight:700;color:var(--navy);">Delete this package?</h5>
         </div>
+        <div class="modal-body">
+          <p style="color:var(--text-muted);font-size:0.86rem;margin:0;">
+            <strong style="color:var(--red);">{{ package.package_name }}</strong> will be permanently removed.
+          </p>
+        </div>
+        <div class="modal-footer gap-2 justify-content-end">
+          <button type="button" class="btn-cream" data-bs-dismiss="modal">Cancel</button>
+          <form method="POST" action="{{ url_for('delete_package', package_id=package.id) }}">
+            <button type="submit" class="btn-navy" style="background:#c0392b;">
+              <i class="fas fa-trash me-1"></i>Delete
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
-</div>
-{% endif %}
+  </div>
+  {% endif %}
 
-<div class="scroll-buttons">
-    <button class="scroll-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Lên đầu">
-        <i class="fas fa-arrow-up"></i>
-    </button>
-    <button class="scroll-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="Xuống cuối">
-        <i class="fas fa-arrow-down"></i>
-    </button>
-</div>
+  <div class="scroll-buttons">
+    <button class="scroll-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-arrow-up"></i></button>
+    <button class="scroll-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})"><i class="fas fa-arrow-down"></i></button>
+  </div>
 
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterLedger(q) {
+  const term = q.trim().toLowerCase();
+  const rows  = document.querySelectorAll('#ledgerRows .ledger-row-2');
+  let visible = 0;
+  rows.forEach(row => {
+    const en = row.dataset.en || '';
+    const vi = row.dataset.vi || '';
+    const match = !term || en.includes(term) || vi.includes(term);
+    row.classList.toggle('hidden', !match);
+    if (match) visible++;
+  });
+  document.getElementById('ledgerNoResult').style.display = visible === 0 ? 'block' : 'none';
+}
+</script>
 {% endblock %}

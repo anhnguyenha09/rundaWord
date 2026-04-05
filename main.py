@@ -217,7 +217,7 @@ def guest_home():
         .order_by(func.random()) \
         .limit(12).all()
 
-    return render_template('guest_home.html', public_packages=public_packages)
+    return render_template('landing.html', public_packages=public_packages)
 
 
 @app.route('/public/package/<int:package_id>')
@@ -226,8 +226,24 @@ def guest_package_detail(package_id):
     package = VocabPackage.query.get_or_404(package_id)
     if not package.is_public:
         abort(404)
-    return render_template('guest_package_detail.html', package=package)
+    return render_template('explore.html', package=package)
 
+@app.route('/explore')
+def explore():
+    q = request.args.get('q', '').strip()
+    if q:
+        public_packages = search_packages(q)
+    else:
+        public_packages = VocabPackage.query \
+            .filter(VocabPackage.is_public == True) \
+            .order_by(VocabPackage.updated_at.desc()).all()
+
+    if current_user.is_authenticated:
+        return redirect(url_for('packages'))
+
+    return render_template('explore.html',
+                           public_packages=public_packages,
+                           search_query=q)
 
 # ──────────────────────────────────────────────
 # AUTH

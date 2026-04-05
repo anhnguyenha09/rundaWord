@@ -1,203 +1,238 @@
 {% extends "base.html" %}
-{% block title %}Sửa {{ package.package_name }} - RundaWord{% endblock %}
-
-{% block content %}
-
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div class="page-title mb-0">Edit Vocabulary Package</div>
-    <div class="d-flex gap-2">
-        <a href="{{ url_for('package_detail', package_id=package.id) }}" class="btn btn-cream px-4">Cancel</a>
-        <button type="submit" form="editForm" class="btn btn-navy px-4">Save changes</button>
-    </div>
-</div>
-
-<form method="POST" enctype="multipart/form-data" id="editForm">
-
-    <div class="rw-card mb-4">
-
-        <!-- NAME -->
-        <div class="mb-3">
-            <label class="rw-label">Package Name <span class="text-danger">*</span></label>
-            <input type="text" class="rw-input" name="package_name"
-                value="{{ package.package_name }}" required>
-        </div>
-
-        <!-- DESCRIPTION -->
-        <div class="mb-3">
-            <label class="rw-label">Description</label>
-            <input type="text" class="rw-input" name="description"
-                value="{{ package.package_description or '' }}" maxlength="70">
-        </div>
-
-        <!-- VISIBILITY -->
-        <div class="mb-3">
-            <label class="rw-label">Visibility</label>
-            <div class="d-flex gap-3 mt-2">
-                <label class="visibility-option">
-                    <input type="radio" name="is_public" value="true"
-                        {% if package.is_public %}checked{% endif %}>
-                    <div class="option-box">
-                        🌍 Public
-                        <div class="small-text">Ai cũng có thể thấy</div>
-                    </div>
-                </label>
-                <label class="visibility-option">
-                    <input type="radio" name="is_public" value="false"
-                        {% if not package.is_public %}checked{% endif %}>
-                    <div class="option-box">
-                        🔒 Private
-                        <div class="small-text">Chỉ mình bạn thấy</div>
-                    </div>
-                </label>
-            </div>
-        </div>
-
-        <!-- FILE UPLOAD -->
-        <div>
-            <div class="d-flex justify-content-between align-items-center mb-1">
-                <label class="rw-label mb-0">Upload file thay thế (tuỳ chọn)</label>
-                <a href="{{ url_for('download_template') }}"
-                    style="font-size:0.85rem;color:var(--accent);font-weight:600;text-decoration:underline;">
-                    Tải template
-                </a>
-            </div>
-            <div class="position-relative">
-                <input type="text" class="rw-input pe-5" id="fileLabel"
-                    placeholder="Upload file CSV / XLSX..." readonly
-                    onclick="document.getElementById('vocab_file').click()"
-                    style="cursor:pointer;">
-                <label for="vocab_file"
-                    style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;">
-                    <i class="fas fa-paperclip"></i>
-                </label>
-                <input type="file" id="vocab_file" name="vocab_file"
-                    accept=".csv,.xlsx,.xls" style="display:none;"
-                    onchange="document.getElementById('fileLabel').value=this.files[0]?this.files[0].name:''">
-            </div>
-            <div class="mt-1" style="font-size:0.8rem;color:#c0392b;">
-                ⚠️ Upload file mới sẽ <strong>thay thế toàn bộ từ vựng</strong> bên dưới
-            </div>
-        </div>
-
-    </div>
-
-    <!-- VOCAB LIST -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="section-header mb-0">
-            Vocabulary List
-            <span style="font-size:0.85rem;font-weight:600;color:var(--muted);margin-left:8px;" id="wordCount">
-                ({{ package.vocabularies | length }} từ)
-            </span>
-        </div>
-        <button type="button" class="btn btn-navy btn-sm px-3" onclick="addNewWordRow()">
-            + Thêm từ mới
-        </button>
-    </div>
-
-    <!-- New word rows inserted here (top, visually distinct) -->
-    <div id="newWordsContainer"></div>
-
-    <!-- Existing words -->
-    <div id="existingWordsContainer">
-        {% for vocab in package.vocabularies %}
-        <div class="vocab-row d-flex align-items-center gap-2 mb-2">
-            <input type="hidden" name="word_id[]" value="{{ vocab.id }}">
-            <div class="row g-2 flex-grow-1">
-                <div class="col-1 d-flex align-items-center justify-content-center">
-                    <span style="font-weight:700;color:var(--muted);font-size:0.85rem;">{{ loop.index }}</span>
-                </div>
-                <div class="col">
-                    <input type="text" class="rw-input" name="word_en[]"
-                        value="{{ vocab.word_en }}" placeholder="English">
-                </div>
-                <div class="col">
-                    <input type="text" class="rw-input" name="word_vi[]"
-                        value="{{ vocab.word_vi }}" placeholder="Tiếng Việt">
-                </div>
-            </div>
-            <button type="button" class="btn btn-sm delete-btn"
-                onclick="removeExistingRow(this)">✕</button>
-        </div>
-        {% endfor %}
-    </div>
-
-</form>
-
-{% endblock %}
+{% block title %}Edit — {{ package.package_name }}{% endblock %}
 
 {% block head_extra %}
 <style>
-.visibility-option input { display: none; }
-.option-box {
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 16px;
-    cursor: pointer;
-    transition: 0.2s;
-    font-weight: 600;
+.edit-wrap { max-width: 780px; margin: 0 auto; padding: 32px 0 80px; }
+
+.vocab-edit-row {
+  display: grid;
+  grid-template-columns: 36px 1fr 1fr 40px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
 }
-.small-text { font-size: 0.75rem; color: var(--muted); font-weight: 500; }
-.visibility-option input:checked + .option-box {
-    border-color: var(--navy);
-    background: #eef3fb;
+.vocab-edit-row:last-child { border-bottom: none; }
+
+.row-index {
+  font-size: 0.78rem; font-weight: 700; color: var(--text-muted);
+  text-align: center; user-select: none;
 }
-.new-word-row {
-    background: #f0f7ff;
-    border: 1.5px dashed var(--accent);
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+
+.vocab-input {
+  border: 1.5px solid var(--border); border-radius: var(--r-md);
+  padding: 9px 13px; font-size: 0.88rem; font-family: 'Inter', sans-serif;
+  background: white; color: var(--text); outline: none; width: 100%;
+  transition: border-color 0.15s;
 }
-.delete-btn {
-    background: #fdf2f2;
-    color: #c0392b;
-    border: 1px solid #fad7d7;
-    border-radius: 8px;
-    padding: 8px 12px;
-    flex-shrink: 0;
+.vocab-input:focus { border-color: var(--accent); }
+
+.btn-del-row {
+  width: 34px; height: 34px; border-radius: var(--r-sm);
+  background: none; border: 1.5px solid var(--border);
+  color: var(--text-muted); cursor: pointer; display: flex;
+  align-items: center; justify-content: center; font-size: 0.8rem;
+  transition: all 0.15s; flex-shrink: 0;
 }
-.delete-btn:hover { background: #fce4e4; }
+.btn-del-row:hover { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+
+.vocab-col-header {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--text-muted);
+}
 </style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-wrap container">
+
+  <!-- Page header -->
+  <div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+      <div class="page-title">Edit Vocabulary Package</div>
+      <p class="page-desc mb-0">Refine your collection or bulk-update translations.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('package_detail', package_id=package.id) }}" class="btn-cream">
+        <i class="fas fa-times" style="font-size:0.78rem;"></i> Cancel
+      </a>
+      <button type="submit" form="editForm" class="btn-navy">
+        <i class="fas fa-save" style="font-size:0.78rem;"></i> Save changes
+      </button>
+    </div>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data" id="editForm">
+
+    <!-- Package info card -->
+    <div class="rw-card mb-4">
+
+      <div class="mb-4">
+        <label class="rw-label">Package Name <span style="color:var(--red);">*</span></label>
+        <input type="text" class="rw-input" name="package_name"
+          value="{{ package.package_name }}" required>
+      </div>
+
+      <div class="mb-4">
+        <label class="rw-label">Description</label>
+        <input type="text" class="rw-input" name="description"
+          value="{{ package.package_description or '' }}" maxlength="70">
+      </div>
+
+      <!-- Visibility -->
+      <div class="mb-4">
+        <label class="rw-label">Visibility</label>
+        <div class="d-flex gap-3 mt-2">
+          <label class="visibility-option">
+            <input type="radio" name="is_public" value="true"
+              {% if package.is_public %}checked{% endif %}>
+            <div class="option-box">
+              <i class="fas fa-globe me-1" style="color:var(--green);"></i> Public
+              <div class="small-text">Visible to all curators</div>
+            </div>
+          </label>
+          <label class="visibility-option">
+            <input type="radio" name="is_public" value="false"
+              {% if not package.is_public %}checked{% endif %}>
+            <div class="option-box">
+              <i class="fas fa-lock me-1" style="color:var(--text-muted);"></i> Private
+              <div class="small-text">Only you can see this</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Bulk upload -->
+      <div>
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <label class="rw-label mb-0">
+            <i class="fas fa-file-upload me-1"></i> Bulk Replacement (CSV/XLSX)
+          </label>
+          <a href="{{ url_for('download_template') }}"
+            style="font-size:0.82rem;color:var(--accent);font-weight:600;text-decoration:none;">
+            <i class="fas fa-download me-1"></i>Download template
+          </a>
+        </div>
+        <div style="position:relative;">
+          <input type="text" class="rw-input" id="fileLabel"
+            placeholder="Choose file…" readonly style="cursor:pointer;padding-right:44px;"
+            onclick="document.getElementById('vocab_file').click()">
+          <label for="vocab_file"
+            style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--text-muted);">
+            <i class="fas fa-paperclip"></i>
+          </label>
+          <input type="file" id="vocab_file" name="vocab_file"
+            accept=".csv,.xlsx,.xls" style="display:none;"
+            onchange="document.getElementById('fileLabel').value=this.files[0]?this.files[0].name:''">
+        </div>
+        <p style="font-size:0.76rem;color:var(--red);margin-top:6px;">
+          <i class="fas fa-exclamation-triangle me-1"></i>
+          Uploading a file will <strong>replace all</strong> current vocabulary below.
+        </p>
+      </div>
+    </div>
+
+    <!-- Vocabulary list card -->
+    <div class="rw-card">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <span style="font-weight:700;font-size:0.95rem;color:var(--navy);">Vocabulary Items</span>
+          <span id="wordCountBadge"
+            style="font-size:0.78rem;color:var(--text-muted);margin-left:8px;font-weight:500;">
+            ({{ package.vocabularies|length }} words)
+          </span>
+        </div>
+        <button type="button" class="btn-navy" style="padding:8px 16px;font-size:0.83rem;" onclick="addNewRow()">
+          <i class="fas fa-plus" style="font-size:0.74rem;"></i> Add word
+        </button>
+      </div>
+
+      <!-- Column headers -->
+      <div style="display:grid;grid-template-columns:36px 1fr 1fr 40px;gap:10px;padding:0 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px;">
+        <div></div>
+        <div class="vocab-col-header">English</div>
+        <div class="vocab-col-header">Vietnamese</div>
+        <div></div>
+      </div>
+
+      <!-- Existing words — newest rows added at TOP, so index counts down from top -->
+      <div id="vocabContainer">
+        {% set total = package.vocabularies | length %}
+        {% for vocab in package.vocabularies %}
+        <div class="vocab-edit-row" data-rowid="{{ vocab.id }}">
+          <div class="row-index">{{ total - loop.index0 }}</div>
+          <input type="hidden" name="word_id[]" value="{{ vocab.id }}">
+          <input type="text" class="vocab-input" name="word_en[]"
+            value="{{ vocab.word_en }}" placeholder="English word">
+          <input type="text" class="vocab-input" name="word_vi[]"
+            value="{{ vocab.word_vi }}" placeholder="Vietnamese meaning">
+          <button type="button" class="btn-del-row" onclick="deleteRow(this)" title="Remove">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- New rows will be prepended above existing (handled by JS) -->
+      <div id="newRowsTop"></div>
+
+    </div>
+
+    <!-- Bottom save bar -->
+    <div class="d-flex justify-content-end gap-2 mt-4">
+      <a href="{{ url_for('package_detail', package_id=package.id) }}" class="btn-cream">
+        <i class="fas fa-times" style="font-size:0.78rem;"></i> Discard Changes
+      </a>
+      <button type="submit" class="btn-navy">
+        <i class="fas fa-save" style="font-size:0.78rem;"></i> Save Package
+      </button>
+    </div>
+
+  </form>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-function addNewWordRow() {
-    const container = document.getElementById('newWordsContainer');
-    const div = document.createElement('div');
-    div.className = 'new-word-row';
-    div.innerHTML = `
-        <div class="row g-2 flex-grow-1">
-            <div class="col-1 d-flex align-items-center justify-content-center">
-                <span style="font-size:1rem;">✨</span>
-            </div>
-            <div class="col">
-                <input type="text" class="rw-input" name="new_word_en[]" placeholder="English word">
-            </div>
-            <div class="col">
-                <input type="text" class="rw-input" name="new_word_vi[]" placeholder="Nghĩa tiếng Việt">
-            </div>
-        </div>
-        <button type="button" class="delete-btn btn btn-sm"
-            onclick="this.closest('.new-word-row').remove(); updateCount();">✕</button>
-    `;
-    container.appendChild(div);
-    div.querySelector('input[name="new_word_en[]"]').focus();
-    updateCount();
+// Recount and relabel all row indices (largest number at top)
+function reIndex() {
+  const rows = document.querySelectorAll('#newRowsTop .vocab-edit-row, #vocabContainer .vocab-edit-row');
+  const total = rows.length;
+  rows.forEach((row, i) => {
+    const idx = row.querySelector('.row-index');
+    if (idx) idx.textContent = total - i;
+  });
+  const badge = document.getElementById('wordCountBadge');
+  if (badge) badge.textContent = '(' + total + ' words)';
 }
 
-function removeExistingRow(btn) {
-    btn.closest('.vocab-row').remove();
-    updateCount();
+// Add new row — prepend to TOP of list with highest index
+function addNewRow() {
+  const container = document.getElementById('newRowsTop');
+  const div = document.createElement('div');
+  div.className = 'vocab-edit-row';
+  div.innerHTML = `
+    <div class="row-index">?</div>
+    <input type="text" class="vocab-input" name="new_word_en[]" placeholder="English word" autocomplete="off">
+    <input type="text" class="vocab-input" name="new_word_vi[]" placeholder="Vietnamese meaning" autocomplete="off">
+    <button type="button" class="btn-del-row" onclick="deleteRow(this)" title="Remove">
+      <i class="fas fa-trash-alt"></i>
+    </button>
+  `;
+  // Prepend so newest is at top
+  container.insertBefore(div, container.firstChild);
+  reIndex();
+  div.querySelector('input').focus();
 }
 
-function updateCount() {
-    const existing = document.querySelectorAll('#existingWordsContainer .vocab-row').length;
-    const newRows  = document.querySelectorAll('#newWordsContainer .new-word-row').length;
-    document.getElementById('wordCount').textContent = `(${existing + newRows} từ)`;
+// Delete any row and re-index
+function deleteRow(btn) {
+  btn.closest('.vocab-edit-row').remove();
+  reIndex();
 }
+
+// Initial index on load
+reIndex();
 </script>
 {% endblock %}

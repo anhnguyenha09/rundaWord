@@ -95,6 +95,8 @@
 {% endblock %}
 
 {% block content %}
+<div class="match-container"> 
+
 <div class="d-flex align-items-center gap-2 mb-4">
     <a href="{{ url_for('package_detail', package_id=package.id) }}"
        style="color:var(--muted);font-size:0.85rem;font-weight:600;text-decoration:none;">
@@ -133,6 +135,7 @@
         <button class="btn btn-navy px-4" onclick="startGame()">Chơi lại</button>
         <a href="{{ url_for('quiz', package_id=package.id) }}" class="btn btn-cream px-4">Trắc nghiệm</a>
     </div>
+</div>
 </div>
 {% endblock %}
 
