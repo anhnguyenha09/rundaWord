@@ -49,7 +49,7 @@
       width: 100%; display: flex; align-items: center; justify-content: space-between;
     }
     .lp-logo {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Inter', sans-serif;
       font-weight: 700; font-size: 1.1rem; color: var(--navy);
       text-decoration: none;
     }
@@ -89,8 +89,8 @@
     }
     .hero-pill span { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
     .hero-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 3rem; font-weight: 700; line-height: 1.15;
+      font-family: 'Inter', sans-serif;
+      font-size: 3rem; font-weight: 800; line-height: 1.15;
       color: var(--navy); letter-spacing: -0.03em; margin-bottom: 18px;
     }
     .hero-sub {
@@ -168,24 +168,11 @@
     /* ── METHODS ── */
     .methods-header { margin-bottom: 40px; }
     .methods-header h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.8rem; font-weight: 700; color: var(--navy);
-      letter-spacing: -0.02em; margin-bottom: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.8rem; font-weight: 800; color: var(--navy);
+      letter-spacing: -0.03em; margin-bottom: 8px;
     }
     .methods-header p { font-size: 0.9rem; color: var(--muted); max-width: 480px; }
-    .methods-nav {
-      display: flex; gap: 8px;
-    }
-    .methods-nav-btn {
-      width: 34px; height: 34px; border-radius: 50%;
-      border: 1.5px solid var(--border); background: white;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.82rem; color: var(--muted); cursor: pointer;
-      transition: all 0.15s;
-    }
-    .methods-nav-btn.active, .methods-nav-btn:hover {
-      background: var(--navy); color: white; border-color: var(--navy);
-    }
     .methods-grid {
       display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
     }
@@ -199,12 +186,12 @@
     .method-icon {
       width: 44px; height: 44px; border-radius: var(--r-md);
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem; margin-bottom: 16px;
+      font-size: 1.1rem; margin-bottom: 16px;
     }
-    .method-icon.green  { background: #e8f8f0; }
-    .method-icon.blue   { background: #e8f0fb; }
-    .method-icon.purple { background: #f0e8fb; }
-    .method-icon.orange { background: #fdf0e8; }
+    .method-icon.green  { background: #e8f8f0; color: #1a7a4a; }
+    .method-icon.blue   { background: #e8f0fb; color: #1a5ccf; }
+    .method-icon.purple { background: #f0e8fb; color: #7a2acf; }
+    .method-icon.orange { background: #fdf0e8; color: #cf6a1a; }
     .method-name {
       font-weight: 700; font-size: 0.97rem; color: var(--navy);
       margin-bottom: 8px;
@@ -226,8 +213,8 @@
       text-transform: uppercase; color: var(--green); margin-bottom: 10px;
     }
     .pop-header h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.8rem; font-weight: 700; color: var(--navy); letter-spacing: -0.02em;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.8rem; font-weight: 800; color: var(--navy); letter-spacing: -0.03em;
     }
     .pop-grid {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
@@ -261,12 +248,9 @@
     }
     .pop-cat-badge.business { background: #e67e22; }
     .pop-cat-badge.standardized { background: #8e44ad; }
-    .pop-word-count {
-      font-size: 0.73rem; color: rgba(255,255,255,0.7); font-weight: 500;
-    }
     .pop-card-bottom { margin-top: auto; }
     .pop-card-name {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Inter', sans-serif;
       font-size: 1.1rem; font-weight: 700; line-height: 1.3;
       margin-bottom: 6px; color: white;
     }
@@ -274,20 +258,6 @@
       font-size: 0.78rem; color: rgba(255,255,255,0.70); line-height: 1.5;
       margin-bottom: 14px;
     }
-    .pop-learners {
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .pop-learner-avatars { display: flex; }
-    .pop-learner-av {
-      width: 24px; height: 24px; border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.6);
-      background: rgba(255,255,255,0.3);
-      margin-left: -6px; font-size: 0.6rem;
-      display: flex; align-items: center; justify-content: center;
-      color: white; font-weight: 700;
-    }
-    .pop-learner-av:first-child { margin-left: 0; }
-    .pop-learner-count { font-size: 0.74rem; color: rgba(255,255,255,0.65); }
     .btn-learn {
       background: white; color: var(--navy);
       border: none; border-radius: 30px;
@@ -307,9 +277,9 @@
       background-size: cover;
     }
     .cta-section h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.2rem; font-weight: 700; color: white;
-      letter-spacing: -0.02em; margin-bottom: 16px; max-width: 480px; line-height: 1.25;
+      font-family: 'Inter', sans-serif;
+      font-size: 2.2rem; font-weight: 800; color: white;
+      letter-spacing: -0.03em; margin-bottom: 16px; max-width: 480px; line-height: 1.25;
     }
     .cta-section p { font-size: 0.92rem; color: rgba(255,255,255,0.6); max-width: 460px; line-height: 1.75; margin-bottom: 32px; }
     .cta-btns { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -329,18 +299,30 @@
     }
     .btn-cta-outline:hover { border-color: rgba(255,255,255,0.65); color: white; }
 
-    /* ── FOOTER ── */
-    footer {
-      background: #fff; border-top: 1px solid var(--border);
-      padding: 32px 24px; margin-top: 80px;
+    /* ── FOOTER (unified) ── */
+    .lp-footer {
+      background: #fff;
+      border-top: 1px solid var(--border);
+      padding: 40px 24px 32px;
+      margin-top: 80px;
     }
-    .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
-    .footer-brand { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1rem; color: var(--navy); margin-bottom: 4px; }
-    .footer-tagline { font-size: 0.78rem; color: var(--muted); }
-    .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
-    .footer-link { font-size: 0.78rem; color: var(--muted); text-decoration: none; transition: color 0.15s; }
-    .footer-link:hover { color: var(--navy); }
-    .footer-copy { font-size: 0.74rem; color: #b0b8c4; margin-top: 4px; }
+    .lp-footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 24px; flex-wrap: wrap;
+    }
+    .lp-footer-brand {
+      font-family: 'Inter', sans-serif;
+      font-weight: 800; font-size: 1rem; color: var(--navy); margin-bottom: 4px;
+    }
+    .lp-footer-tagline { font-size: 0.78rem; color: var(--muted); margin-bottom: 8px; }
+    .lp-footer-copy { font-size: 0.74rem; color: #b0b8c4; }
+    .lp-footer-links { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
+    .lp-footer-link {
+      font-size: 0.8rem; color: var(--muted); text-decoration: none;
+      font-weight: 500; transition: color 0.15s;
+    }
+    .lp-footer-link:hover { color: var(--navy); }
 
     /* ── AUTH MODAL ── */
     .auth-overlay {
@@ -358,7 +340,6 @@
     }
     @keyframes modalIn { from { transform: scale(0.88) translateY(20px); opacity: 0; } }
 
-    /* Tabs */
     .auth-tabs {
       display: flex; border-bottom: 1px solid var(--border);
     }
@@ -375,7 +356,7 @@
     .auth-panel { display: none; }
     .auth-panel.active { display: block; }
 
-    .auth-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .auth-title { font-family: 'Inter', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
     .auth-sub { font-size: 0.83rem; color: var(--muted); margin-bottom: 24px; }
     .field-label { font-size: 0.69rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; display: block; }
     .field-input {
@@ -429,7 +410,6 @@
 <!-- HERO -->
 <div style="padding-bottom: 0; overflow: hidden;">
   <div class="hero">
-    
     <h1 class="hero-title">Explore the hidden knowledge<br>of English Vocabulary</h1>
     <p class="hero-sub">
       Học từ vựng tiếng Anh theo cách đơn giản, thú vị với RundaWord.<br>
@@ -470,37 +450,33 @@
 
 <!-- METHODS SECTION -->
 <div class="section">
-  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:36px;">
+  <div style="margin-bottom:36px;">
     <div class="methods-header" style="margin-bottom:0;">
       <h2>Phương pháp học đa chiều</h2>
       <p>RundaWord cung cấp 4 chế độ học chuyên sâu để đảm bảo sự thú vị và khả năng ghi nhớ.</p>
     </div>
-    <div class="methods-nav">
-      <button class="methods-nav-btn"><i class="fas fa-chevron-left"></i></button>
-      <button class="methods-nav-btn active"><i class="fas fa-chevron-right"></i></button>
-    </div>
   </div>
   <div class="methods-grid">
     <div class="method-card">
-      <div class="method-icon green"><span style="font-size:1.3rem;">🃏</span></div>
+      <div class="method-icon green"><i class="fas fa-clone"></i></div>
       <div class="method-name">Lật thẻ (Flashcard)</div>
       <p class="method-desc">Ghi nhớ nhanh mặt chữ và ý nghĩa thông qua thẻ lật hai mặt trực quan thông minh.</p>
       <a href="#" class="method-try" onclick="openAuth('login');return false;">Thử ngay <i class="fas fa-arrow-right" style="font-size:0.75rem;"></i></a>
     </div>
     <div class="method-card">
-      <div class="method-icon blue"><span style="font-size:1.3rem;">📝</span></div>
+      <div class="method-icon blue"><i class="fas fa-list-ul"></i></div>
       <div class="method-name">Trắc nghiệm (Quiz)</div>
       <p class="method-desc">Kiểm tra khả năng nhận diện từ vựng qua các câu hỏi đa lựa chọn thông minh.</p>
       <a href="#" class="method-try" onclick="openAuth('login');return false;">Thử ngay <i class="fas fa-arrow-right" style="font-size:0.75rem;"></i></a>
     </div>
     <div class="method-card">
-      <div class="method-icon purple"><span style="font-size:1.3rem;">✍️</span></div>
+      <div class="method-icon purple"><i class="fas fa-pencil-alt"></i></div>
       <div class="method-name">Kiểm tra (Test)</div>
       <p class="method-desc">Rèn luyện kỹ năng viết chính tả và sử dụng từ trong ngữ cảnh thực tế.</p>
       <a href="#" class="method-try" onclick="openAuth('login');return false;">Thử ngay <i class="fas fa-arrow-right" style="font-size:0.75rem;"></i></a>
     </div>
     <div class="method-card">
-      <div class="method-icon orange"><span style="font-size:1.3rem;">🎯</span></div>
+      <div class="method-icon orange"><i class="fas fa-link"></i></div>
       <div class="method-name">Ghép thẻ (Match)</div>
       <p class="method-desc">Trò chơi tốc độ giúp củng cố phản xạ kết nối từ và nghĩa trong tích tắc.</p>
       <a href="#" class="method-try" onclick="openAuth('login');return false;">Thử ngay <i class="fas fa-arrow-right" style="font-size:0.75rem;"></i></a>
@@ -521,7 +497,6 @@
       <div class="pop-card-content">
         <div class="pop-card-top">
           <span class="pop-cat-badge">Academic</span>
-          <span class="pop-word-count">5.800+ học viên</span>
         </div>
         <div class="pop-card-bottom">
           <div class="pop-card-name">Academic IELTS 8.0+</div>
@@ -536,7 +511,6 @@
       <div class="pop-card-content">
         <div class="pop-card-top">
           <span class="pop-cat-badge business">Business</span>
-          <span class="pop-word-count">3.200+ học viên</span>
         </div>
         <div class="pop-card-bottom">
           <div class="pop-card-name">Advanced Business</div>
@@ -551,7 +525,6 @@
       <div class="pop-card-content">
         <div class="pop-card-top">
           <span class="pop-cat-badge standardized">Standardized</span>
-          <span class="pop-word-count">4 học viên</span>
         </div>
         <div class="pop-card-bottom">
           <div class="pop-card-name">TOEFL Mastery</div>
@@ -579,19 +552,19 @@
   </div>
 </div>
 
-<!-- FOOTER -->
-<footer>
-  <div class="footer-inner">
+<!-- FOOTER (unified) -->
+<footer class="lp-footer">
+  <div class="lp-footer-inner">
     <div>
-      <div class="footer-brand">RundaWord</div>
-      <div class="footer-tagline">Nền tảng từ vựng dựa trên khoa học não bộ.</div>
-      <div class="footer-copy">© 2026 RundaWord. Hàng tâm tri thức ngôn ngữ.</div>
+      <div class="lp-footer-brand">RundaWord</div>
+      <div class="lp-footer-tagline">Nền tảng từ vựng dựa trên khoa học não bộ.</div>
+      <div class="lp-footer-copy">© 2026 RundaWord. All rights reserved.</div>
     </div>
-    <div class="footer-links">
-      <a href="#" class="footer-link">Điều khoản</a>
-      <a href="#" class="footer-link">Bảo mật</a>
-      <a href="{{ url_for('login') }}" class="footer-link">Login</a>
-      <a href="{{ url_for('register') }}" class="footer-link">Đăng ký</a>
+    <div class="lp-footer-links">
+      <a href="#" class="lp-footer-link">Điều khoản</a>
+      <a href="#" class="lp-footer-link">Bảo mật</a>
+      <a href="{{ url_for('login') }}" class="lp-footer-link">Đăng nhập</a>
+      <a href="{{ url_for('register') }}" class="lp-footer-link">Đăng ký</a>
     </div>
   </div>
 </footer>
@@ -601,15 +574,11 @@
   <div class="auth-modal-wrap">
     <div class="auth-modal">
       <button class="auth-close" onclick="closeAuth()"><i class="fas fa-times"></i></button>
-
-      <!-- Tabs -->
       <div class="auth-tabs">
         <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Đăng nhập</button>
         <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Đăng ký</button>
       </div>
-
       <div class="auth-body">
-
         <!-- LOGIN PANEL -->
         <div class="auth-panel active" id="panelLogin">
           <div class="auth-title">Chào mừng trở lại</div>
@@ -632,7 +601,6 @@
             <a href="#" onclick="switchTab('register');return false;" style="color:var(--navy);font-weight:700;text-decoration:none;">Đăng ký ngay</a>
           </p>
         </div>
-
         <!-- REGISTER PANEL -->
         <div class="auth-panel" id="panelRegister">
           <div class="auth-title">Tạo tài khoản</div>
@@ -667,7 +635,6 @@
             <a href="#" onclick="switchTab('login');return false;" style="color:var(--navy);font-weight:700;text-decoration:none;">Đăng nhập</a>
           </p>
         </div>
-
       </div>
     </div>
   </div>

@@ -6,7 +6,7 @@
 /* Hide base navbar on this page, use custom one below */
 .rw-navbar { display: none; }
 
-/* ── Custom navbar (matches landing page style) ── */
+/* ── Custom navbar ── */
 .lp-nav {
   background: #fff; border-bottom: 1px solid var(--border);
   height: 58px; display: flex; align-items: center;
@@ -17,7 +17,7 @@
   width: 100%; display: flex; align-items: center;
 }
 .lp-logo {
-  font-family: 'Playfair Display', serif; font-weight: 700;
+  font-family: 'Inter', sans-serif; font-weight: 800;
   font-size: 1.05rem; color: var(--navy); text-decoration: none;
   display: flex; align-items: center; gap: 8px; margin-right: 32px;
 }
@@ -49,7 +49,7 @@
 
 .exp-hero { text-align: center; margin-bottom: 40px; }
 .exp-hero h1 {
-  font-family: 'Playfair Display', serif; font-size: 2.4rem; font-weight: 700;
+  font-family: 'Inter', sans-serif; font-size: 2.4rem; font-weight: 800;
   color: var(--navy); letter-spacing: -0.03em; margin-bottom: 14px;
 }
 .exp-hero p { font-size: 0.95rem; color: var(--text-muted); max-width: 480px; margin: 0 auto; line-height: 1.75; }
@@ -133,7 +133,7 @@
 .pag-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
 .pag-dots { color: var(--text-muted); padding: 0 4px; font-weight: 600; }
 
-/* ── AUTH MODAL (wider/more spacious than before) ── */
+/* ── AUTH MODAL ── */
 .auth-overlay {
   display: none; position: fixed; inset: 0; z-index: 1000;
   background: rgba(7,16,32,0.55); backdrop-filter: blur(4px);
@@ -160,14 +160,11 @@
   font-family: 'Inter', sans-serif;
 }
 .auth-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
-
 .auth-body { padding: 32px 36px 36px; }
 .auth-panel { display: none; }
 .auth-panel.active { display: block; }
-
-.auth-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.auth-title { font-family: 'Inter', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
 .auth-sub { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 28px; line-height: 1.5; }
-
 .field-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 7px; display: block; }
 .field-input {
   width: 100%; border: 1.5px solid var(--border); border-radius: var(--r-md);
@@ -177,7 +174,6 @@
 }
 .field-input:focus { border-color: var(--navy); }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-
 .btn-auth {
   width: 100%; background: var(--navy); color: white; border: none;
   border-radius: var(--r-md); padding: 14px; font-size: 0.94rem; font-weight: 700;
@@ -185,7 +181,6 @@
   margin-top: 6px;
 }
 .btn-auth:hover { opacity: 0.88; }
-
 .auth-close {
   position: absolute; top: 14px; right: 14px;
   background: none; border: none; font-size: 1rem; color: var(--text-muted);
@@ -195,11 +190,30 @@
 }
 .auth-close:hover { background: var(--off-white); color: var(--navy); }
 
-/* Footer override for this page */
-footer { background: white !important; border-top: 1px solid var(--border); }
-footer .footer-logo-text { color: var(--navy) !important; font-size: 0.78rem !important; font-weight: 700 !important; text-transform: uppercase; letter-spacing: 0.08em; }
-footer p, footer a { opacity: 1 !important; color: var(--text-muted) !important; }
-footer a:hover { color: var(--navy) !important; }
+/* ── UNIFIED FOOTER ── */
+footer {
+  background: white !important;
+  border-top: 1px solid var(--border);
+  padding: 40px 32px 32px !important;
+  margin-top: 0 !important;
+}
+.footer-inner-unified {
+  max-width: 1100px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 24px; flex-wrap: wrap;
+}
+.footer-brand-unified {
+  font-family: 'Inter', sans-serif; font-weight: 800;
+  font-size: 1rem; color: var(--navy); margin-bottom: 4px;
+}
+.footer-tagline-unified { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px; }
+.footer-copy-unified { font-size: 0.74rem; color: #b0b8c4; }
+.footer-links-unified { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
+.footer-link-unified {
+  font-size: 0.8rem; color: var(--text-muted); text-decoration: none;
+  font-weight: 500; transition: color 0.15s;
+}
+.footer-link-unified:hover { color: var(--navy); }
 </style>
 {% endblock %}
 
@@ -279,7 +293,6 @@ footer a:hover { color: var(--navy) !important; }
           <div class="exp-card-name">{{ pkg.package_name }}</div>
           <div class="exp-card-meta">
             by <strong>@{{ pkg.user.username if pkg.user else 'unknown' }}</strong>
-            &nbsp;·&nbsp;{{ pkg.vocabularies|length }} từ
           </div>
           <div class="exp-card-actions">
             <button class="btn-learn-dark" onclick="openAuth('login')">Học ngay</button>
@@ -291,16 +304,15 @@ footer a:hover { color: var(--navy) !important; }
       </div>
       {% endfor %}
     {% else %}
-      {# Demo cards for when no public packages exist yet #}
       {% set demo = [
-        ('IELTS 8.0+ Essential Vocab','curator_jane',450,0),
-        ('Corporate Strategy & Finance','expert_lex',320,1),
-        ('Artificial Intelligence & ML','tech_wizard',150,2),
-        ('SAT Verbal Masterclass','academic_pro',600,3),
-        ('Nature & Environment Terms','green_earth',210,4),
-        ('Advanced Literature Analysis','scholar_mind',380,5),
+        ('IELTS 8.0+ Essential Vocab','curator_jane',0),
+        ('Corporate Strategy & Finance','expert_lex',1),
+        ('Artificial Intelligence & ML','tech_wizard',2),
+        ('SAT Verbal Masterclass','academic_pro',3),
+        ('Nature & Environment Terms','green_earth',4),
+        ('Advanced Literature Analysis','scholar_mind',5),
       ] %}
-      {% for name,author,count,idx in demo %}
+      {% for name,author,idx in demo %}
       <div class="exp-card">
         <div class="exp-card-img-wrap">
           <div class="exp-card-img-bg" style="background:{{ bg_colors[idx] }};"></div>
@@ -309,7 +321,7 @@ footer a:hover { color: var(--navy) !important; }
         <div class="exp-card-body">
           <div class="exp-card-name">{{ name }}</div>
           <div class="exp-card-meta">
-            by <strong>@{{ author }}</strong> &nbsp;·&nbsp; {{ count }} từ
+            by <strong>@{{ author }}</strong>
           </div>
           <div class="exp-card-actions">
             <button class="btn-learn-dark" onclick="openAuth('login')">Học ngay</button>
@@ -341,14 +353,11 @@ footer a:hover { color: var(--navy) !important; }
   <div class="auth-modal-wrap">
     <div class="auth-modal">
       <button class="auth-close" onclick="closeAuth()"><i class="fas fa-times"></i></button>
-
       <div class="auth-tabs">
         <button class="auth-tab active" id="tabLogin"    onclick="switchTab('login')">Đăng nhập</button>
         <button class="auth-tab"        id="tabRegister" onclick="switchTab('register')">Đăng ký</button>
       </div>
-
       <div class="auth-body">
-
         <!-- LOGIN -->
         <div class="auth-panel active" id="panelLogin">
           <div class="auth-title">Chào mừng trở lại</div>
@@ -371,7 +380,6 @@ footer a:hover { color: var(--navy) !important; }
             <a href="#" onclick="switchTab('register');return false;" style="color:var(--navy);font-weight:700;text-decoration:none;margin-left:3px;">Đăng ký ngay</a>
           </p>
         </div>
-
         <!-- REGISTER -->
         <div class="auth-panel" id="panelRegister">
           <div class="auth-title">Tạo tài khoản</div>
@@ -408,7 +416,6 @@ footer a:hover { color: var(--navy) !important; }
             <a href="#" onclick="switchTab('login');return false;" style="color:var(--navy);font-weight:700;text-decoration:none;margin-left:3px;">Đăng nhập</a>
           </p>
         </div>
-
       </div>
     </div>
   </div>
@@ -444,5 +451,29 @@ function setFilter(btn, cat) {
   btn.classList.add(cat === 'all' ? 'f-all' : 'f-green');
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAuth(); });
+</script>
+
+<!-- Override base footer with unified version -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const footer = document.querySelector('footer');
+  if (footer) {
+    footer.innerHTML = `
+      <div class="footer-inner-unified">
+        <div>
+          <div class="footer-brand-unified">RundaWord</div>
+          <div class="footer-tagline-unified">Nền tảng từ vựng dựa trên khoa học não bộ.</div>
+          <div class="footer-copy-unified">© 2026 RundaWord. All rights reserved.</div>
+        </div>
+        <div class="footer-links-unified">
+          <a href="#" class="footer-link-unified">Điều khoản</a>
+          <a href="#" class="footer-link-unified">Bảo mật</a>
+          <a href="/login" class="footer-link-unified">Đăng nhập</a>
+          <a href="/register" class="footer-link-unified">Đăng ký</a>
+        </div>
+      </div>
+    `;
+  }
+});
 </script>
 {% endblock %}

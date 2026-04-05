@@ -2,36 +2,39 @@
 {% block title %}Admin Dashboard - RundaWord{% endblock %}
 
 {% block content %}
-<div class="page-title mb-4">
-    <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+<div style="font-family:'Inter',sans-serif;font-weight:800;font-size:1.4rem;color:var(--navy);margin-bottom:24px;letter-spacing:-0.02em;">
+    <i class="fas fa-tachometer-alt me-2" style="font-size:1.1rem;"></i>Admin Dashboard
 </div>
 
-<!-- Stats cards -->
-<div class="row g-3 mb-5">
-    <div class="col-6 col-md-4">
-        <div class="admin-stat-card" style="border-left:4px solid #1565a8;">
-            <div class="admin-stat-num" style="color:#1565a8;">{{ total_users }}</div>
-            <div class="admin-stat-lbl"><i class="fas fa-users me-1"></i>Người dùng</div>
-            <a href="{{ url_for('admin_users') }}" class="admin-stat-link">Quản lý →</a>
-        </div>
+<!-- Stats cards — equal size, harmonious colors -->
+<div class="admin-stats-grid">
+    <div class="admin-stat-card stat-card-users">
+        <div class="admin-stat-icon"><i class="fas fa-users"></i></div>
+        <div class="admin-stat-num">{{ total_users }}</div>
+        <div class="admin-stat-lbl">Người dùng</div>
+        <a href="{{ url_for('admin_users') }}" class="admin-stat-link">
+            Quản lý <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i>
+        </a>
     </div>
-    <div class="col-6 col-md-4">
-        <div class="admin-stat-card" style="border-left:4px solid #0d7a5f;">
-            <div class="admin-stat-num" style="color:#0d7a5f;">{{ total_packages }}</div>
-            <div class="admin-stat-lbl"><i class="fas fa-layer-group me-1"></i>Gói từ</div>
-            <a href="{{ url_for('admin_packages') }}" class="admin-stat-link">Quản lý →</a>
-        </div>
+    <div class="admin-stat-card stat-card-packages">
+        <div class="admin-stat-icon"><i class="fas fa-layer-group"></i></div>
+        <div class="admin-stat-num">{{ total_packages }}</div>
+        <div class="admin-stat-lbl">Gói từ vựng</div>
+        <a href="{{ url_for('admin_packages') }}" class="admin-stat-link">
+            Quản lý <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i>
+        </a>
     </div>
-    <div class="col-6 col-md-4">
-        <div class="admin-stat-card" style="border-left:4px solid #7b2d8b;">
-            <div class="admin-stat-num" style="color:#7b2d8b;">{{ total_words }}</div>
-            <div class="admin-stat-lbl"><i class="fas fa-font me-1"></i>Từ vựng</div>
-        </div>
+    <div class="admin-stat-card stat-card-words">
+        <div class="admin-stat-icon"><i class="fas fa-font"></i></div>
+        <div class="admin-stat-num">{{ total_words }}</div>
+        <div class="admin-stat-lbl">Từ vựng</div>
     </div>
 </div>
 
 <!-- Recent users -->
-<div class="section-header mb-3"><i class="fas fa-user-clock me-2"></i>Người dùng mới nhất</div>
+<div class="section-header mb-3" style="font-weight:700;font-size:0.95rem;color:var(--navy);">
+    <i class="fas fa-user-clock me-2"></i>Người dùng mới nhất
+</div>
 <div class="rw-card">
     <table class="admin-table">
         <thead>

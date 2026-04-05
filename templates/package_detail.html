@@ -35,15 +35,15 @@
 .banner-badge.count   { background: rgba(255,255,255,0.10); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.15); }
 
 .banner-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.8rem; font-weight: 700; color: white;
-  letter-spacing: -0.02em; margin: 12px 0 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.8rem; font-weight: 800; color: white;
+  letter-spacing: -0.03em; margin: 12px 0 4px;
 }
 .banner-author { font-size: 0.84rem; color: rgba(255,255,255,0.55); }
 .banner-author strong { color: rgba(255,255,255,0.80); }
 .banner-desc { font-size: 0.84rem; color: rgba(255,255,255,0.50); margin-top: 10px; line-height: 1.7; max-width: 560px; }
 
-/* Banner action buttons (white style) */
+/* Banner action buttons */
 .banner-btn-save {
   background: rgba(255,255,255,0.12); color: white;
   border: 1.5px solid rgba(255,255,255,0.25); border-radius: var(--r-md);
@@ -60,6 +60,73 @@
   cursor: pointer; transition: background 0.15s; flex-shrink: 0;
 }
 .banner-menu-btn:hover { background: rgba(255,255,255,0.20); }
+
+/* ── MASTERY PATHWAYS — blue/beige tones ── */
+.mastery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 32px;
+}
+@media (max-width: 768px) { .mastery-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.mastery-card {
+  border-radius: var(--r-xl);
+  padding: 22px 20px 18px;
+  text-decoration: none !important;
+  display: flex; flex-direction: column; gap: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative; overflow: hidden;
+  min-height: 130px;
+}
+.mastery-card::after {
+  content: '';
+  position: absolute; top: -20px; right: -20px;
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+}
+.mastery-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(13,31,60,0.15); }
+
+.mode-flash {
+  background: linear-gradient(135deg, #1a4a8a 0%, #2563c7 100%);
+  color: white;
+}
+.mode-quiz {
+  background: linear-gradient(135deg, #f5f0e8 0%, #ede5d4 100%);
+  color: #3a2e1e;
+  border: 1px solid #ddd4c0;
+}
+.mode-test {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8e 100%);
+  color: white;
+}
+.mode-match {
+  background: linear-gradient(135deg, #f7f3ec 0%, #e8dfc8 100%);
+  color: #3a2e1e;
+  border: 1px solid #ddd4c0;
+}
+
+.mastery-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; margin-bottom: 4px;
+}
+.mode-flash .mastery-icon  { background: rgba(255,255,255,0.18); color: white; }
+.mode-quiz .mastery-icon   { background: rgba(58,46,30,0.10); color: #5a4a2e; }
+.mode-test .mastery-icon   { background: rgba(255,255,255,0.18); color: white; }
+.mode-match .mastery-icon  { background: rgba(58,46,30,0.10); color: #5a4a2e; }
+
+.mastery-name {
+  font-weight: 700; font-size: 0.97rem; letter-spacing: -0.01em;
+}
+.mode-flash .mastery-name, .mode-test .mastery-name { color: white; }
+.mode-quiz .mastery-name, .mode-match .mastery-name { color: #2a1e0e; }
+
+.mastery-desc {
+  font-size: 0.78rem; line-height: 1.5; opacity: 0.75;
+}
+.mode-flash .mastery-desc, .mode-test .mastery-desc { color: rgba(255,255,255,0.8); }
+.mode-quiz .mastery-desc, .mode-match .mastery-desc { color: #6b5a40; }
 
 /* Ledger — 2 columns only (EN + VI) */
 .ledger-row-2 {
@@ -187,7 +254,7 @@
   <!-- VOCABULARY LEDGER -->
   {% if package.vocabularies %}
   <div class="vocab-ledger">
-    <!-- Header: title + search only (no sort button) -->
+    <!-- Header: title + search only -->
     <div class="ledger-header">
       <span class="ledger-title">Vocabulary Ledger
         <span style="font-size:0.78rem;color:var(--text-muted);font-weight:500;margin-left:8px;">
