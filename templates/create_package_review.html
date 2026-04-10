@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Review Package — RundaWord{% endblock %}
+
+{% block head_extra %}
+<style>
+.edit-wrap { max-width: 780px; margin: 0 auto; padding: 32px 0 80px; }
+.vocab-edit-row {
+  display: grid; grid-template-columns: 36px 1fr 1fr 40px;
+  align-items: center; gap: 10px; padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.row-index { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-align: center; }
+.vocab-input {
+  border: 1.5px solid var(--border); border-radius: var(--r-md);
+  padding: 9px 13px; font-size: 0.88rem; width: 100%;
+}
+.btn-del-row {
+  width: 34px; height: 34px; border-radius: var(--r-sm); background: none;
+  border: 1.5px solid var(--border); color: var(--text-muted); cursor: pointer;
+}
+.btn-del-row:hover { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+.vocab-col-header {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--text-muted);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-wrap container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <div class="page-title">Review Vocabulary Package</div>
+      <p class="page-desc mb-0">Kiểm tra lại thông tin trước khi tạo gói từ.</p>
+    </div>
+  </div>
+
+  <form method="POST" action="{{ url_for('create_package') }}">
+    <input type="hidden" name="action" value="create_final">
+
+    <div class="rw-card mb-4">
+      <div class="mb-4">
+        <label class="rw-label">Package Name</label>
+        <input type="text" class="rw-input" name="package_name" value="{{ package_name }}" required>
+      </div>
+      <div class="mb-4">
+        <label class="rw-label">Description</label>
+        <input type="text" class="rw-input" name="description" value="{{ description }}" maxlength="70">
+      </div>
+      <div class="mb-4">
+        <label class="rw-label">Topic</label>
+        <select class="rw-input" name="topic" style="cursor:pointer;">
+          <option value="">— Không chọn chủ đề —</option>
+          {% for t in available_topics %}
+          <option value="{{ t }}" {% if topic == t %}selected{% endif %}>{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="rw-label">Visibility</label>
+        <div class="d-flex gap-3 mt-2">
+          <label class="visibility-option">
+            <input type="radio" name="is_public" value="true" {% if is_public %}checked{% endif %}>
+            <div class="option-box">🌍 Public</div>
+          </label>
+          <label class="visibility-option">
+            <input type="radio" name="is_public" value="false" {% if not is_public %}checked{% endif %}>
+            <div class="option-box">🔒 Private</div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="rw-card">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <span style="font-weight:700;font-size:0.95rem;color:var(--navy);">Vocabulary Items</span>
+          <span id="wordCountBadge" style="font-size:0.78rem;color:var(--text-muted);margin-left:8px;">
+            ({{ words|length }} words)
+          </span>
+        </div>
+        <button type="button" class="btn-navy" style="padding:8px 16px;font-size:0.83rem;" onclick="addNewRow()">
+          <i class="fas fa-plus" style="font-size:0.74rem;"></i> Add word
+        </button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:36px 1fr 1fr 40px;gap:10px;padding:0 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px;">
+        <div></div><div class="vocab-col-header">English</div><div class="vocab-col-header">Vietnamese</div><div></div>
+      </div>
+
+      <div id="rowsWrap">
+        {% for en, vi in words %}
+        <div class="vocab-edit-row">
+          <div class="row-index">{{ loop.index }}</div>
+          <input type="text" class="vocab-input" name="word_en[]" value="{{ en }}" placeholder="English word">
+          <input type="text" class="vocab-input" name="word_vi[]" value="{{ vi }}" placeholder="Vietnamese meaning">
+          <button type="button" class="btn-del-row" onclick="deleteRow(this)" title="Remove"><i class="fas fa-trash-alt"></i></button>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mt-4">
+      <button type="submit" name="action" value="discard" class="btn-cream">
+        <i class="fas fa-times" style="font-size:0.78rem;"></i> Discard
+      </button>
+      <button type="submit" class="btn-navy">
+        <i class="fas fa-check" style="font-size:0.78rem;"></i> Create Package
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function reIndex() {
+  const rows = document.querySelectorAll('#rowsWrap .vocab-edit-row');
+  rows.forEach((row, i) => {
+    const idx = row.querySelector('.row-index');
+    if (idx) idx.textContent = i + 1;
+  });
+  document.getElementById('wordCountBadge').textContent = '(' + rows.length + ' words)';
+}
+function addNewRow() {
+  const wrap = document.getElementById('rowsWrap');
+  const div = document.createElement('div');
+  div.className = 'vocab-edit-row';
+  div.innerHTML = `
+    <div class="row-index">0</div>
+    <input type="text" class="vocab-input" name="word_en[]" placeholder="English word" autocomplete="off">
+    <input type="text" class="vocab-input" name="word_vi[]" placeholder="Vietnamese meaning" autocomplete="off">
+    <button type="button" class="btn-del-row" onclick="deleteRow(this)" title="Remove"><i class="fas fa-trash-alt"></i></button>
+  `;
+  wrap.appendChild(div);
+  reIndex();
+  div.querySelector('input').focus();
+}
+function deleteRow(btn) {
+  btn.closest('.vocab-edit-row').remove();
+  reIndex();
+}
+reIndex();
+</script>
+{% endblock %}

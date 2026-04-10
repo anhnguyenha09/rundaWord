@@ -1,123 +1,115 @@
 {% extends "base.html" %}
 {% block title %}Tạo gói từ - RundaWord{% endblock %}
 
-{% block content %}
-
-<div class="page-title">Create new Vocabulary Package</div>
-
-<div class="rw-card" style="max-width:680px;">
-    <form method="POST" enctype="multipart/form-data">
-
-        <!-- NAME -->
-        <div class="mb-4">
-            <label class="rw-label">Package Name <span class="text-danger">*</span></label>
-            <input type="text" class="rw-input" name="package_name" placeholder="Insert package name" required>
-        </div>
-
-        <!-- DESCRIPTION -->
-        <div class="mb-4">
-            <label class="rw-label">Description</label>
-            <input type="text" class="rw-input" name="description"
-                placeholder="Describe this package" maxlength="70"
-                oninput="document.getElementById('descCount').textContent=this.value.length">
-            <div class="text-end mt-1" style="font-size:0.8rem;color:var(--muted);">
-                <span id="descCount">0</span>/70 char.
-            </div>
-        </div>
-
-        <!-- TOPIC -->
-        <div class="mb-4">
-            <label class="rw-label">Chủ đề <span class="text-danger">*</span></label>
-            <select class="rw-input" name="topic" required style="cursor:pointer;">
-                {% for t in PACKAGE_TOPICS %}
-                <option value="{{ t }}" {% if t == 'Others' %}selected{% endif %}>{{ t }}</option>
-                {% endfor %}
-            </select>
-            <div class="mt-1" style="font-size:0.78rem;color:var(--muted);">Phân loại gói để người học dễ tìm.</div>
-        </div>
-
-        <!-- 🔥 PUBLIC / PRIVATE -->
-        <div class="mb-4">
-            <label class="rw-label">Visibility</label>
-
-            <div class="d-flex gap-3 mt-2">
-                <label class="visibility-option">
-                    <input type="radio" name="is_public" value="true" checked>
-                    <div class="option-box">
-                        🌍 Public
-                        <div class="small-text">Ai cũng có thể thấy</div>
-                    </div>
-                </label>
-
-                <label class="visibility-option">
-                    <input type="radio" name="is_public" value="false">
-                    <div class="option-box">
-                        🔒 Private
-                        <div class="small-text">Chỉ mình bạn thấy</div>
-                    </div>
-                </label>
-            </div>
-        </div>
-
-        <!-- FILE -->
-        <div class="mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-                <label class="rw-label mb-0">Vocabularies Upload</label>
-                <a href="{{ url_for('download_template') }}"
-                    style="font-size:0.85rem;color:var(--accent);font-weight:600;text-decoration:underline;">
-                    Tải template
-                </a>
-            </div>
-
-            <div class="position-relative">
-                <input type="text" class="rw-input pe-5" id="fileLabel"
-                    placeholder="Upload file..." readonly
-                    onclick="document.getElementById('vocab_file').click()" style="cursor:pointer;">
-
-                <label for="vocab_file"
-                    style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;">
-                    <i class="fas fa-paperclip"></i>
-                </label>
-
-                <input type="file" id="vocab_file" name="vocab_file"
-                    accept=".csv,.xlsx,.xls" style="display:none;"
-                    onchange="document.getElementById('fileLabel').value=this.files[0]?this.files[0].name:''">
-            </div>
-        </div>
-
-        <div class="text-end">
-            <button type="submit" class="btn btn-navy px-4">Create Package</button>
-        </div>
-
-    </form>
-</div>
-
-{% endblock %}
-
 {% block head_extra %}
 <style>
-.visibility-option input {
-    display: none;
+.create-pkg-wrap {
+  min-height: calc(100vh - 60px - 120px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 48px 24px;
 }
-
-.option-box {
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 16px;
-    cursor: pointer;
-    transition: 0.2s;
-    font-weight: 600;
-}
-
-.option-box .small-text {
-    font-size: 0.75rem;
-    color: var(--muted);
-    font-weight: 500;
-}
-
-.visibility-option input:checked + .option-box {
-    border-color: var(--navy);
-    background: #eef3fb;
+.create-pkg-card {
+  background: white; border-radius: var(--r-xl); border: 1px solid var(--border);
+  padding: 40px 44px; width: 100%; max-width: 560px;
+  box-shadow: var(--shadow-md);
 }
 </style>
+{% endblock %}
+
+{% block content %}
+<div class="create-pkg-wrap">
+  <div class="create-pkg-card">
+
+    <div style="margin-bottom:28px;">
+      <div class="page-title">Create Vocabulary Package</div>
+      <p class="page-desc mb-0">Build a new curated collection to study and share.</p>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+
+      <!-- NAME -->
+      <div class="mb-4">
+        <label class="rw-label">Package Name <span class="text-danger">*</span></label>
+        <input type="text" class="rw-input" name="package_name" placeholder="e.g. IELTS Academic 8.0+" required>
+      </div>
+
+      <!-- DESCRIPTION -->
+      <div class="mb-4">
+        <label class="rw-label">Description</label>
+        <input type="text" class="rw-input" name="description"
+          placeholder="Briefly describe this package" maxlength="70"
+          oninput="document.getElementById('descCount').textContent=this.value.length">
+        <div class="text-end mt-1" style="font-size:0.8rem;color:var(--text-muted);">
+          <span id="descCount">0</span>/70 char.
+        </div>
+      </div>
+
+      <!-- TOPIC -->
+      <div class="mb-4">
+        <label class="rw-label">Topic / Category</label>
+        <select class="rw-input" name="topic" style="cursor:pointer;">
+          <option value="">— Chọn chủ đề (không bắt buộc) —</option>
+          {% for t in available_topics %}
+          <option value="{{ t }}">{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- PUBLIC / PRIVATE -->
+      <div class="mb-4">
+        <label class="rw-label">Visibility</label>
+        <div class="d-flex gap-3 mt-2">
+          <label class="visibility-option">
+            <input type="radio" name="is_public" value="true" checked>
+            <div class="option-box">
+              🌍 Public
+              <div class="small-text">Ai cũng có thể thấy</div>
+            </div>
+          </label>
+          <label class="visibility-option">
+            <input type="radio" name="is_public" value="false">
+            <div class="option-box">
+              🔒 Private
+              <div class="small-text">Chỉ mình bạn thấy</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- FILE -->
+      <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <label class="rw-label mb-0">Vocabularies Upload</label>
+          <a href="{{ url_for('download_template') }}"
+            style="font-size:0.85rem;color:var(--accent);font-weight:600;text-decoration:underline;">
+            Tải template
+          </a>
+        </div>
+        <div class="position-relative">
+          <input type="text" class="rw-input pe-5" id="fileLabel"
+            placeholder="Upload file..." readonly
+            onclick="document.getElementById('vocab_file').click()" style="cursor:pointer;">
+          <label for="vocab_file"
+            style="position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;">
+            <i class="fas fa-paperclip"></i>
+          </label>
+          <input type="file" id="vocab_file" name="vocab_file"
+            accept=".csv,.xlsx,.xls" style="display:none;"
+            onchange="document.getElementById('fileLabel').value=this.files[0]?this.files[0].name:''">
+        </div>
+        <div style="font-size:0.76rem;color:var(--text-muted);margin-top:6px;">
+          Hỗ trợ .csv, .xlsx — Cột 1: English, Cột 2: Vietnamese
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn-navy flex-grow-1" style="padding:13px;font-size:0.92rem;">
+          <i class="fas fa-plus me-1"></i>Create Package
+        </button>
+        <a href="{{ url_for('packages') }}" class="btn-cream" style="padding:13px 20px;">Cancel</a>
+      </div>
+
+    </form>
+  </div>
+</div>
 {% endblock %}

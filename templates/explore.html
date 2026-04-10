@@ -3,7 +3,7 @@
 
 {% block head_extra %}
 <style>
-/* Hide base navbar on this page, use custom one below */
+/* Hide base navbar, use custom one */
 .rw-navbar { display: none; }
 
 /* ── Custom navbar ── */
@@ -14,39 +14,41 @@
 }
 .lp-nav .inner {
   max-width: 1100px; margin: 0 auto; padding: 0 32px;
-  width: 100%; display: flex; align-items: center;
+  width: 100%; display: flex; align-items: center; position: relative;
 }
 .lp-logo {
   font-family: 'Inter', sans-serif; font-weight: 800;
   font-size: 1.05rem; color: var(--navy); text-decoration: none;
-  display: flex; align-items: center; gap: 8px; margin-right: 32px;
+  display: flex; align-items: center; gap: 8px;
 }
-.lp-nav-links { display: flex; align-items: center; gap: 2px; position: absolute; left: 50%; transform: translateX(-50%); }
+.lp-nav-links {
+  display: flex; align-items: center; gap: 2px;
+  position: absolute; left: 50%; transform: translateX(-50%);
+}
 .lp-nav-link {
   font-size: 0.87rem; font-weight: 500; color: var(--text-muted);
   text-decoration: none; padding: 6px 14px; border-radius: 8px; transition: color 0.15s;
 }
 .lp-nav-link:hover { color: var(--navy); }
-.lp-nav-link.active { color: var(--navy); font-weight: 600; border-bottom: 2px solid var(--navy); border-radius: 0; padding-bottom: 4px; }
-.lp-nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
-.lp-icon-btn {
-  width: 34px; height: 34px; border-radius: 50%;
-  border: 1.5px solid var(--border); background: var(--off-white);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text-muted); font-size: 0.9rem; cursor: pointer; transition: all 0.15s;
-  text-decoration: none;
+.lp-nav-link.active {
+  color: var(--navy); font-weight: 600;
+  border-bottom: 2px solid var(--navy); border-radius: 0; padding-bottom: 4px;
 }
-.lp-icon-btn:hover { border-color: var(--navy); color: var(--navy); }
+.lp-nav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
 .btn-start-sm {
   background: var(--navy); color: white; border: none;
   border-radius: 30px; padding: 8px 20px; font-size: 0.84rem; font-weight: 600;
   cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.15s;
+  text-decoration: none;
 }
 .btn-start-sm:hover { opacity: 0.88; color: white; }
+.lp-nav-signin {
+  font-size: 0.87rem; font-weight: 500; color: var(--text-muted); text-decoration: none; padding: 6px 14px;
+}
+.lp-nav-signin:hover { color: var(--navy); }
 
-/* ── Explore page layout ── */
+/* ── Page ── */
 .exp-page { max-width: 1100px; margin: 0 auto; padding: 56px 32px 80px; }
-
 .exp-hero { text-align: center; margin-bottom: 40px; }
 .exp-hero h1 {
   font-family: 'Inter', sans-serif; font-size: 2.4rem; font-weight: 800;
@@ -54,9 +56,11 @@
 }
 .exp-hero p { font-size: 0.95rem; color: var(--text-muted); max-width: 480px; margin: 0 auto; line-height: 1.75; }
 
-/* Search */
 .exp-search-wrap { max-width: 600px; margin: 32px auto; position: relative; }
-.exp-search-wrap i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.84rem; z-index: 1; }
+.exp-search-wrap .si {
+  position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+  color: var(--text-muted); font-size: 0.84rem; pointer-events: none;
+}
 .exp-search-wrap input {
   width: 100%; border: 1.5px solid var(--border); border-radius: 14px;
   padding: 14px 18px 14px 46px; font-size: 0.9rem; font-family: 'Inter', sans-serif;
@@ -66,18 +70,18 @@
 .exp-search-wrap input:focus { border-color: var(--navy); }
 .exp-search-wrap input::placeholder { color: #b0bcc8; }
 
-/* Filter tabs */
-.exp-filters { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 40px; }
+.exp-filters {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; flex-wrap: wrap; margin-bottom: 40px;
+}
 .exp-filter {
   padding: 8px 20px; border-radius: 30px; font-size: 0.84rem; font-weight: 600;
-  cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--text-muted);
-  transition: all 0.15s; font-family: 'Inter', sans-serif;
+  border: 1.5px solid var(--border); background: white; color: var(--text-muted);
+  transition: all 0.15s; text-decoration: none; display: inline-block;
 }
 .exp-filter:hover { border-color: var(--navy); color: var(--navy); }
-.exp-filter.f-all   { background: var(--navy);  color: white; border-color: var(--navy); }
-.exp-filter.f-green { background: var(--green); color: white; border-color: var(--green); }
+.exp-filter.active { background: var(--navy); color: white; border-color: var(--navy); }
 
-/* Package grid */
 .exp-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-bottom: 48px; }
 @media (max-width: 860px) { .exp-grid { grid-template-columns: repeat(2,1fr); } }
 @media (max-width: 560px) { .exp-grid { grid-template-columns: 1fr; } }
@@ -87,89 +91,46 @@
   border: 1px solid var(--border); transition: box-shadow 0.2s, transform 0.15s;
 }
 .exp-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
-
 .exp-card-img-wrap { position: relative; }
-.exp-card-img-bg { width: 100%; aspect-ratio: 3/2; background-size: cover; background-position: center; }
-
+.exp-card-img-bg { width: 100%; aspect-ratio: 3/2; }
 .exp-cat-badge {
   position: absolute; top: 12px; left: 12px;
-  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.09em;
-  text-transform: uppercase; color: white; padding: 4px 10px; border-radius: 20px;
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+  color: white; padding: 4px 10px; border-radius: 20px;
+  background: rgba(13,31,60,0.72); backdrop-filter: blur(4px);
 }
-.exp-cat-badge.academic     { background: rgba(30,120,70,0.92); }
-.exp-cat-badge.business     { background: rgba(190,100,20,0.92); }
-.exp-cat-badge.standardized { background: rgba(100,40,160,0.92); }
-.exp-cat-badge.daily-life   { background: rgba(30,90,180,0.92); }
-.exp-cat-badge.technology   { background: rgba(20,130,160,0.92); }
-.exp-cat-badge.topic {
-  background: rgba(13,31,60,0.88);
-  font-size: 0.58rem;
-  max-width: calc(100% - 4px);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: inline-block;
-  vertical-align: top;
-}
-.exp-learners-inline { font-weight: 600; color: var(--navy); margin-left: 6px; }
-
 .exp-card-body { padding: 18px 20px 16px; }
-.exp-card-name { font-size: 1.05rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; letter-spacing: -0.01em; line-height: 1.3; }
+.exp-card-name { font-size: 1.05rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; line-height: 1.3; }
 .exp-card-meta { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 14px; }
-.exp-card-actions { display: flex; align-items: center; gap: 10px; }
 .btn-learn-dark {
-  flex: 1; background: var(--navy); color: white; border: none;
+  display: block; width: 100%; background: var(--navy); color: white; border: none;
   border-radius: var(--r-md); padding: 10px 0; font-size: 0.85rem; font-weight: 600;
-  cursor: pointer; text-align: center; font-family: 'Inter', sans-serif; transition: opacity 0.15s;
+  cursor: pointer; text-align: center; font-family: 'Inter', sans-serif;
+  transition: opacity 0.15s; text-decoration: none;
 }
-.btn-learn-dark:hover { opacity: 0.88; }
-.btn-bm {
-  width: 40px; height: 40px; border-radius: var(--r-md);
-  border: 1.5px solid var(--border); background: white;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text-muted); cursor: pointer; transition: all 0.15s; flex-shrink: 0;
-}
-.btn-bm:hover { border-color: var(--navy); color: var(--navy); }
+.btn-learn-dark:hover { opacity: 0.88; color: white; }
 
-/* Pagination */
-.exp-pagination { display: flex; align-items: center; justify-content: center; gap: 6px; }
-.pag-btn {
-  width: 40px; height: 40px; border-radius: 50%;
-  border: 1.5px solid var(--border); background: white;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.88rem; font-weight: 600; color: var(--text-muted);
-  cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif;
-}
-.pag-btn:hover { border-color: var(--navy); color: var(--navy); }
-.pag-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
-.pag-dots { color: var(--text-muted); padding: 0 4px; font-weight: 600; }
+.exp-empty { text-align: center; padding: 64px 24px; color: var(--text-muted); }
+.exp-empty i { font-size: 2.5rem; margin-bottom: 16px; color: var(--border); display: block; }
 
-/* ── AUTH MODAL ── */
-.auth-overlay {
-  display: none; position: fixed; inset: 0; z-index: 1000;
-  background: rgba(7,16,32,0.55); backdrop-filter: blur(4px);
-  align-items: center; justify-content: center;
-}
+/* Footer override */
+footer { background: white !important; border-top: 1px solid var(--border); padding: 40px 32px 32px !important; }
+.footer-inner-unified { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+.footer-brand-unified { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1rem; color: var(--navy); margin-bottom: 4px; }
+.footer-tagline-unified { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px; }
+.footer-copy-unified { font-size: 0.74rem; color: #b0b8c4; }
+.footer-links-unified { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
+.footer-link-unified { font-size: 0.8rem; color: var(--text-muted); text-decoration: none; font-weight: 500; transition: color 0.15s; }
+.footer-link-unified:hover { color: var(--navy); }
+
+/* Guest auth modal */
+.auth-overlay { display: none; position: fixed; inset: 0; z-index: 1000; background: rgba(7,16,32,0.55); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
 .auth-overlay.open { display: flex; }
 .auth-modal-wrap { position: relative; }
-.auth-modal {
-  background: white; border-radius: 24px;
-  width: 100%; max-width: 500px; margin: 16px;
-  box-shadow: 0 24px 80px rgba(7,16,32,0.22);
-  overflow: hidden;
-  animation: modalIn 0.28s cubic-bezier(0.34,1.2,0.64,1);
-}
+.auth-modal { background: white; border-radius: 24px; width: 100%; max-width: 500px; margin: 16px; box-shadow: 0 24px 80px rgba(7,16,32,0.22); overflow: hidden; animation: modalIn 0.28s cubic-bezier(0.34,1.2,0.64,1); }
 @keyframes modalIn { from { transform: scale(0.88) translateY(20px); opacity: 0; } }
-
 .auth-tabs { display: flex; border-bottom: 1px solid var(--border); }
-.auth-tab {
-  flex: 1; padding: 18px; text-align: center;
-  font-size: 0.92rem; font-weight: 600; color: var(--text-muted);
-  cursor: pointer; border-bottom: 2.5px solid transparent;
-  transition: color 0.15s, border-color 0.15s;
-  background: none; border-top: none; border-left: none; border-right: none;
-  font-family: 'Inter', sans-serif;
-}
+.auth-tab { flex: 1; padding: 18px; text-align: center; font-size: 0.92rem; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 2.5px solid transparent; transition: color 0.15s, border-color 0.15s; background: none; border-top: none; border-left: none; border-right: none; font-family: 'Inter', sans-serif; }
 .auth-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
 .auth-body { padding: 32px 36px 36px; }
 .auth-panel { display: none; }
@@ -177,110 +138,98 @@
 .auth-title { font-family: 'Inter', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
 .auth-sub { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 28px; line-height: 1.5; }
 .field-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 7px; display: block; }
-.field-input {
-  width: 100%; border: 1.5px solid var(--border); border-radius: var(--r-md);
-  padding: 13px 15px; font-size: 0.9rem; font-family: 'Inter', sans-serif;
-  background: white; color: var(--text); outline: none; transition: border-color 0.15s;
-  margin-bottom: 16px;
-}
+.field-input { width: 100%; border: 1.5px solid var(--border); border-radius: var(--r-md); padding: 13px 15px; font-size: 0.9rem; font-family: 'Inter', sans-serif; background: white; color: var(--text); outline: none; transition: border-color 0.15s; margin-bottom: 16px; }
 .field-input:focus { border-color: var(--navy); }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.btn-auth {
-  width: 100%; background: var(--navy); color: white; border: none;
-  border-radius: var(--r-md); padding: 14px; font-size: 0.94rem; font-weight: 700;
-  cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.15s;
-  margin-top: 6px;
-}
+.btn-auth { width: 100%; background: var(--navy); color: white; border: none; border-radius: var(--r-md); padding: 14px; font-size: 0.94rem; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.15s; margin-top: 6px; }
 .btn-auth:hover { opacity: 0.88; }
-.auth-close {
-  position: absolute; top: 14px; right: 14px;
-  background: none; border: none; font-size: 1rem; color: var(--text-muted);
-  cursor: pointer; width: 32px; height: 32px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s; z-index: 1;
-}
+.auth-close { position: absolute; top: 14px; right: 14px; background: none; border: none; font-size: 1rem; color: var(--text-muted); cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.15s; z-index: 1; }
 .auth-close:hover { background: var(--off-white); color: var(--navy); }
-
-/* ── UNIFIED FOOTER ── */
-footer {
-  background: white !important;
-  border-top: 1px solid var(--border);
-  padding: 40px 32px 32px !important;
-  margin-top: 0 !important;
-}
-.footer-inner-unified {
-  max-width: 1100px; margin: 0 auto;
-  display: flex; justify-content: space-between; align-items: flex-start;
-  gap: 24px; flex-wrap: wrap;
-}
-.footer-brand-unified {
-  font-family: 'Inter', sans-serif; font-weight: 800;
-  font-size: 1rem; color: var(--navy); margin-bottom: 4px;
-}
-.footer-tagline-unified { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px; }
-.footer-copy-unified { font-size: 0.74rem; color: #b0b8c4; }
-.footer-links-unified { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
-.footer-link-unified {
-  font-size: 0.8rem; color: var(--text-muted); text-decoration: none;
-  font-weight: 500; transition: color 0.15s;
-}
-.footer-link-unified:hover { color: var(--navy); }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- Custom navbar -->
+<!-- Custom navbar adapts to auth state -->
 <nav class="lp-nav">
   <div class="inner">
     <a href="{{ url_for('index') }}" class="lp-logo">
       <i class="fas fa-book-open" style="font-size:0.88rem;"></i>RundaWord
     </a>
     <div class="lp-nav-links">
-      <a href="{{ url_for('index') }}" class="lp-nav-link">Trang chủ</a>
-      <a href="{{ url_for('explore') }}" class="lp-nav-link active">Gói từ vựng</a>
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard') }}" class="lp-nav-link">Dashboard</a>
+        <a href="{{ url_for('packages') }}"  class="lp-nav-link">Library</a>
+        <a href="{{ url_for('explore') }}"   class="lp-nav-link active">Explore</a>
+      {% else %}
+        <a href="{{ url_for('guest_home') }}" class="lp-nav-link">Trang chủ</a>
+        <a href="{{ url_for('explore') }}"    class="lp-nav-link active">Gói từ vựng</a>
+      {% endif %}
     </div>
     <div class="lp-nav-right">
-      <a href="#" class="lp-icon-btn" title="Notifications" onclick="openAuth('login');return false;">
-        <i class="fas fa-bell"></i>
-      </a>
-      <a href="#" class="lp-icon-btn" title="Sign in" onclick="openAuth('login');return false;">
-        <i class="fas fa-user"></i>
-      </a>
-      <button class="btn-start-sm" onclick="openAuth('register')">Bắt đầu học</button>
+      {% if current_user.is_authenticated %}
+      <div class="dropdown">
+        <a class="rw-avatar-btn" href="#" data-bs-toggle="dropdown" role="button">
+          <i class="fas fa-user"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" style="min-width:180px;">
+          <li>
+            <div class="px-3 py-2" style="border-bottom:1px solid var(--border);">
+              <div style="font-weight:700;font-size:0.88rem;color:var(--navy);">{{ current_user.name or current_user.username }}</div>
+              <div style="font-size:0.74rem;color:var(--text-muted);">{{ current_user.email }}</div>
+            </div>
+          </li>
+          <li><a class="dropdown-item mt-1" href="{{ url_for('profile') }}">
+            <i class="fas fa-user me-2" style="color:var(--text-muted);width:14px;"></i>Profile
+          </a></li>
+          {% if current_user.is_admin %}
+          <li><a class="dropdown-item" href="{{ url_for('admin_dashboard') }}">
+            <i class="fas fa-shield-alt me-2 text-muted"></i>Admin Panel
+          </a></li>
+          {% endif %}
+          <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">
+            <i class="fas fa-sign-out-alt me-2" style="width:14px;"></i>Sign out
+          </a></li>
+        </ul>
+      </div>
+      {% else %}
+        <a href="{{ url_for('login') }}" class="lp-nav-signin">Đăng nhập</a>
+        <a href="{{ url_for('register') }}" class="btn-start-sm">Bắt đầu học</a>
+      {% endif %}
     </div>
   </div>
 </nav>
 
 <div class="exp-page">
 
-  <!-- Header -->
   <div class="exp-hero">
     <h1>Thư viện Gói từ vựng</h1>
-    <p>Khám phá hàng nghìn bộ từ vựng được chia sẻ bởi cộng đồng RundaWord.</p>
+    <p>Khám phá các bộ từ vựng được chia sẻ bởi cộng đồng RundaWord.</p>
   </div>
 
   <!-- Search -->
   <div class="exp-search-wrap">
-    <i class="fas fa-search"></i>
+    <i class="fas fa-search si"></i>
     <form method="GET" action="{{ url_for('explore') }}" style="display:contents;">
+      {% if topic_filter %}<input type="hidden" name="topic" value="{{ topic_filter }}">{% endif %}
       <input type="text" name="q"
-        placeholder="Tìm kiếm gói từ vựng, chủ đề hoặc tác giả…"
-        value="{{ search_query or '' }}">
+        placeholder="Tìm kiếm tên gói, tác giả hoặc chủ đề…"
+        value="{{ search_query or '' }}"
+        style="width:100%;">
     </form>
   </div>
 
-  <!-- Filter tabs -->
+  <!-- Topic filters — only real topics from DB -->
   <div class="exp-filters">
-    <button class="exp-filter f-all"   onclick="setFilter(this,'all')">Tất cả</button>
-    <button class="exp-filter"         onclick="setFilter(this,'academic')">Academic</button>
-    <button class="exp-filter"         onclick="setFilter(this,'business')">Business</button>
-    <button class="exp-filter"         onclick="setFilter(this,'standardized')">Standardized</button>
-    <button class="exp-filter"         onclick="setFilter(this,'daily')">Daily Life</button>
-    <button class="exp-filter"         onclick="setFilter(this,'technology')">Technology</button>
+    <a href="{{ url_for('explore', q=search_query or '') }}"
+       class="exp-filter {% if not topic_filter %}active{% endif %}">Tất cả</a>
+    {% for topic in available_topics %}
+    <a href="{{ url_for('explore', q=search_query or '', topic=topic) }}"
+       class="exp-filter {% if topic_filter == topic %}active{% endif %}">{{ topic }}</a>
+    {% endfor %}
   </div>
 
-  <!-- Package grid -->
+  <!-- Packages -->
   {% set bg_colors = [
     'linear-gradient(135deg,#1a3060,#2a5ccf)',
     'linear-gradient(135deg,#0d3a6a,#1a7ac0)',
@@ -289,78 +238,55 @@ footer {
     'linear-gradient(135deg,#0d3a20,#1a8a4a)',
     'linear-gradient(135deg,#2a1a3a,#6a2a9a)'
   ] %}
-  {% set cats = ['academic','business','technology','standardized','daily-life','academic'] %}
-  {% set cat_labels = ['ACADEMIC','BUSINESS','TECHNOLOGY','STANDARDIZED','DAILY LIFE','ACADEMIC'] %}
 
+  {% if public_packages %}
   <div class="exp-grid">
-    {% if public_packages %}
-      {% for pkg in public_packages %}
-      <div class="exp-card">
-        <div class="exp-card-img-wrap">
-          <div class="exp-card-img-bg" style="background:{{ bg_colors[loop.index0 % 6] }};"></div>
-          <span class="exp-cat-badge topic" title="{{ pkg.topic or 'Others' }}">{{ pkg.topic or 'Others' }}</span>
-        </div>
-        <div class="exp-card-body">
-          <div class="exp-card-name">{{ pkg.package_name }}</div>
-          <div class="exp-card-meta">
-            by <strong>@{{ pkg.user.username if pkg.user else 'unknown' }}</strong>
-            <span class="exp-learners-inline"><i class="fas fa-users" style="font-size:0.72rem;"></i> {{ learner_counts.get(pkg.id, 0) }}</span>
-          </div>
-          <div class="exp-card-actions">
-            <button class="btn-learn-dark" onclick="openAuth('login')">Học ngay</button>
-            <button class="btn-bm" onclick="openAuth('login')" title="Save">
-              <i class="far fa-bookmark"></i>
-            </button>
-          </div>
-        </div>
+    {% for pkg in public_packages %}
+    <div class="exp-card">
+      <div class="exp-card-img-wrap">
+        <div class="exp-card-img-bg" style="background:{{ bg_colors[loop.index0 % 6] }};"></div>
+        {% if pkg.topic %}
+          <span class="exp-cat-badge">{{ pkg.topic }}</span>
+        {% endif %}
       </div>
-      {% endfor %}
+      <div class="exp-card-body">
+        <div class="exp-card-name">{{ pkg.package_name }}</div>
+        <div class="exp-card-meta">
+          by <strong>@{{ pkg.user.username if pkg.user else 'unknown' }}</strong>
+          · {{ pkg.vocabularies|length }} từ
+        </div>
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('package_detail', package_id=pkg.id) }}" class="btn-learn-dark">Học ngay</a>
+        {% else %}
+          <button class="btn-learn-dark" onclick="openAuth('login')">Học ngay</button>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="exp-empty">
+    <i class="fas fa-box-open"></i>
+    {% if search_query or topic_filter %}
+      <p style="font-size:0.95rem;font-weight:600;color:var(--navy);margin-bottom:6px;">Không tìm thấy kết quả</p>
+      <p style="font-size:0.85rem;">Thử tìm với từ khóa khác hoặc chọn chủ đề khác.</p>
+      <a href="{{ url_for('explore') }}" style="display:inline-block;margin-top:16px;font-size:0.84rem;font-weight:600;color:var(--navy);text-decoration:underline;">
+        Xem tất cả gói từ
+      </a>
     {% else %}
-      {% set demo = [
-        ('IELTS 8.0+ Essential Vocab','curator_jane',0),
-        ('Corporate Strategy & Finance','expert_lex',1),
-        ('Artificial Intelligence & ML','tech_wizard',2),
-        ('SAT Verbal Masterclass','academic_pro',3),
-        ('Nature & Environment Terms','green_earth',4),
-        ('Advanced Literature Analysis','scholar_mind',5),
-      ] %}
-      {% for name,author,idx in demo %}
-      <div class="exp-card">
-        <div class="exp-card-img-wrap">
-          <div class="exp-card-img-bg" style="background:{{ bg_colors[idx] }};"></div>
-          <span class="exp-cat-badge {{ cats[idx] }}">{{ cat_labels[idx] }}</span>
-        </div>
-        <div class="exp-card-body">
-          <div class="exp-card-name">{{ name }}</div>
-          <div class="exp-card-meta">
-            by <strong>@{{ author }}</strong>
-          </div>
-          <div class="exp-card-actions">
-            <button class="btn-learn-dark" onclick="openAuth('login')">Học ngay</button>
-            <button class="btn-bm" onclick="openAuth('login')" title="Save">
-              <i class="far fa-bookmark"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
+      <p style="font-size:0.95rem;font-weight:600;color:var(--navy);margin-bottom:6px;">Chưa có gói từ vựng nào</p>
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('create_package') }}" class="btn-learn-dark" style="display:inline-block;margin-top:16px;padding:10px 28px;width:auto;">Tạo gói từ</a>
+      {% endif %}
     {% endif %}
   </div>
+  {% endif %}
 
-  <!-- Pagination -->
-  <div class="exp-pagination">
-    <button class="pag-btn"><i class="fas fa-chevron-left" style="font-size:0.75rem;"></i></button>
-    <button class="pag-btn active">1</button>
-    <button class="pag-btn">2</button>
-    <button class="pag-btn">3</button>
-    <span class="pag-dots">…</span>
-    <button class="pag-btn">12</button>
-    <button class="pag-btn"><i class="fas fa-chevron-right" style="font-size:0.75rem;"></i></button>
-  </div>
+</div>
 
-</div><!-- /exp-page -->
-
-<!-- ── AUTH MODAL ── -->
+{# Auth modal — guests only #}
+{% if not current_user.is_authenticated %}
 <div class="auth-overlay" id="authOverlay" onclick="closeAuthOnBg(event)">
   <div class="auth-modal-wrap">
     <div class="auth-modal">
@@ -370,7 +296,6 @@ footer {
         <button class="auth-tab"        id="tabRegister" onclick="switchTab('register')">Đăng ký</button>
       </div>
       <div class="auth-body">
-        <!-- LOGIN -->
         <div class="auth-panel active" id="panelLogin">
           <div class="auth-title">Chào mừng trở lại</div>
           <div class="auth-sub">Đăng nhập để tiếp tục hành trình học của bạn.</div>
@@ -379,20 +304,13 @@ footer {
             <input type="text" name="email" class="field-input" placeholder="curator@scholar.edu" required>
             <label class="field-label">Mật khẩu</label>
             <input type="password" name="password" class="field-input" placeholder="••••••••" required>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;margin-top:-4px;">
-              <label style="display:flex;align-items:center;gap:7px;font-size:0.82rem;color:var(--text-muted);cursor:pointer;">
-                <input type="checkbox" style="accent-color:var(--navy);"> Ghi nhớ 7 ngày
-              </label>
-              <a href="#" style="font-size:0.82rem;color:var(--navy);text-decoration:none;font-weight:600;">Quên mật khẩu?</a>
-            </div>
             <button type="submit" class="btn-auth">Đăng nhập</button>
           </form>
           <p style="text-align:center;margin-top:18px;font-size:0.84rem;color:var(--text-muted);">
             Chưa có tài khoản?
-            <a href="#" onclick="switchTab('register');return false;" style="color:var(--navy);font-weight:700;text-decoration:none;margin-left:3px;">Đăng ký ngay</a>
+            <a href="#" onclick="switchTab('register');return false;" style="color:var(--navy);font-weight:700;text-decoration:none;">Đăng ký ngay</a>
           </p>
         </div>
-        <!-- REGISTER -->
         <div class="auth-panel" id="panelRegister">
           <div class="auth-title">Tạo tài khoản</div>
           <div class="auth-sub">Bắt đầu hành trình từ vựng của bạn ngay hôm nay.</div>
@@ -413,29 +331,23 @@ footer {
             <input type="password" name="password" class="field-input" placeholder="••••••••" required>
             <label class="field-label">Xác nhận mật khẩu</label>
             <input type="password" name="confirm_password" class="field-input" placeholder="••••••••" required>
-            <div style="margin-bottom:20px;">
-              <label style="display:flex;align-items:flex-start;gap:8px;font-size:0.82rem;color:var(--text-muted);cursor:pointer;line-height:1.5;">
-                <input type="checkbox" required style="accent-color:var(--navy);margin-top:3px;">
-                Tôi đồng ý với
-                <a href="#" style="color:var(--navy);font-weight:600;text-decoration:none;">Điều khoản</a> và
-                <a href="#" style="color:var(--navy);font-weight:600;text-decoration:none;">Chính sách</a>.
-              </label>
-            </div>
             <button type="submit" class="btn-auth">Tạo tài khoản</button>
           </form>
           <p style="text-align:center;margin-top:18px;font-size:0.84rem;color:var(--text-muted);">
             Đã có tài khoản?
-            <a href="#" onclick="switchTab('login');return false;" style="color:var(--navy);font-weight:700;text-decoration:none;margin-left:3px;">Đăng nhập</a>
+            <a href="#" onclick="switchTab('login');return false;" style="color:var(--navy);font-weight:700;text-decoration:none;">Đăng nhập</a>
           </p>
         </div>
       </div>
     </div>
   </div>
 </div>
+{% endif %}
 
 {% endblock %}
 
 {% block scripts %}
+{% if not current_user.is_authenticated %}
 <script>
 function openAuth(tab) {
   document.getElementById('authOverlay').classList.add('open');
@@ -456,36 +368,31 @@ function switchTab(tab) {
   document.getElementById('tab' + key).classList.add('active');
   document.getElementById('panel' + key).classList.add('active');
 }
-function setFilter(btn, cat) {
-  document.querySelectorAll('.exp-filter').forEach(b => {
-    b.classList.remove('f-all','f-green');
-  });
-  btn.classList.add(cat === 'all' ? 'f-all' : 'f-green');
-}
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAuth(); });
 </script>
-
-<!-- Override base footer with unified version -->
+{% endif %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const footer = document.querySelector('footer');
-  if (footer) {
-    footer.innerHTML = `
-      <div class="footer-inner-unified">
-        <div>
-          <div class="footer-brand-unified">RundaWord</div>
-          <div class="footer-tagline-unified">Nền tảng từ vựng dựa trên khoa học não bộ.</div>
-          <div class="footer-copy-unified">© 2026 RundaWord. All rights reserved.</div>
-        </div>
-        <div class="footer-links-unified">
-          <a href="#" class="footer-link-unified">Điều khoản</a>
-          <a href="#" class="footer-link-unified">Bảo mật</a>
-          <a href="/login" class="footer-link-unified">Đăng nhập</a>
-          <a href="/register" class="footer-link-unified">Đăng ký</a>
-        </div>
+  if (!footer) return;
+  footer.innerHTML = `
+    <div class="footer-inner-unified">
+      <div>
+        <div class="footer-brand-unified">RundaWord</div>
+        <div class="footer-tagline-unified">Nền tảng từ vựng dựa trên khoa học não bộ.</div>
+        <div class="footer-copy-unified">© 2026 RundaWord. All rights reserved.</div>
       </div>
-    `;
-  }
+      <div class="footer-links-unified">
+        <a href="#" class="footer-link-unified">Điều khoản</a>
+        <a href="#" class="footer-link-unified">Bảo mật</a>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard') }}" class="footer-link-unified">Dashboard</a>
+        {% else %}
+        <a href="/login"    class="footer-link-unified">Đăng nhập</a>
+        <a href="/register" class="footer-link-unified">Đăng ký</a>
+        {% endif %}
+      </div>
+    </div>`;
 });
 </script>
 {% endblock %}

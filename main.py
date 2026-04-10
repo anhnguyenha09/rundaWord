@@ -14,7 +14,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from sqlalchemy.sql import func
-from sqlalchemy import inspect, text
 import random
 
 load_dotenv()
@@ -33,7 +32,6 @@ ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xls'}
 
 ROLE_USER  = 0
 ROLE_ADMIN = 1
-
 PACKAGE_TOPICS = (
     'Beginner English',
     'Education & Learning',
@@ -68,22 +66,50 @@ def normalize_text(text: str) -> str:
     return re.sub(r'\s+', ' ', stripped)
 
 
-def search_packages(q: str):
-    q_norm   = normalize_text(q)
-    all_pkgs = VocabPackage.query \
-        .filter(VocabPackage.is_public == True) \
-        .order_by(VocabPackage.updated_at.desc()).all()
+def search_packages(q: str, include_private_for_user=None):
+    """
+    Search public packages by name, author username, or topic.
+    If include_private_for_user is set, also includes that user's private packages.
+    """
+    q_norm = normalize_text(q)
+
+    query = VocabPackage.query.filter(VocabPackage.is_public == True)
+    if include_private_for_user:
+        from sqlalchemy import or_
+        query = VocabPackage.query.filter(
+            (VocabPackage.is_public == True) |
+            (VocabPackage.user_id == include_private_for_user)
+        )
+
+    all_pkgs = query.order_by(VocabPackage.updated_at.desc()).all()
     results = []
     for pkg in all_pkgs:
         name_norm  = normalize_text(pkg.package_name)
         owner_norm = normalize_text(pkg.user.username) if pkg.user else ''
-        if q_norm in name_norm or q_norm in owner_norm:
+        topic_norm = normalize_text(pkg.topic or '') if hasattr(pkg, 'topic') else ''
+        desc_norm  = normalize_text(pkg.package_description or '')
+        if (q_norm in name_norm or q_norm in owner_norm
+                or q_norm in topic_norm or q_norm in desc_norm):
             results.append(pkg)
     return results[:20]
 
 
+def get_available_topics():
+    """Return topic list from catalog table in DB."""
+    rows = TopicCatalog.query.order_by(TopicCatalog.name).all()
+    return [r.name for r in rows]
+
+
+def get_topics_for_user(user_id=None):
+    """
+    Return all allowed topics from DB catalog.
+    user_id kept for compatibility with existing route calls.
+    """
+    _ = user_id
+    return get_available_topics()
+
+
 def admin_required(f):
-    """Decorator: route only accessible to logged-in admins."""
     @wraps(f)
     def decorated(*args, **kwargs):
         if not current_user.is_authenticated or current_user.role != ROLE_ADMIN:
@@ -109,7 +135,7 @@ class User(UserMixin, db.Model):
     name          = db.Column(db.String(100))
     email         = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    role          = db.Column(db.Integer, default=ROLE_USER, nullable=False)  # 0=user, 1=admin
+    role          = db.Column(db.Integer, default=ROLE_USER, nullable=False)
     created_at    = db.Column(db.DateTime, default=datetime.utcnow)
 
     packages = db.relationship(
@@ -142,11 +168,11 @@ class VocabPackage(db.Model):
     id                  = db.Column(db.Integer, primary_key=True)
     package_name        = db.Column(db.String(100), nullable=False)
     package_description = db.Column(db.Text)
+    topic               = db.Column(db.String(80))          # NEW: topic/category field
     created_at          = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at          = db.Column(db.DateTime, default=datetime.utcnow)
     user_id             = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     is_public           = db.Column(db.Boolean, default=True)
-    topic               = db.Column(db.String(120), nullable=False, default='Others')
     vocabularies = db.relationship(
         'Vocabulary', backref='package', lazy=True, cascade='all, delete-orphan'
     )
@@ -160,27 +186,27 @@ class Vocabulary(db.Model):
     package_id = db.Column(db.Integer, db.ForeignKey('vocab_packages.id'), nullable=False)
 
 
+class TopicCatalog(db.Model):
+    __tablename__ = 'topic_catalog'
+    id   = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), unique=True, nullable=False)
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-def normalize_package_topic(raw):
-    t = (raw or '').strip()
-    return t if t in PACKAGE_TOPICS else 'Others'
-
-
-def learner_counts_for_package_ids(package_ids):
-    """Số người đã thêm gói vào thư viện (bảng user_saved_packages)."""
-    if not package_ids:
-        return {}
-    rows = db.session.query(
-        user_saved_packages.c.package_id,
-        func.count(user_saved_packages.c.user_id)
-    ).filter(
-        user_saved_packages.c.package_id.in_(package_ids)
-    ).group_by(user_saved_packages.c.package_id).all()
-    return {pid: n for pid, n in rows}
+def ensure_topic_catalog():
+    """Seed and keep the topic catalog in DB."""
+    existing = {r.name for r in TopicCatalog.query.all()}
+    changed = False
+    for topic in PACKAGE_TOPICS:
+        if topic not in existing:
+            db.session.add(TopicCatalog(name=topic))
+            changed = True
+    if changed:
+        db.session.commit()
 
 
 def allowed_file(filename):
@@ -231,26 +257,6 @@ def parse_vocab_file(file_content, filename):
     return words
 
 
-def ensure_vocab_package_schema():
-    """Thêm cột topic cho DB SQLite cũ (sau khi db.create_all() không alter bảng có sẵn)."""
-    try:
-        insp = inspect(db.engine)
-        cols = {c['name'] for c in insp.get_columns('vocab_packages')}
-        if 'topic' not in cols:
-            with db.engine.begin() as conn:
-                conn.execute(text(
-                    "ALTER TABLE vocab_packages ADD COLUMN topic VARCHAR(120) DEFAULT 'Others'"
-                ))
-            print('[migrate] Added column vocab_packages.topic')
-    except Exception as ex:
-        print(f'[migrate] Schema: {ex}')
-
-
-@app.context_processor
-def inject_package_topics():
-    return dict(PACKAGE_TOPICS=PACKAGE_TOPICS, learner_counts={})
-
-
 # ==================== ROUTES ====================
 
 @app.route('/')
@@ -261,59 +267,56 @@ def index():
 
 
 # ──────────────────────────────────────────────
-# GUEST ROUTES (no login required)
+# GUEST ROUTES
 # ──────────────────────────────────────────────
 
 @app.route('/home')
 def guest_home():
-    """Public landing page - visible to guests and logged-in users."""
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-
     public_packages = VocabPackage.query \
         .filter(VocabPackage.is_public == True) \
         .order_by(func.random()) \
         .limit(12).all()
-    lc_ids = [p.id for p in public_packages]
-    learner_counts = learner_counts_for_package_ids(lc_ids)
+    return render_template('landing.html', public_packages=public_packages)
 
-    return render_template(
-        'landing.html',
-        public_packages=public_packages,
-        learner_counts=learner_counts
-    )
-
-
-@app.route('/public/package/<int:package_id>')
-def guest_package_detail(package_id):
-    """Public package detail — guests can view vocab list but not study modes."""
-    package = VocabPackage.query.get_or_404(package_id)
-    if not package.is_public:
-        abort(404)
-    return render_template('explore.html', package=package)
 
 @app.route('/explore')
 def explore():
-    q = request.args.get('q', '').strip()
+    """
+    Public explore page — accessible to both guests and logged-in users.
+    Shows all public packages with search and topic filtering.
+    """
+    q            = request.args.get('q', '').strip()
+    topic_filter = request.args.get('topic', '').strip()
+    available_topics = get_available_topics()
+    if topic_filter and topic_filter not in available_topics:
+        topic_filter = ''
+
+    # Base query: all public packages
+    pkg_query = VocabPackage.query.filter(VocabPackage.is_public == True)
+
+    # Apply topic filter
+    if topic_filter:
+        pkg_query = pkg_query.filter(VocabPackage.topic == topic_filter)
+
+    # Apply text search (name, author, description)
     if q:
         public_packages = search_packages(q)
+        # Re-apply topic filter on search results if needed
+        if topic_filter:
+            public_packages = [p for p in public_packages if p.topic == topic_filter]
     else:
-        public_packages = VocabPackage.query \
-            .filter(VocabPackage.is_public == True) \
-            .order_by(VocabPackage.updated_at.desc()).all()
-
-    if current_user.is_authenticated:
-        return redirect(url_for('packages'))
-
-    lc_ids = [p.id for p in public_packages]
-    learner_counts = learner_counts_for_package_ids(lc_ids)
+        public_packages = pkg_query.order_by(VocabPackage.updated_at.desc()).all()
 
     return render_template(
         'explore.html',
         public_packages=public_packages,
         search_query=q,
-        learner_counts=learner_counts
+        topic_filter=topic_filter,
+        available_topics=available_topics,
     )
+
 
 # ──────────────────────────────────────────────
 # AUTH
@@ -374,16 +377,34 @@ def logout():
 
 
 # ──────────────────────────────────────────────
-# DASHBOARD (logged-in users)
+# DASHBOARD
 # ──────────────────────────────────────────────
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    q = request.args.get('q', '').strip()
+    q            = request.args.get('q', '').strip()
+    topic_filter = request.args.get('topic', '').strip()
+    available_topics = get_topics_for_user(current_user.id)
+    if topic_filter and topic_filter not in available_topics:
+        topic_filter = ''
     search_results = None
-    if q:
-        search_results = search_packages(q)
+
+    if q or topic_filter:
+        # Search public packages + user's own packages
+        if q:
+            results = search_packages(q, include_private_for_user=current_user.id)
+        else:
+            results = VocabPackage.query.filter(
+                (VocabPackage.is_public == True) |
+                (VocabPackage.user_id == current_user.id)
+            ).order_by(VocabPackage.updated_at.desc()).all()
+
+        # Apply topic filter on top
+        if topic_filter:
+            results = [p for p in results if (p.topic or '') == topic_filter]
+
+        search_results = results
 
     recent_packages = VocabPackage.query \
         .filter_by(user_id=current_user.id) \
@@ -399,13 +420,15 @@ def dashboard():
         .order_by(func.random()) \
         .limit(6).all()
 
+    # Build 3-question quick quiz
     user_packages = VocabPackage.query.filter_by(user_id=current_user.id).all()
     quiz_package  = random.choice(user_packages) if user_packages else None
     quiz_words    = []
     if quiz_package:
         vocabs = list(quiz_package.vocabularies)
         if len(vocabs) >= 2:
-            sample = random.sample(vocabs, min(5, len(vocabs)))
+            # Pick up to 3 questions
+            sample = random.sample(vocabs, min(3, len(vocabs)))
             for v in sample:
                 wrong_pool = [x.word_vi for x in vocabs if x.id != v.id]
                 wrong      = random.sample(wrong_pool, min(3, len(wrong_pool)))
@@ -414,11 +437,6 @@ def dashboard():
                 quiz_words.append({
                     "word": v.word_en, "correct": v.word_vi, "options": options
                 })
-
-    id_set = []
-    for lst in (recent_packages, saved_recent, public_packages, search_results or []):
-        id_set.extend(p.id for p in lst)
-    learner_counts = learner_counts_for_package_ids(list(set(id_set)))
 
     return render_template(
         'index.html',
@@ -429,7 +447,8 @@ def dashboard():
         quiz_package=quiz_package,
         search_results=search_results,
         search_query=q,
-        learner_counts=learner_counts
+        topic_filter=topic_filter,
+        available_topics=available_topics,
     )
 
 
@@ -476,7 +495,7 @@ def packages():
     tab = request.args.get('tab', 'mine')
 
     if q:
-        pkgs       = search_packages(q)
+        pkgs       = search_packages(q, include_private_for_user=current_user.id)
         saved_pkgs = []
         if not pkgs:
             flash('Không tìm thấy gói từ phù hợp.', 'warning')
@@ -490,8 +509,20 @@ def packages():
                 .order_by(VocabPackage.updated_at.desc()).all()
             saved_pkgs = []
 
-    id_set = [p.id for p in pkgs] + [p.id for p in saved_pkgs]
-    learner_counts = learner_counts_for_package_ids(id_set)
+    learner_counts = {}
+    all_visible_pkgs = pkgs + saved_pkgs
+    if all_visible_pkgs:
+        pkg_ids = list({p.id for p in all_visible_pkgs})
+        rows = (
+            db.session.query(
+                user_saved_packages.c.package_id,
+                func.count(user_saved_packages.c.user_id)
+            )
+            .filter(user_saved_packages.c.package_id.in_(pkg_ids))
+            .group_by(user_saved_packages.c.package_id)
+            .all()
+        )
+        learner_counts = {package_id: count for package_id, count in rows}
 
     return render_template(
         'packages.html',
@@ -510,59 +541,87 @@ def package_detail(package_id):
         flash('Bạn không có quyền truy cập gói từ này!', 'danger')
         return redirect(url_for('packages'))
     is_saved = current_user.has_saved(package) if not is_owner else False
-    learner_count = package.saved_by.count()
     return render_template(
-        'package_detail.html',
-        package=package,
-        is_owner=is_owner,
-        is_saved=is_saved,
-        learner_count=learner_count
+        'package_detail.html', package=package, is_owner=is_owner, is_saved=is_saved
     )
 
 
 @app.route('/create', methods=['GET', 'POST'])
 @login_required
 def create_package():
+    available_topics = get_available_topics()
     if request.method == 'POST':
+        action = (request.form.getlist('action') or ['preview'])[-1]
+        if action == 'discard':
+            flash('Đã hủy tạo gói từ.', 'info')
+            return redirect(url_for('packages'))
+
         package_name = request.form.get('package_name', '').strip()
         description  = request.form.get('description',  '').strip()
+        topic        = request.form.get('topic', '').strip()
         is_public    = request.form.get('is_public') == 'true'
-        topic          = normalize_package_topic(request.form.get('topic'))
 
         if not package_name:
             flash('Vui lòng nhập tên gói từ!', 'danger')
-            return render_template('create_package.html')
+            return render_template('create_package.html', available_topics=available_topics)
+
+        if topic and topic not in available_topics:
+            topic = None
+
+        file = request.files.get('vocab_file')
+        if action == 'preview' and file and file.filename and allowed_file(file.filename):
+            result = parse_vocab_file(file.read(), file.filename)
+            if isinstance(result, str):
+                flash(f'Lỗi file: {result}', 'warning')
+                return render_template('create_package.html', available_topics=available_topics)
+
+            return render_template(
+                'create_package_review.html',
+                package_name=package_name,
+                description=description,
+                topic=topic or '',
+                is_public=is_public,
+                available_topics=available_topics,
+                words=result
+            )
+
+        # Create directly (without review) if no valid file is uploaded.
+        words = []
+        if action == 'create_final':
+            word_ens = request.form.getlist('word_en[]')
+            word_vis = request.form.getlist('word_vi[]')
+            for en, vi in zip(word_ens, word_vis):
+                en, vi = en.strip(), vi.strip()
+                if en and vi:
+                    words.append((en, vi))
 
         new_package = VocabPackage(
             package_name=package_name,
             package_description=description,
+            topic=topic or None,
             user_id=current_user.id,
-            is_public=is_public,
-            topic=topic
+            is_public=is_public
         )
         db.session.add(new_package)
         db.session.flush()
 
-        file = request.files.get('vocab_file')
-        if file and file.filename and allowed_file(file.filename):
-            result = parse_vocab_file(file.read(), file.filename)
-            if isinstance(result, str):
-                flash(f'Lỗi file: {result}', 'warning')
-            else:
-                for en, vi in result:
-                    db.session.add(Vocabulary(word_en=en, word_vi=vi, package_id=new_package.id))
+        for en, vi in words:
+            db.session.add(Vocabulary(word_en=en, word_vi=vi, package_id=new_package.id))
 
         db.session.commit()
         flash('Tạo gói từ thành công!', 'success')
         return redirect(url_for('package_detail', package_id=new_package.id))
 
-    return render_template('create_package.html')
+    return render_template('create_package.html', available_topics=available_topics)
 
 
 @app.route('/package/<int:package_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_package(package_id):
     package = VocabPackage.query.get_or_404(package_id)
+    available_topics = get_topics_for_user(current_user.id)
+    if package.topic and package.topic not in available_topics:
+        available_topics = sorted(set(available_topics + [package.topic]))
 
     if package.user_id != current_user.id and not current_user.is_admin:
         flash('Bạn không có quyền chỉnh sửa gói từ này!', 'danger')
@@ -574,8 +633,11 @@ def edit_package(package_id):
 
         package.package_name        = request.form.get('package_name', '').strip()
         package.package_description = request.form.get('description', '').strip()
+        selected_topic              = request.form.get('topic', '').strip()
+        package.topic               = (
+            selected_topic if selected_topic and selected_topic in available_topics else None
+        )
         package.is_public           = request.form.get('is_public') == 'true'
-        package.topic               = normalize_package_topic(request.form.get('topic'))
         package.updated_at          = datetime.utcnow()
 
         file = request.files.get('vocab_file')
@@ -618,7 +680,11 @@ def edit_package(package_id):
         flash('Cập nhật gói từ thành công!', 'success')
         return redirect(url_for('package_detail', package_id=package.id))
 
-    return render_template('edit_package.html', package=package)
+    return render_template(
+        'edit_package.html',
+        package=package,
+        available_topics=available_topics
+    )
 
 
 @app.route('/package/<int:package_id>/save', methods=['POST'])
@@ -651,8 +717,6 @@ def unsave_package(package_id):
     return redirect(url_for('package_detail', package_id=package_id))
 
 
-# FIX: clone_package now has its own POST handler instead of redirecting
-# to save_package with code=307 (which caused issues with CSRF and form data)
 @app.route('/package/<int:package_id>/clone', methods=['POST'])
 @login_required
 def clone_package(package_id):
@@ -682,7 +746,6 @@ def delete_package(package_id):
     db.session.delete(package)
     db.session.commit()
     flash(f'Đã xóa gói từ "{package.package_name}".', 'success')
-    # Admin redirects back to admin panel if coming from there
     if current_user.is_admin and request.referrer and '/admin' in request.referrer:
         return redirect(url_for('admin_packages'))
     return redirect(url_for('packages'))
@@ -801,8 +864,6 @@ def admin_dashboard():
     )
 
 
-# ── Admin: Users ────────────────────────────────────────────
-
 @app.route('/admin/users')
 @admin_required
 def admin_users():
@@ -891,15 +952,13 @@ def admin_delete_user(user_id):
     return redirect(url_for('admin_users'))
 
 
-# ── Admin: Packages ─────────────────────────────────────────
-
 @app.route('/admin/packages')
 @admin_required
 def admin_packages():
     q     = request.args.get('q', '').strip()
     query = VocabPackage.query
     if q:
-        q_norm = normalize_text(q)
+        q_norm   = normalize_text(q)
         all_pkgs = query.order_by(VocabPackage.updated_at.desc()).all()
         pkgs = [
             p for p in all_pkgs
@@ -909,7 +968,20 @@ def admin_packages():
     else:
         pkgs = query.order_by(VocabPackage.updated_at.desc()).all()
 
-    learner_counts = learner_counts_for_package_ids([p.id for p in pkgs])
+    # Number of learners who saved each package (for admin table).
+    learner_counts = {}
+    if pkgs:
+        pkg_ids = [p.id for p in pkgs]
+        rows = (
+            db.session.query(
+                user_saved_packages.c.package_id,
+                func.count(user_saved_packages.c.user_id)
+            )
+            .filter(user_saved_packages.c.package_id.in_(pkg_ids))
+            .group_by(user_saved_packages.c.package_id)
+            .all()
+        )
+        learner_counts = {package_id: count for package_id, count in rows}
 
     return render_template(
         'admin/packages.html',
@@ -960,7 +1032,7 @@ def not_found(e):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-        ensure_vocab_package_schema()
+        ensure_topic_catalog()
 
         if not User.query.filter_by(role=ROLE_ADMIN).first():
             admin = User(

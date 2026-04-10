@@ -76,7 +76,7 @@
     /* ── HERO ── */
     .hero {
       text-align: center;
-      padding: 72px 24px 0;
+      padding: 80px 24px 72px;
       max-width: 700px; margin: 0 auto;
     }
     .hero-pill {
@@ -87,7 +87,7 @@
       letter-spacing: 0.07em; text-transform: uppercase;
       color: var(--muted); margin-bottom: 24px;
     }
-    .hero-pill span { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+    .hero-pill span { width: 6px; height: 6px; border-radius: 50%; background: var(--green); display:inline-block; }
     .hero-title {
       font-family: 'Inter', sans-serif;
       font-size: 3rem; font-weight: 800; line-height: 1.15;
@@ -100,7 +100,7 @@
     .hero-search {
       display: flex; align-items: center;
       border: 1.5px solid var(--border); border-radius: 40px;
-      padding: 6px 6px 6px 20px; max-width: 460px; margin: 0 auto 48px;
+      padding: 6px 6px 6px 20px; max-width: 460px; margin: 0 auto 0;
       background: white; box-shadow: var(--shadow-sm);
     }
     .hero-search i { color: var(--muted); font-size: 0.88rem; margin-right: 10px; }
@@ -116,51 +116,6 @@
       transition: opacity 0.15s;
     }
     .hero-search button:hover { opacity: 0.88; }
-
-    /* Hero image */
-    .hero-img-wrap {
-      max-width: 840px; margin: 0 auto;
-      border-radius: 24px; overflow: hidden;
-      box-shadow: 0 24px 80px rgba(13,31,60,0.14);
-      position: relative;
-    }
-    .hero-img-wrap img {
-      width: 100%; display: block;
-      aspect-ratio: 16/9; object-fit: cover;
-      background: linear-gradient(135deg, #e8edf5, #c8d5e8);
-    }
-    /* Floating stat card */
-    .hero-float-card {
-      position: absolute; bottom: 24px; left: 24px;
-      background: white; border-radius: var(--r-lg);
-      padding: 14px 18px; box-shadow: var(--shadow-lg);
-      display: flex; align-items: flex-start; gap: 10px;
-      max-width: 260px;
-    }
-    .hfc-badge {
-      background: var(--green); color: white;
-      border-radius: 8px; padding: 4px 10px;
-      font-size: 0.68rem; font-weight: 700;
-      letter-spacing: 0.06em; white-space: nowrap; flex-shrink: 0;
-    }
-    .hfc-badge i { margin-right: 4px; }
-    .hfc-text { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
-    /* Floating avatars */
-    .hero-float-avatars {
-      position: absolute; bottom: 24px; right: 24px;
-      display: flex; align-items: center;
-    }
-    .hero-avatar {
-      width: 34px; height: 34px; border-radius: 50%;
-      border: 2px solid white; background: var(--navy);
-      display: flex; align-items: center; justify-content: center;
-      color: white; font-size: 0.7rem; font-weight: 700;
-      margin-left: -10px;
-    }
-    .hero-avatar:first-child { margin-left: 0; }
-    .hero-avatar-count {
-      background: var(--green); color: white; font-size: 0.68rem; font-weight: 700;
-    }
 
     /* ── SECTIONS ── */
     .section { max-width: 1100px; margin: 0 auto; padding: 80px 24px 0; }
@@ -249,16 +204,6 @@
     .pop-cat-badge.business { background: #e67e22; }
     .pop-cat-badge.standardized { background: #8e44ad; }
     .pop-card-bottom { margin-top: auto; }
-    .pop-card-learners { font-size: 0.76rem; font-weight: 600; opacity: 0.92; margin-top: 8px; display: flex; align-items: center; gap: 6px; }
-    .pop-cat-badge.topic-dynamic {
-      background: rgba(13,31,60,0.88);
-      font-size: 0.62rem;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      display: inline-block;
-    }
     .pop-card-name {
       font-family: 'Inter', sans-serif;
       font-size: 1.1rem; font-weight: 700; line-height: 1.3;
@@ -283,8 +228,6 @@
       padding: 64px 48px; margin: 80px auto 0;
       max-width: 1100px; margin-left: 24px; margin-right: 24px;
       position: relative; overflow: hidden;
-      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400"><rect width="800" height="400" fill="%230d1f3c"/><circle cx="650" cy="50" r="200" fill="%23132340" opacity="0.5"/><circle cx="100" cy="350" r="150" fill="%23132340" opacity="0.4"/></svg>');
-      background-size: cover;
     }
     .cta-section h2 {
       font-family: 'Inter', sans-serif;
@@ -321,17 +264,11 @@
       display: flex; justify-content: space-between; align-items: flex-start;
       gap: 24px; flex-wrap: wrap;
     }
-    .lp-footer-brand {
-      font-family: 'Inter', sans-serif;
-      font-weight: 800; font-size: 1rem; color: var(--navy); margin-bottom: 4px;
-    }
+    .lp-footer-brand { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 1rem; color: var(--navy); margin-bottom: 4px; }
     .lp-footer-tagline { font-size: 0.78rem; color: var(--muted); margin-bottom: 8px; }
     .lp-footer-copy { font-size: 0.74rem; color: #b0b8c4; }
     .lp-footer-links { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
-    .lp-footer-link {
-      font-size: 0.8rem; color: var(--muted); text-decoration: none;
-      font-weight: 500; transition: color 0.15s;
-    }
+    .lp-footer-link { font-size: 0.8rem; color: var(--muted); text-decoration: none; font-weight: 500; transition: color 0.15s; }
     .lp-footer-link:hover { color: var(--navy); }
 
     /* ── AUTH MODAL ── */
@@ -349,10 +286,7 @@
       animation: modalIn 0.28s cubic-bezier(0.34,1.2,0.64,1);
     }
     @keyframes modalIn { from { transform: scale(0.88) translateY(20px); opacity: 0; } }
-
-    .auth-tabs {
-      display: flex; border-bottom: 1px solid var(--border);
-    }
+    .auth-tabs { display: flex; border-bottom: 1px solid var(--border); }
     .auth-tab {
       flex: 1; padding: 16px; text-align: center;
       font-size: 0.9rem; font-weight: 600; color: var(--muted);
@@ -361,11 +295,9 @@
       font-family: 'Inter', sans-serif;
     }
     .auth-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
-
     .auth-body { padding: 28px 32px 32px; }
     .auth-panel { display: none; }
     .auth-panel.active { display: block; }
-
     .auth-title { font-family: 'Inter', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
     .auth-sub { font-size: 0.83rem; color: var(--muted); margin-bottom: 24px; }
     .field-label { font-size: 0.69rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; display: block; }
@@ -393,14 +325,6 @@
     }
     .auth-close:hover { background: var(--off-white); color: var(--navy); }
     .auth-modal-wrap { position: relative; }
-
-    /* Placeholder hero image */
-    .hero-placeholder {
-      width: 100%; aspect-ratio: 16/9;
-      background: linear-gradient(135deg, #d8e4f0 0%, #e8edf5 50%, #d0dcea 100%);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .hero-placeholder i { font-size: 4rem; color: #a0b0c5; }
   </style>
 </head>
 <body>
@@ -417,45 +341,19 @@
   </div>
 </nav>
 
-<!-- HERO -->
-<div style="padding-bottom: 0; overflow: hidden;">
-  <div class="hero">
-    <h1 class="hero-title">Explore the hidden knowledge<br>of English Vocabulary</h1>
-    <p class="hero-sub">
-      Học từ vựng tiếng Anh theo cách đơn giản, thú vị với RundaWord.<br>
-      Nền tảng dựa trên phương pháp khoa học cho hiệu quả tối ưu.
-    </p>
-    <form class="hero-search" onsubmit="openAuth('login');return false;">
-      <i class="fas fa-search"></i>
-      <input type="text" placeholder="Tìm kiếm bộ từ vựng (IELTS, Business,...)">
-      <button type="submit">Khám phá</button>
-    </form>
-  </div>
-
-  <!-- Hero image block -->
-  <div style="max-width:900px;margin:0 auto;padding:0 24px;">
-    <div class="hero-img-wrap">
-      <div class="hero-placeholder">
-        <i class="fas fa-laptop-code"></i>
-      </div>
-      <!-- Floating card bottom-left -->
-      <div class="hero-float-card">
-        <div>
-          <div class="hfc-badge"><i class="fas fa-bolt"></i> TĂNG 40% HIỆU QUẢ</div>
-          <p class="hfc-text" style="margin-top:8px;">
-            Phương pháp Spaced Repetition giúp ghi nhớ từ vựng vĩnh viễn trong thời gian ngắn nhất.
-          </p>
-        </div>
-      </div>
-      <!-- Floating avatars bottom-right -->
-      <div class="hero-float-avatars">
-        <div class="hero-avatar">T</div>
-        <div class="hero-avatar">A</div>
-        <div class="hero-avatar">S</div>
-        <div class="hero-avatar hero-avatar-count">+10</div>
-      </div>
-    </div>
-  </div>
+<!-- HERO (no image block) -->
+<div class="hero">
+  <div class="hero-pill"><span></span> Học từ vựng thông minh</div>
+  <h1 class="hero-title">Explore the hidden knowledge<br>of English Vocabulary</h1>
+  <p class="hero-sub">
+    Học từ vựng tiếng Anh theo cách đơn giản, thú vị với RundaWord.<br>
+    Nền tảng dựa trên phương pháp khoa học cho hiệu quả tối ưu.
+  </p>
+  <form class="hero-search" onsubmit="openAuth('login');return false;">
+    <i class="fas fa-search"></i>
+    <input type="text" placeholder="Tìm kiếm bộ từ vựng (IELTS, Business,...)">
+    <button type="submit">Khám phá</button>
+  </form>
 </div>
 
 <!-- METHODS SECTION -->
@@ -494,100 +392,19 @@
   </div>
 </div>
 
-<!-- POPULAR PACKAGES -->
-<div class="section">
-  <div class="pop-header">
-    <div class="pop-tag">Cộng đồng tin dùng</div>
-    <h2>Gói từ vựng phổ biến</h2>
-  </div>
-  <div class="pop-grid">
-    {% set pop_gradients = [
-      'linear-gradient(135deg,#1a3a7a,#2d5fcf)',
-      'linear-gradient(135deg,#0d5c3a,#1ebc82)',
-      'linear-gradient(135deg,#6a1a1a,#bb3a3a)'
-    ] %}
-    {% if public_packages %}
-      {% for pkg in public_packages[:3] %}
-      <div class="pop-card" onclick="openAuth('login')">
-        <div class="pop-card-bg" style="background: {{ pop_gradients[loop.index0 % 3] }};"></div>
-        <div class="pop-card-overlay"></div>
-        <div class="pop-card-content">
-          <div class="pop-card-top">
-            <span class="pop-cat-badge topic-dynamic" title="{{ pkg.topic or 'Others' }}">{{ pkg.topic or 'Others' }}</span>
-          </div>
-          <div class="pop-card-bottom">
-            <div class="pop-card-name">{{ pkg.package_name }}</div>
-            <p class="pop-card-desc">{% if pkg.package_description %}{{ pkg.package_description[:90] }}{% if pkg.package_description|length > 90 %}…{% endif %}{% else %}{{ pkg.vocabularies|length }} từ vựng trong gói.{% endif %}</p>
-            <div class="pop-card-learners"><i class="fas fa-users"></i> {{ learner_counts.get(pkg.id, 0) }} người học</div>
-            <button class="btn-learn" onclick="event.stopPropagation();openAuth('login')">Học ngay</button>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-    {% else %}
-    <div class="pop-card" onclick="openAuth('login')">
-      <div class="pop-card-bg" style="background: linear-gradient(135deg,#1a3a7a,#2d5fcf);"></div>
-      <div class="pop-card-overlay"></div>
-      <div class="pop-card-content">
-        <div class="pop-card-top">
-          <span class="pop-cat-badge">Academic</span>
-        </div>
-        <div class="pop-card-bottom">
-          <div class="pop-card-name">Academic IELTS 8.0+</div>
-          <p class="pop-card-desc">5.800 từ vựng cho chứng chỉ điểm cao các môn.</p>
-          <button class="btn-learn" onclick="event.stopPropagation();openAuth('login')">Học ngay</button>
-        </div>
-      </div>
-    </div>
-    <div class="pop-card" onclick="openAuth('login')">
-      <div class="pop-card-bg" style="background: linear-gradient(135deg,#0d5c3a,#1ebc82);"></div>
-      <div class="pop-card-overlay"></div>
-      <div class="pop-card-content">
-        <div class="pop-card-top">
-          <span class="pop-cat-badge business">Business</span>
-        </div>
-        <div class="pop-card-bottom">
-          <div class="pop-card-name">Advanced Business</div>
-          <p class="pop-card-desc">Chinh phục môi trường làm việc quốc tế với bộ từ lĩnh doanh.</p>
-          <button class="btn-learn" onclick="event.stopPropagation();openAuth('login')">Học ngay</button>
-        </div>
-      </div>
-    </div>
-    <div class="pop-card" onclick="openAuth('login')">
-      <div class="pop-card-bg" style="background: linear-gradient(135deg,#6a1a1a,#bb3a3a);"></div>
-      <div class="pop-card-overlay"></div>
-      <div class="pop-card-content">
-        <div class="pop-card-top">
-          <span class="pop-cat-badge standardized">Standardized</span>
-        </div>
-        <div class="pop-card-bottom">
-          <div class="pop-card-name">TOEFL Mastery</div>
-          <p class="pop-card-desc">Trọn bộ từ vựng học thuật cho kỳ thi TOEFL iBT mới nhất.</p>
-          <button class="btn-learn" onclick="event.stopPropagation();openAuth('login')">Học ngay</button>
-        </div>
-      </div>
-    </div>
-    {% endif %}
-  </div>
-</div>
-
 <!-- CTA SECTION -->
 <div style="padding: 0 24px; max-width:1148px; margin: 0 auto;">
   <div class="cta-section">
     <h2>Sẵn sàng để nâng tầm tri thức của bạn?</h2>
     <p>Tham gia cùng hàng trăm học viên khác và bắt đầu lộ trình học từ vựng khoa học ngay hôm nay. Hoàn toàn miễn phí để bắt đầu.</p>
     <div class="cta-btns">
-      <a href="#" class="btn-cta-primary" onclick="openAuth('register');return false;">
-        Bắt đầu học ngay
-      </a>
-      <a href="#" class="btn-cta-outline" onclick="openAuth('register');return false;">
-        Đăng ký tài khoản
-      </a>
+      <a href="#" class="btn-cta-primary" onclick="openAuth('register');return false;">Bắt đầu học ngay</a>
+      <a href="#" class="btn-cta-outline" onclick="openAuth('register');return false;">Đăng ký tài khoản</a>
     </div>
   </div>
 </div>
 
-<!-- FOOTER (unified) -->
+<!-- FOOTER -->
 <footer class="lp-footer">
   <div class="lp-footer-inner">
     <div>
@@ -604,7 +421,7 @@
   </div>
 </footer>
 
-<!-- ── AUTH MODAL ── -->
+<!-- AUTH MODAL -->
 <div class="auth-overlay" id="authOverlay" onclick="closeAuthOnBg(event)">
   <div class="auth-modal-wrap">
     <div class="auth-modal">
@@ -614,7 +431,6 @@
         <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Đăng ký</button>
       </div>
       <div class="auth-body">
-        <!-- LOGIN PANEL -->
         <div class="auth-panel active" id="panelLogin">
           <div class="auth-title">Chào mừng trở lại</div>
           <div class="auth-sub">Đăng nhập để tiếp tục hành trình học của bạn.</div>
@@ -636,7 +452,6 @@
             <a href="#" onclick="switchTab('register');return false;" style="color:var(--navy);font-weight:700;text-decoration:none;">Đăng ký ngay</a>
           </p>
         </div>
-        <!-- REGISTER PANEL -->
         <div class="auth-panel" id="panelRegister">
           <div class="auth-title">Tạo tài khoản</div>
           <div class="auth-sub">Bắt đầu hành trình từ vựng của bạn ngay hôm nay.</div>
