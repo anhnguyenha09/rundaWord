@@ -72,7 +72,7 @@
       <div class="hero-banner" style="min-height:220px;">
         <div class="hero-content">
           <div class="d-flex justify-content-end mb-2">
-            <a href="{{ url_for('create_package') }}" class="btn-navy" style="padding:7px 12px;border-radius:999px;" title="Create package">
+            <a href="{{ url_for('create_package') }}" class="btn-navy" style="padding:7px 12px;border-radius:999px; background-color: aliceblue; color: navy;" title="Create package">
               <i class="fas fa-plus"></i>
             </a>
           </div>
@@ -152,9 +152,9 @@
 
   <!-- ── TOPIC FILTER ── -->
   <div class="topic-filter-row">
-    <a href="{{ url_for('dashboard') }}" class="topic-chip {% if not topic_filter %}active{% endif %}">Tất cả</a>
+    <a href="{{ url_for('dashboard') }}" class="topic-chip {% if not topic_filter %}active{% endif %}" style="text-decoration: none;">Tất cả</a>
     {% for t in available_topics %}
-    <a href="{{ url_for('dashboard', topic=t) }}" class="topic-chip {% if topic_filter == t %}active{% endif %}">{{ t }}</a>
+    <a href="{{ url_for('dashboard', topic=t) }}" class="topic-chip {% if topic_filter == t %}active{% endif %}" style="text-decoration: none;">{{ t }}</a>
     {% endfor %}
   </div>
 

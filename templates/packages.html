@@ -23,9 +23,9 @@
     <a href="{{ url_for('packages', tab='saved') }}"
        class="lib-tab {% if tab == 'saved' %}active{% endif %}">Đã lưu</a>
     {% endif %}
-    <form method="GET" action="{{ url_for('packages') }}" class="lib-search">
+    <form method="GET" action="{{ url_for('packages') }}" class="lib-search" >
       <i class="fas fa-search si"></i>
-      <input type="text" name="q" placeholder="Search packages…" value="{{ search_query or '' }}">
+      <input type="text" name="q" placeholder="Search packages…" value="{{ search_query or '' }}" style="background-color: white;">
     </form>
   </div>
 
