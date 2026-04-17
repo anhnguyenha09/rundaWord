@@ -64,6 +64,12 @@
       color: var(--navy); font-weight: 600;
       border-bottom: 2px solid var(--navy); border-radius: 0; padding-bottom: 4px;
     }
+    .lp-nav-signin {
+      font-size: 0.87rem; font-weight: 500; color: var(--muted);
+      text-decoration: none; padding: 6px 10px; border-radius: 8px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .lp-nav-signin:hover { color: var(--navy); background: var(--off-white); }
     .btn-start {
       background: var(--navy); color: white;
       border: none; border-radius: 30px;
@@ -271,60 +277,30 @@
     .lp-footer-link { font-size: 0.8rem; color: var(--muted); text-decoration: none; font-weight: 500; transition: color 0.15s; }
     .lp-footer-link:hover { color: var(--navy); }
 
-    /* ── AUTH MODAL ── */
-    .auth-overlay {
-      display: none; position: fixed; inset: 0; z-index: 1000;
-      background: rgba(7,16,32,0.55); backdrop-filter: blur(4px);
-      align-items: center; justify-content: center;
-    }
+    /* ── AUTH MODAL (match Explore guest / base) ── */
+    .auth-overlay { display: none; position: fixed; inset: 0; z-index: 3000; background: rgba(7,16,32,0.55); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 18px; }
     .auth-overlay.open { display: flex; }
-    .auth-modal {
-      background: white; border-radius: 24px;
-      width: 100%; max-width: 440px; margin: 16px;
-      box-shadow: 0 24px 80px rgba(7,16,32,0.22);
-      overflow: hidden;
-      animation: modalIn 0.28s cubic-bezier(0.34,1.2,0.64,1);
-    }
-    @keyframes modalIn { from { transform: scale(0.88) translateY(20px); opacity: 0; } }
+    .auth-modal-wrap { width: 100%; max-width: 520px; }
+    .auth-modal { position: relative; background: #fff; border-radius: 20px; width: 100%; box-shadow: 0 24px 80px rgba(7,16,32,0.22); overflow: hidden; }
+    .auth-close { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.9); border: 1px solid var(--border); font-size: 0.95rem; color: var(--muted); cursor: pointer; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; z-index: 2; }
+    .auth-close:hover { background: var(--off-white); color: var(--navy); border-color: var(--border); }
     .auth-tabs { display: flex; border-bottom: 1px solid var(--border); }
-    .auth-tab {
-      flex: 1; padding: 16px; text-align: center;
-      font-size: 0.9rem; font-weight: 600; color: var(--muted);
-      cursor: pointer; border-bottom: 2px solid transparent;
-      transition: color 0.15s, border-color 0.15s; background: none; border-top: none; border-left: none; border-right: none;
-      font-family: 'Inter', sans-serif;
-    }
+    .auth-tab { flex: 1; padding: 16px 18px; text-align: center; font-size: 0.92rem; font-weight: 700; color: var(--muted); cursor: pointer; border: none; border-bottom: 2.5px solid transparent; background: none; }
     .auth-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
-    .auth-body { padding: 28px 32px 32px; }
+    .auth-body { padding: 24px 26px 22px; }
     .auth-panel { display: none; }
     .auth-panel.active { display: block; }
-    .auth-title { font-family: 'Inter', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
-    .auth-sub { font-size: 0.83rem; color: var(--muted); margin-bottom: 24px; }
-    .field-label { font-size: 0.69rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; display: block; }
-    .field-input {
-      width: 100%; border: 1.5px solid var(--border); border-radius: var(--r-md);
-      padding: 11px 15px; font-size: 0.88rem; font-family: 'Inter', sans-serif;
-      background: white; color: var(--text); outline: none; transition: border-color 0.15s;
-      margin-bottom: 14px;
-    }
+    .auth-title { font-size: 1.35rem; font-weight: 800; color: var(--navy); margin-bottom: 4px; letter-spacing: -0.02em; }
+    .auth-sub { font-size: 0.86rem; color: var(--muted); margin-bottom: 18px; line-height: 1.55; }
+    .field-label { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; display: block; }
+    .field-input { width: 100%; border: 1.5px solid var(--border); border-radius: 14px; padding: 12px 14px; font-size: 0.92rem; background: white; color: var(--text); outline: none; transition: border-color 0.15s; margin-bottom: 14px; }
     .field-input:focus { border-color: var(--navy); }
     .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .btn-auth {
-      width: 100%; background: var(--navy); color: white; border: none;
-      border-radius: var(--r-md); padding: 13px; font-size: 0.92rem; font-weight: 700;
-      cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.15s;
-      margin-top: 4px;
-    }
-    .btn-auth:hover { opacity: 0.88; }
-    .auth-close {
-      position: absolute; top: 16px; right: 16px;
-      background: none; border: none; font-size: 1.1rem; color: var(--muted);
-      cursor: pointer; width: 32px; height: 32px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.15s; z-index: 1;
-    }
-    .auth-close:hover { background: var(--off-white); color: var(--navy); }
-    .auth-modal-wrap { position: relative; }
+    @media (max-width: 520px) { .field-row { grid-template-columns: 1fr; } }
+    .btn-auth { width: 100%; background: var(--navy); color: white; border: none; border-radius: 14px; padding: 12px 14px; font-size: 0.95rem; font-weight: 800; cursor: pointer; transition: opacity 0.15s; margin-top: 2px; }
+    .btn-auth:hover { opacity: 0.9; }
+    .auth-switch { text-align: center; margin-top: 14px; font-size: 0.84rem; color: var(--muted); }
+    .auth-switch a { color: var(--navy); font-weight: 800; text-decoration: none; }
   </style>
 </head>
 <body>
@@ -337,7 +313,10 @@
       <a href="#" class="lp-nav-link active">Trang chủ</a>
       <a href="{{ url_for('explore') }}" class="lp-nav-link">Gói từ vựng</a>
     </div>
-    <button class="btn-start" onclick="openAuth('login')">Bắt đầu học</button>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <a href="#" class="lp-nav-signin" onclick="openAuth('login');return false;">Sign in</a>
+      <a href="#" class="btn-start" onclick="openAuth('register');return false;">Get started</a>
+    </div>
   </div>
 </nav>
 
@@ -414,8 +393,8 @@
     <div class="lp-footer-links">
       <a href="#" class="lp-footer-link">Điều khoản</a>
       <a href="#" class="lp-footer-link">Bảo mật</a>
-      <a href="{{ url_for('login') }}" class="lp-footer-link">Đăng nhập</a>
-      <a href="{{ url_for('register') }}" class="lp-footer-link">Đăng ký</a>
+      <a href="#" class="lp-footer-link" onclick="openAuth('login');return false;">Đăng nhập</a>
+      <a href="#" class="lp-footer-link" onclick="openAuth('register');return false;">Đăng ký</a>
     </div>
   </div>
 </footer>
@@ -446,9 +425,9 @@
             </div>
             <button type="submit" class="btn-auth">Đăng nhập</button>
           </form>
-          <p style="text-align:center;margin-top:16px;font-size:0.82rem;color:var(--muted);">
+          <p class="auth-switch">
             Chưa có tài khoản?
-            <a href="#" onclick="switchTab('register');return false;" style="color:var(--navy);font-weight:700;text-decoration:none;">Đăng ký ngay</a>
+            <a href="#" onclick="switchTab('register');return false;">Đăng ký ngay</a>
           </p>
         </div>
         <div class="auth-panel" id="panelRegister">
@@ -479,9 +458,9 @@
             </div>
             <button type="submit" class="btn-auth">Tạo tài khoản</button>
           </form>
-          <p style="text-align:center;margin-top:16px;font-size:0.82rem;color:var(--muted);">
+          <p class="auth-switch">
             Đã có tài khoản?
-            <a href="#" onclick="switchTab('login');return false;" style="color:var(--navy);font-weight:700;text-decoration:none;">Đăng nhập</a>
+            <a href="#" onclick="switchTab('login');return false;">Đăng nhập</a>
           </p>
         </div>
       </div>

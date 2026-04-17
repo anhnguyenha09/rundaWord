@@ -33,7 +33,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-y: scroll; }
 body {
   font-family: 'Inter', sans-serif;
   background: var(--bg);
@@ -43,6 +43,10 @@ body {
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   display: flex; flex-direction: column;
+}
+/* Keep Inter consistent everywhere (templates may override locally). */
+*:not(.fa):not(.fas):not(.far):not(.fab):not(.fa-solid):not(.fa-regular):not(.fa-brands):not(.fa-classic) {
+  font-family: 'Inter', sans-serif;
 }
 main { flex: 1 0 auto; }
 footer { flex-shrink: 0; }
@@ -388,6 +392,33 @@ footer { flex-shrink: 0; }
   display: flex; align-items: center; gap: 5px;
 }
 
+/* Floating create button (dashboard) */
+.fab-create {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--navy);
+  color: white !important;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(13,31,60,0.28);
+  z-index: 2000;
+  text-decoration: none !important;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+}
+.fab-create:hover {
+  opacity: 0.95;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px rgba(13,31,60,0.32);
+}
+.fab-create:active { transform: translateY(0); }
+.fab-create i { font-size: 1.05rem; }
+
 /* ── PACKAGE DETAIL ── */
 .pkg-detail-header {
   background: var(--off-white); border: 1px solid var(--border);
@@ -538,6 +569,16 @@ footer { flex-shrink: 0; }
 .btn-navy:hover { background: var(--navy-mid); color: white; }
 .btn-cream { background: var(--off-white); color: var(--text); border: 1.5px solid var(--border); border-radius: var(--r-md); font-weight: 600; font-size: 0.88rem; padding: 10px 22px; transition: background 0.15s, border-color 0.15s; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; }
 .btn-cream:hover { background: var(--border); color: var(--text); border-color: #c8ced8; }
+.btn-cream.danger {
+  background: rgba(231, 76, 60, 0.10);
+  border-color: rgba(231, 76, 60, 0.28);
+  color: #c0392b;
+}
+.btn-cream.danger:hover {
+  background: rgba(231, 76, 60, 0.16);
+  border-color: rgba(231, 76, 60, 0.38);
+  color: #a93226;
+}
 .btn-study-flashcard { background: var(--off-white); color: var(--navy); border: none; border-radius: var(--r-md); font-weight: 700; font-size: 1rem; padding: 14px 24px; flex: 1; transition: background 0.15s; cursor: pointer; }
 .btn-study-quiz { background: var(--navy); color: white; border: none; border-radius: var(--r-md); font-weight: 700; font-size: 1rem; padding: 14px 24px; flex: 1; transition: background 0.15s; cursor: pointer; }
 .btn-save { background: white; color: var(--navy); border: 1.5px solid var(--border); border-radius: var(--r-md); font-weight: 600; font-size: 0.84rem; padding: 8px 16px; transition: all 0.15s; cursor: pointer; white-space: nowrap; }

@@ -54,7 +54,7 @@
       <p class="page-desc mb-0">Refine your collection or bulk-update translations.</p>
     </div>
     <div class="d-flex gap-2">
-      <a href="{{ url_for('package_detail', package_id=package.id) }}" class="btn-cream">
+      <a href="{{ url_for('package_detail', package_id=package.id) }}" class="btn-cream danger">
         <i class="fas fa-times" style="font-size:0.78rem;"></i> Cancel
       </a>
       <button type="submit" form="editForm" class="btn-navy">
@@ -117,7 +117,7 @@
       <div>
         <div class="d-flex justify-content-between align-items-center mb-1">
           <label class="rw-label mb-0">
-            <i class="fas fa-file-upload me-1"></i> Bulk Replacement (CSV/XLSX)
+            <i class="fas fa-file-arrow-up me-1"></i> Bulk Replacement (CSV/XLSX)
           </label>
           <a href="{{ url_for('download_template') }}"
             style="font-size:0.82rem;color:var(--accent);font-weight:600;text-decoration:none;">
@@ -193,7 +193,7 @@
 
     <!-- Bottom save bar -->
     <div class="d-flex justify-content-end gap-2 mt-4">
-      <a href="{{ url_for('package_detail', package_id=package.id) }}" class="btn-cream">
+      <a href="{{ url_for('package_detail', package_id=package.id) }}" class="btn-cream danger">
         <i class="fas fa-times" style="font-size:0.78rem;"></i> Discard Changes
       </a>
       <button type="submit" class="btn-navy">
@@ -255,7 +255,7 @@ function reIndex() {
 
   allRows.forEach((row, i) => {
     const idx = row.querySelector('.row-index');
-    if (idx) idx.textContent = i + 1;
+    if (idx) idx.textContent = allRows.length - i;
   });
 
   document.getElementById('wordCountBadge').textContent =

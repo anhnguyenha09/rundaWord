@@ -9,19 +9,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
     <style>
-        body {
+        body { font-family: 'Inter', sans-serif !important; background: #f0f2f5; }
+        /* Force Inter everywhere (except icon glyphs). */
+        *:not(.fa):not(.fas):not(.far):not(.fab):not(.fa-solid):not(.fa-regular):not(.fa-brands):not(.fa-classic) {
             font-family: 'Inter', sans-serif !important;
-            background: #f0f2f5;
         }
-        .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands, .fa-classic {
-            font-family: "Font Awesome 6 Free" !important;
-        }
-        .fab, .fa-brands {
-            font-family: "Font Awesome 6 Brands" !important;
-        }
-        .far, .fa-regular {
-            font-weight: 400 !important;
-        }
+        /* Keep Font Awesome icon fonts intact. */
+        .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands, .fa-classic { font-family: "Font Awesome 6 Free" !important; }
+        .fab, .fa-brands { font-family: "Font Awesome 6 Brands" !important; }
+        .far, .fa-regular { font-weight: 400 !important; }
 
         /* ── Admin shell ── */
         .admin-shell { display: flex; min-height: 100vh; }

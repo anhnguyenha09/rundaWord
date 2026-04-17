@@ -29,53 +29,15 @@
 {% block content %}
 <div class="container dashboard-wrap">
 
-  {% if search_query or topic_filter %}
-  <!-- ── SEARCH / FILTER RESULTS ── -->
-  <div class="d-flex align-items-center gap-3 mb-4">
-    <div style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--navy);">
-      {% if search_query %}Results for "{{ search_query }}"{% else %}Chủ đề: {{ topic_filter }}{% endif %}
-    </div>
-    <a href="{{ url_for('dashboard') }}" style="font-size:0.82rem;color:var(--text-muted);text-decoration:none;font-weight:600;">✕ Clear</a>
-  </div>
-  {% if search_results %}
-  <div class="row g-3 mb-5">
-    {% for package in search_results %}
-    <div class="col-6 col-md-3 col-lg-2">
-      <a href="{{ url_for('package_detail', package_id=package.id) }}" class="pkg-card" style="min-height:130px;">
-        <div class="pkg-card-top">
-          <span class="pkg-badge {% if package.is_public %}public{% else %}private{% endif %}">
-            {% if package.is_public %}Public{% else %}Private{% endif %}
-          </span>
-        </div>
-        <div class="pkg-name">{{ package.package_name }}</div>
-        <div class="pkg-author" style="font-size:0.75rem;color:var(--text-muted);">by @{{ package.user.username if package.user else '—' }}</div>
-        <div class="pkg-meta">
-          <span class="pkg-word-count"><i class="fas fa-layer-group" style="font-size:0.7rem;"></i> {{ package.vocabularies|length }} words</span>
-          <span class="pkg-play-btn"><i class="fas fa-play"></i></span>
-        </div>
-      </a>
-    </div>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div class="rw-card text-center py-5 mb-4">
-    <i class="fas fa-search fa-2x mb-3" style="color:var(--border);"></i>
-    <p style="color:var(--text-muted);margin:0;font-size:0.88rem;">No packages matched your search.</p>
-  </div>
-  {% endif %}
-
-  {% else %}
+  <a class="fab-create" href="{{ url_for('create_package') }}" title="Tạo gói từ">
+    <i class="fas fa-plus"></i>
+  </a>
 
   <!-- ── ROW 1: Hero banner + Quiz widget ── -->
   <div class="row g-4 mb-4">
     <div class="col-lg-7">
       <div class="hero-banner" style="min-height:220px;">
         <div class="hero-content">
-          <div class="d-flex justify-content-end mb-2">
-            <a href="{{ url_for('create_package') }}" class="btn-navy" style="padding:7px 12px;border-radius:999px; background-color: aliceblue; color: navy;" title="Create package">
-              <i class="fas fa-plus"></i>
-            </a>
-          </div>
           <div class="hero-title">Chào mừng bạn,<br>{{ current_user.name or current_user.username }}!</div>
           <p class="hero-sub">Your linguistic journey continues. Ready for your next curator's challenge?</p>
           <form method="GET" action="{{ url_for('dashboard') }}">
@@ -158,6 +120,42 @@
     {% endfor %}
   </div>
 
+  {% if search_query or topic_filter %}
+  <!-- ── SEARCH / FILTER RESULTS ── -->
+  <div class="d-flex align-items-center gap-3 mb-3" style="margin-top:-6px;">
+    <div style="font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--navy);">
+      {% if search_query %}Results for "{{ search_query }}"{% else %}Chủ đề: {{ topic_filter }}{% endif %}
+    </div>
+    <a href="{{ url_for('dashboard') }}" style="font-size:0.82rem;color:var(--text-muted);text-decoration:none;font-weight:600;">✕ Clear</a>
+  </div>
+  {% if search_results %}
+  <div class="row g-3 mb-4">
+    {% for package in search_results %}
+    <div class="col-6 col-md-3 col-lg-2">
+      <a href="{{ url_for('package_detail', package_id=package.id) }}" class="pkg-card" style="min-height:130px;">
+        <div class="pkg-card-top">
+          <span class="pkg-badge {% if package.is_public %}public{% else %}private{% endif %}">
+            {% if package.is_public %}Public{% else %}Private{% endif %}
+          </span>
+        </div>
+        <div class="pkg-name">{{ package.package_name }}</div>
+        <div class="pkg-author" style="font-size:0.75rem;color:var(--text-muted);">by @{{ package.user.username if package.user else '—' }}</div>
+        <div class="pkg-meta">
+          <span class="pkg-word-count"><i class="fas fa-layer-group" style="font-size:0.7rem;"></i> {{ package.vocabularies|length }} words</span>
+          <span class="pkg-play-btn"><i class="fas fa-play"></i></span>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="rw-card text-center py-4 mb-4" style="border-style:dashed;">
+    <i class="fas fa-search fa-2x mb-3" style="color:var(--border);"></i>
+    <p style="color:var(--text-muted);margin:0;font-size:0.88rem;">No packages matched your search.</p>
+  </div>
+  {% endif %}
+  {% endif %}
+
   <!-- ── CONTINUE LEARNING ── -->
   <div class="section-label">
     Continue Learning
@@ -239,7 +237,6 @@
     </div>
   </div>
 
-  {% endif %}
 </div>
 {% endblock %}
 
