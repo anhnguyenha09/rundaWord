@@ -23,6 +23,43 @@
   font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.07em; color: var(--text-muted);
 }
+
+/* Scroll buttons */
+.scroll-buttons {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 999;
+}
+
+.scroll-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-md);
+  background: var(--navy);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(13, 31, 60, 0.2);
+}
+
+.scroll-btn:hover {
+  background: #1a3a5a;
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(13, 31, 60, 0.3);
+}
+
+.scroll-btn:active {
+  transform: scale(0.95);
+}
 </style>
 {% endblock %}
 
@@ -109,6 +146,13 @@
       </button>
     </div>
   </form>
+
+  <!-- Scroll buttons -->
+  <div class="scroll-buttons">
+    <button class="scroll-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-arrow-up"></i></button>
+    <button class="scroll-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})"><i class="fas fa-arrow-down"></i></button>
+  </div>
+
 </div>
 {% endblock %}
 
@@ -116,12 +160,14 @@
 <script>
 function reIndex() {
   const rows = document.querySelectorAll('#rowsWrap .vocab-edit-row');
+  const total = rows.length;
   rows.forEach((row, i) => {
     const idx = row.querySelector('.row-index');
-    if (idx) idx.textContent = i + 1;
+    if (idx) idx.textContent = total - i;
   });
-  document.getElementById('wordCountBadge').textContent = '(' + rows.length + ' words)';
+  document.getElementById('wordCountBadge').textContent = '(' + total + ' words)';
 }
+
 function addNewRow() {
   const wrap = document.getElementById('rowsWrap');
   const div = document.createElement('div');
@@ -132,14 +178,17 @@ function addNewRow() {
     <input type="text" class="vocab-input" name="word_vi[]" placeholder="Vietnamese meaning" autocomplete="off">
     <button type="button" class="btn-del-row" onclick="deleteRow(this)" title="Remove"><i class="fas fa-trash-alt"></i></button>
   `;
-  wrap.appendChild(div);
+  // Prepend so newest is at top
+  wrap.insertBefore(div, wrap.firstChild);
   reIndex();
   div.querySelector('input').focus();
 }
+
 function deleteRow(btn) {
   btn.closest('.vocab-edit-row').remove();
   reIndex();
 }
+
 reIndex();
 </script>
 {% endblock %}

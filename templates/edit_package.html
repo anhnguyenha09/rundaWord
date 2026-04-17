@@ -166,6 +166,9 @@
         <div></div>
       </div>
 
+      <!-- New rows will be prepended above existing (handled by JS) -->
+      <div id="newRowsTop"></div>
+
       <!-- Existing words — newest rows added at TOP, so index counts down from top -->
       <div id="vocabContainer">
         {% set total = package.vocabularies | length %}
@@ -184,8 +187,7 @@
         {% endfor %}
       </div>
 
-      <!-- New rows will be prepended above existing (handled by JS) -->
-      <div id="newRowsTop"></div>
+      
 
     </div>
 
@@ -200,24 +202,34 @@
     </div>
 
   </form>
+
+  <!-- Scroll buttons -->
+  <div class="scroll-buttons">
+    <button class="scroll-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-arrow-up"></i></button>
+    <button class="scroll-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})"><i class="fas fa-arrow-down"></i></button>
+  </div>
+
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-// Recount and relabel all row indices (largest number at top)
-function reIndex() {
-  const rows = document.querySelectorAll('#newRowsTop .vocab-edit-row, #vocabContainer .vocab-edit-row');
-  const total = rows.length;
-  rows.forEach((row, i) => {
-    const idx = row.querySelector('.row-index');
-    if (idx) idx.textContent = total - i;
-  });
-  const badge = document.getElementById('wordCountBadge');
-  if (badge) badge.textContent = '(' + total + ' words)';
-}
+// function reIndex() {
+//   // Lấy newRowsTop trước (từ mới ở cuối), rồi vocabContainer (từ cũ ở trước)
+//   const newRows = document.querySelectorAll('#newRowsTop .vocab-edit-row');
+//   const oldRows = document.querySelectorAll('#vocabContainer .vocab-edit-row');
+//   const allRows = [...newRows, ...oldRows];
+  
+//   const total = allRows.length;
+//   allRows.forEach((row, i) => {
+//     const idx = row.querySelector('.row-index');
+//     if (idx) idx.textContent = i + 1;
+//   });
+//   const badge = document.getElementById('wordCountBadge');
+//   if (badge) badge.textContent = '(' + total + ' words)';
+// }
 
-// Add new row — prepend to TOP of list with highest index
+// Add new row — append to BOTTOM of list
 function addNewRow() {
   const container = document.getElementById('newRowsTop');
   const div = document.createElement('div');
@@ -230,10 +242,24 @@ function addNewRow() {
       <i class="fas fa-trash-alt"></i>
     </button>
   `;
-  // Prepend so newest is at top
-  container.insertBefore(div, container.firstChild);
+
+  container.prepend(div); // quan trọng
   reIndex();
   div.querySelector('input').focus();
+}
+
+function reIndex() {
+  const newRows = document.querySelectorAll('#newRowsTop .vocab-edit-row');
+  const oldRows = document.querySelectorAll('#vocabContainer .vocab-edit-row');
+  const allRows = [...newRows, ...oldRows]; // đổi thứ tự
+
+  allRows.forEach((row, i) => {
+    const idx = row.querySelector('.row-index');
+    if (idx) idx.textContent = i + 1;
+  });
+
+  document.getElementById('wordCountBadge').textContent =
+    '(' + allRows.length + ' words)';
 }
 
 // Delete any row and re-index
