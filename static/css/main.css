@@ -300,10 +300,10 @@ footer { flex-shrink: 0; }
   width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.10);
 }
 .mastery-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); color: white !important; }
-.mastery-card.mode-flash { background: linear-gradient(140deg, #1a3a7a 0%, #2d5fcf 100%); }
-.mastery-card.mode-quiz  { background: linear-gradient(140deg, #1a5c2a 0%, #2aaa50 100%); }
-.mastery-card.mode-test  { background: linear-gradient(140deg, #6a1a1a 0%, #bb3a3a 100%); }
-.mastery-card.mode-match { background: linear-gradient(140deg, #2a3a5c 0%, #5070a8 100%); }
+.mastery-card.mode-flash { background: linear-gradient(140deg, #0d1f3c 0%, #2563eb 100%); }
+.mastery-card.mode-quiz  { background: linear-gradient(140deg, #0b1a33 0%, #1f4fb8 100%); color: #fff !important; }
+.mastery-card.mode-test  { background: linear-gradient(140deg, #bfa885 0%, #e9ddc9 100%); color: #0d1f3c !important; }
+.mastery-card.mode-match { background: linear-gradient(140deg, #0d1f3c 0%, #5070a8 100%); color: #fff !important; }
 .mastery-icon {
   width: 34px; height: 34px; background: rgba(255,255,255,0.15);
   border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center;

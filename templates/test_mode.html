@@ -35,14 +35,35 @@
 .t-feedback.fb-wrong   { color: #e74c3c; }
 .t-feedback .correct-ans { color: #c0392b; }
 
-/* Sticky bar */
-.test-bar {
-    position: sticky; top: 62px; z-index: 100;
-    background: rgba(245,247,250,0.96); backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--border); padding: 10px 0; margin-bottom: 24px;
+/* Page wrapper + toolbar (not sticky, not full-width strip) */
+.test-page {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 22px 18px 100px;
 }
-.test-bar-inner {
-    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+.test-top { margin-bottom: 8px; }
+.test-top a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 10px;
+}
+.test-top a:hover { background: rgba(13,31,60,0.04); }
+.test-toolbar {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 14px 0 18px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+    position: sticky;
+    top: 72px;
+    z-index: 120;
 }
 
 /* Result modal */
@@ -77,32 +98,31 @@
 {% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center gap-2 mb-3">
-    <a href="{{ url_for('package_detail', package_id=package.id) }}"
-       style="color:var(--muted);font-size:0.85rem;font-weight:600;text-decoration:none;">
-        <i class="fas fa-arrow-left me-1"></i>{{ package.package_name }}
-    </a>
-    <span style="color:var(--muted);">·</span>
-    <span style="font-family:'Poppins';font-weight:700;color:var(--navy);">Kiểm tra viết</span>
-</div>
+<div class="test-page">
+  <div class="test-toolbar">
+      <div class="d-flex align-items-center gap-2" style="min-width:0;">
+          <a href="{{ url_for('package_detail', package_id=package.id) }}"
+             style="color:var(--muted);font-size:0.85rem;font-weight:700;text-decoration:none;white-space:nowrap;">
+              <i class="fas fa-arrow-left me-1"></i>Back
+          </a>
+          <span style="color:var(--muted);">·</span>
+          <span style="font-family:'Poppins';font-weight:700;color:var(--navy);white-space:nowrap;">
+              Kiểm tra viết
+          </span>
+          <span style="color:var(--muted);font-size:0.88rem;font-weight:600;white-space:nowrap;">
+              <i class="fas fa-pencil-alt ms-2 me-1"></i>{{ package.vocabularies | length }} câu hỏi
+          </span>
+      </div>
+      <div class="d-flex gap-2">
+          <button id="submitBtn" class="btn btn-navy px-4" onclick="submitTest()">
+              <i class="fas fa-paper-plane me-1"></i>Nộp bài
+          </button>
+      </div>
+  </div>
 
-<!-- Sticky bar -->
-<div class="test-bar">
-    <div class="test-container">
-        <div class="test-bar-inner">
-            <span style="font-size:0.88rem;color:var(--muted);font-weight:600;">
-                <i class="fas fa-pencil-alt me-1"></i>{{ package.vocabularies | length }} câu hỏi
-            </span>
-            <div class="d-flex gap-2">
-                <button id="submitBtn" class="btn btn-navy px-4" onclick="submitTest()">
-                    <i class="fas fa-paper-plane me-1"></i>Nộp bài
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+  <div id="questionsContainer"></div>
 
-<div id="questionsContainer"></div>
+</div>
 
 <!-- Result modal -->
 <div class="result-overlay" id="resultOverlay">
