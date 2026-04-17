@@ -1,7 +1,7 @@
 import os
 import io
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, flash, send_file, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
     LoginManager, UserMixin, login_user, logout_user,
@@ -60,6 +60,23 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+def _sample_packages_id_pool(base_query, model, n: int, pool: int = 300):
+    """
+    SQLite `ORDER BY RANDOM()` gets slow as tables grow.
+    Instead, take a small pool of recent IDs and sample in Python.
+    """
+    id_rows = (
+        base_query.with_entities(model.id)
+        .order_by(model.updated_at.desc())
+        .limit(pool)
+        .all()
+    )
+    ids = [r[0] for r in id_rows]
+    if not ids:
+        return []
+    chosen = random.sample(ids, k=min(n, len(ids)))
+    return model.query.filter(model.id.in_(chosen)).all()
 
 
 def admin_required(f):
@@ -139,6 +156,62 @@ class Vocabulary(db.Model):
     package_id = db.Column(db.Integer, db.ForeignKey('vocab_packages.id'), nullable=False)
 
 
+class UserVocabProgress(db.Model):
+    """
+    Tracks a user's learning progress per vocabulary item.
+    A vocab is considered "learned/seen" when seen_count > 0.
+    """
+    __tablename__ = 'user_vocab_progress'
+    id           = db.Column(db.Integer, primary_key=True)
+    user_id      = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    vocab_id     = db.Column(db.Integer, db.ForeignKey('vocabularies.id'), nullable=False, index=True)
+    package_id   = db.Column(db.Integer, db.ForeignKey('vocab_packages.id'), nullable=False, index=True)
+    seen_count   = db.Column(db.Integer, nullable=False, default=0)
+    correct_count = db.Column(db.Integer, nullable=False, default=0)
+    wrong_count  = db.Column(db.Integer, nullable=False, default=0)
+    last_seen_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'vocab_id', name='uq_user_vocab_progress_user_vocab'),
+    )
+
+
+def completion_percents_for_packages(user_id: int, package_ids: list[int]) -> dict[int, int]:
+    """
+    Returns {package_id: percent_completed} for the given user.
+    percent_completed = round(learned_vocab / total_vocab * 100)
+    """
+    if not package_ids:
+        return {}
+
+    totals = dict(
+        db.session.query(Vocabulary.package_id, func.count(Vocabulary.id))
+        .filter(Vocabulary.package_id.in_(package_ids))
+        .group_by(Vocabulary.package_id)
+        .all()
+    )
+    learned = dict(
+        db.session.query(UserVocabProgress.package_id, func.count(UserVocabProgress.vocab_id))
+        .filter(
+            UserVocabProgress.user_id == user_id,
+            UserVocabProgress.package_id.in_(package_ids),
+            UserVocabProgress.seen_count > 0,
+        )
+        .group_by(UserVocabProgress.package_id)
+        .all()
+    )
+
+    out: dict[int, int] = {}
+    for pid in package_ids:
+        total = int(totals.get(pid, 0) or 0)
+        if total <= 0:
+            out[pid] = 0
+            continue
+        done = int(learned.get(pid, 0) or 0)
+        out[pid] = int(round((done / total) * 100))
+    return out
+
+
 class TopicCatalog(db.Model):
     __tablename__ = 'topic_catalog'
     id   = db.Column(db.Integer, primary_key=True)
@@ -170,10 +243,11 @@ def index():
 def guest_home():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
-    public_packages = VocabPackage.query \
-        .filter(VocabPackage.is_public == True) \
-        .order_by(func.random()) \
-        .limit(12).all()
+    public_packages = _sample_packages_id_pool(
+        VocabPackage.query.filter(VocabPackage.is_public == True),
+        VocabPackage,
+        n=12,
+    )
     return render_template('landing.html', public_packages=public_packages)
 
 
@@ -306,15 +380,20 @@ def dashboard():
         .filter_by(user_id=current_user.id) \
         .order_by(VocabPackage.updated_at.desc()) \
         .limit(4).all()
+    recent_percents = completion_percents_for_packages(
+        current_user.id,
+        [p.id for p in recent_packages],
+    )
 
     saved_recent = current_user.saved_packages \
         .order_by(VocabPackage.updated_at.desc()) \
         .limit(4).all()
 
-    public_packages = VocabPackage.query \
-        .filter(VocabPackage.is_public == True, VocabPackage.user_id != current_user.id) \
-        .order_by(func.random()) \
-        .limit(6).all()
+    public_packages = _sample_packages_id_pool(
+        VocabPackage.query.filter(VocabPackage.is_public == True, VocabPackage.user_id != current_user.id),
+        VocabPackage,
+        n=6,
+    )
 
     # Build 3-question quick quiz
     user_packages = VocabPackage.query.filter_by(user_id=current_user.id).all()
@@ -324,6 +403,7 @@ def dashboard():
     return render_template(
         'index.html',
         recent_packages=recent_packages,
+        recent_percents=recent_percents,
         saved_recent=saved_recent,
         public_packages=public_packages,
         quiz_words=quiz_words,
@@ -691,6 +771,75 @@ def match_mode(package_id):
         flash('Cần ít nhất 4 từ vựng để chơi ghép thẻ!', 'warning')
         return redirect(url_for('package_detail', package_id=package_id))
     return render_template('match_mode.html', package=package)
+
+
+# ──────────────────────────────────────────────
+# PROGRESS API
+# ──────────────────────────────────────────────
+
+@app.route('/api/progress/seen', methods=['POST'])
+@login_required
+def api_progress_seen():
+    data = request.get_json(silent=True) or {}
+    vocab_id = data.get('vocab_id')
+    if not vocab_id:
+        return jsonify({'ok': False, 'error': 'missing vocab_id'}), 400
+
+    vocab = Vocabulary.query.get(int(vocab_id))
+    if not vocab:
+        return jsonify({'ok': False, 'error': 'vocab not found'}), 404
+
+    row = UserVocabProgress.query.filter_by(user_id=current_user.id, vocab_id=vocab.id).first()
+    if not row:
+        row = UserVocabProgress(
+            user_id=current_user.id,
+            vocab_id=vocab.id,
+            package_id=vocab.package_id,
+            seen_count=1,
+            last_seen_at=datetime.utcnow(),
+        )
+        db.session.add(row)
+    else:
+        row.seen_count = (row.seen_count or 0) + 1
+        row.last_seen_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify({'ok': True})
+
+
+@app.route('/api/progress/answer', methods=['POST'])
+@login_required
+def api_progress_answer():
+    data = request.get_json(silent=True) or {}
+    vocab_id = data.get('vocab_id')
+    correct = data.get('correct')
+    if vocab_id is None or correct is None:
+        return jsonify({'ok': False, 'error': 'missing vocab_id/correct'}), 400
+
+    vocab = Vocabulary.query.get(int(vocab_id))
+    if not vocab:
+        return jsonify({'ok': False, 'error': 'vocab not found'}), 404
+
+    row = UserVocabProgress.query.filter_by(user_id=current_user.id, vocab_id=vocab.id).first()
+    if not row:
+        row = UserVocabProgress(
+            user_id=current_user.id,
+            vocab_id=vocab.id,
+            package_id=vocab.package_id,
+            seen_count=1,
+            correct_count=0,
+            wrong_count=0,
+            last_seen_at=datetime.utcnow(),
+        )
+        db.session.add(row)
+
+    row.seen_count = max(int(row.seen_count or 0), 1)
+    if bool(correct):
+        row.correct_count = (row.correct_count or 0) + 1
+    else:
+        row.wrong_count = (row.wrong_count or 0) + 1
+    row.last_seen_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify({'ok': True})
 
 
 @app.route('/download_template')

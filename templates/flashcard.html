@@ -41,7 +41,7 @@
   <div class="flashcard-area" onclick="flipCard()">
     <div class="flashcard" id="flashcard">
       <div class="fc-face fc-front">
-        <div class="fc-pos" id="frontPos">Adjective</div>
+        <div class="fc-pos" id="frontPos" style="display:none;"></div>
         <div class="fc-word" id="wordFront">…</div>
         <div class="fc-hint"><i class="fas fa-sync-alt me-1"></i>Click to flip</div>
       </div>
@@ -100,21 +100,40 @@
 {% endblock %}
 
 {% block scripts %}
+<script type="application/json" id="fcData">{{ {
+  "words": package.vocabularies | map(attribute="word_en") | list,
+  "meanings": package.vocabularies | map(attribute="word_vi") | list,
+  "vocabIds": package.vocabularies | map(attribute="id") | list
+} | tojson }}</script>
 <script>
-const words    = {{ package.vocabularies | map(attribute='word_en') | list | tojson }};
-const meanings = {{ package.vocabularies | map(attribute='word_vi') | list | tojson }};
+const fcData = JSON.parse(document.getElementById('fcData').textContent || '{}');
+const words = fcData.words || [];
+const meanings = fcData.meanings || [];
+const vocabIds = fcData.vocabIds || [];
 let order = [...Array(words.length).keys()];
 let cur = 0, flipped = false;
 
+function markSeen(vocabId){
+  try{
+    fetch('{{ url_for("api_progress_seen") }}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ vocab_id: vocabId })
+    }).catch(()=>{});
+  }catch(e){}
+}
+
 function updateCard() {
-  document.getElementById('wordFront').textContent = words[order[cur]];
-  document.getElementById('wordBack').textContent  = meanings[order[cur]];
+  const idx = order[cur];
+  document.getElementById('wordFront').textContent = words[idx];
+  document.getElementById('wordBack').textContent  = meanings[idx];
   document.getElementById('counter').textContent   = (cur + 1) + ' / ' + words.length;
   document.getElementById('counterBadge').textContent = (cur + 1) + '/' + words.length;
   document.getElementById('btnPrev').disabled = (cur === 0);
   document.getElementById('btnNext').disabled = (cur >= words.length - 1);
   document.getElementById('flashcard').classList.remove('flipped');
   flipped = false;
+  if (vocabIds && vocabIds[idx]) markSeen(vocabIds[idx]);
 }
 function flipCard() {
   document.getElementById('flashcard').classList.toggle('flipped');

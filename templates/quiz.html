@@ -120,6 +120,7 @@
 <script>
 const allWords    = {{ package.vocabularies | map(attribute='word_en') | list | tojson | safe }};
 const allMeanings = {{ package.vocabularies | map(attribute='word_vi') | list | tojson | safe }};
+const vocabIds    = {{ package.vocabularies | map(attribute='id') | list | tojson | safe }};
 
 let pool=[],stats={},currentRound=[],currentIndex=0,roundNum=1,totalWrong=0,answered=false;
 
@@ -137,6 +138,16 @@ function buildPool(){
     return{id:i,prompt,answer,enToVi,options:shuffle([answer,...wrongs])};
   });
   pool.forEach(q=>{stats[q.id]={correctStreak:0,seen:false};});
+}
+
+function markAnswer(vocabId, isCorrect){
+  try{
+    fetch('{{ url_for("api_progress_answer") }}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ vocab_id: vocabId, correct: !!isCorrect })
+    }).catch(()=>{});
+  }catch(e){}
 }
 
 function getRoundSize(){const n=pool.length;if(n<=4)return n;if(n<=8)return n;if(n<=16)return 4;if(n<=30)return 6;return 6+Math.floor(Math.random()*3);}
@@ -191,6 +202,7 @@ function answerQ(oi,isCorrect){
   const q=currentRound[currentIndex];
   const s=stats[q.id];
   s.seen=true;
+  if (vocabIds && vocabIds[q.id]) markAnswer(vocabIds[q.id], isCorrect);
   document.querySelectorAll('.opt-btn').forEach((btn,i)=>{
     btn.disabled=true;
     if(q.options[i]===q.answer)btn.classList.add(isCorrect?'correct':'reveal');

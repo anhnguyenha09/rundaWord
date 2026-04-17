@@ -1,7 +1,8 @@
 from .text_service import normalize_text
+from sqlalchemy.orm import joinedload
 
 
-def search_packages(VocabPackage, q: str, include_private_for_user=None, limit: int = 20):
+def search_packages(VocabPackage, q: str, include_private_for_user=None, limit: int = 20, prelimit: int = 500):
     """
     Search public packages by name, author username, topic, or description.
     If include_private_for_user is set, also includes that user's private packages.
@@ -14,7 +15,13 @@ def search_packages(VocabPackage, q: str, include_private_for_user=None, limit: 
             (VocabPackage.is_public == True) | (VocabPackage.user_id == include_private_for_user)
         )
 
-    all_pkgs = query.order_by(VocabPackage.updated_at.desc()).all()
+    # Avoid scanning all rows in Python: cap the candidate pool and eager-load owner to prevent N+1 queries.
+    all_pkgs = (
+        query.options(joinedload(VocabPackage.user))
+        .order_by(VocabPackage.updated_at.desc())
+        .limit(prelimit)
+        .all()
+    )
     results = []
     for pkg in all_pkgs:
         name_norm = normalize_text(pkg.package_name)
