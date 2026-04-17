@@ -1,0 +1,33 @@
+/* Dashboard page-only styles */
+
+/* Topic filter chips */
+.topic-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.topic-chip {
+  padding: 6px 16px;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1.5px solid var(--border);
+  background: white;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.topic-chip:hover { border-color: var(--navy); color: var(--navy); }
+.topic-chip.active { background: var(--navy); color: white; border-color: var(--navy); }
+
+/* Multi-question quiz widget */
+.quiz-q-item { display: none; }
+.quiz-q-item.active { display: block; }
+.quiz-progress-dots { display: flex; gap: 5px; margin-bottom: 10px; }
+.quiz-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: background 0.2s; }
+.quiz-dot.done { background: var(--green); }
+.quiz-dot.current { background: var(--navy); transform: scale(1.25); }
+

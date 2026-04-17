@@ -11,19 +11,11 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-  <style>
-    body { font-family: 'Inter', sans-serif !important; }
-    /* Force Inter everywhere (except icon glyphs). */
-    *:not(.fa):not(.fas):not(.far):not(.fab):not(.fa-solid):not(.fa-regular):not(.fa-brands):not(.fa-classic) {
-      font-family: 'Inter', sans-serif !important;
-    }
-    /* Ensure Font Awesome keeps its icon font (avoid being overridden by global fonts). */
-    .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands, .fa-classic {
-      font-family: "Font Awesome 6 Free" !important;
-    }
-    .fab, .fa-brands { font-family: "Font Awesome 6 Brands" !important; }
-    .far, .fa-regular { font-weight: 400 !important; }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components/navbar.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components/buttons.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components/cards.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components/fab.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components/typography.css') }}">
   {% block head_extra %}{% endblock %}
 </head>
 
@@ -199,62 +191,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   {% if not current_user.is_authenticated %}
-  <style>
-    .auth-overlay { display: none; position: fixed; inset: 0; z-index: 3000; background: rgba(7,16,32,0.55); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 18px; }
-    .auth-overlay.open { display: flex; }
-    .auth-modal-wrap { width: 100%; max-width: 520px; }
-    .auth-modal { position: relative; background: #fff; border-radius: 20px; width: 100%; box-shadow: 0 24px 80px rgba(7,16,32,0.22); overflow: hidden; }
-    .auth-close { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.9); border: 1px solid var(--border); font-size: 0.95rem; color: var(--text-muted); cursor: pointer; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; z-index: 2; }
-    .auth-close:hover { background: var(--off-white); color: var(--navy); border-color: var(--border); }
-    .auth-tabs { display: flex; border-bottom: 1px solid var(--border); }
-    .auth-tab { flex: 1; padding: 16px 18px; text-align: center; font-size: 0.92rem; font-weight: 700; color: var(--text-muted); cursor: pointer; border: none; border-bottom: 2.5px solid transparent; background: none; }
-    .auth-tab.active { color: var(--navy); border-bottom-color: var(--navy); }
-    .auth-body { padding: 24px 26px 22px; }
-    .auth-panel { display: none; }
-    .auth-panel.active { display: block; }
-    .auth-title { font-size: 1.35rem; font-weight: 800; color: var(--navy); margin-bottom: 4px; letter-spacing: -0.02em; }
-    .auth-sub { font-size: 0.86rem; color: var(--text-muted); margin-bottom: 18px; line-height: 1.55; }
-    .field-label { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 7px; display: block; }
-    .field-input { width: 100%; border: 1.5px solid var(--border); border-radius: 14px; padding: 12px 14px; font-size: 0.92rem; background: white; color: var(--text); outline: none; transition: border-color 0.15s; margin-bottom: 14px; }
-    .field-input:focus { border-color: var(--navy); }
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 520px) { .field-row { grid-template-columns: 1fr; } }
-    .btn-auth { width: 100%; background: var(--navy); color: white; border: none; border-radius: 14px; padding: 12px 14px; font-size: 0.95rem; font-weight: 800; cursor: pointer; transition: opacity 0.15s; margin-top: 2px; }
-    .btn-auth:hover { opacity: 0.9; }
-    .auth-switch { text-align: center; margin-top: 14px; font-size: 0.84rem; color: var(--text-muted); }
-    .auth-switch a { color: var(--navy); font-weight: 800; text-decoration: none; }
-  </style>
-  <script>
-    function openAuth(tab) {
-      var overlay = document.getElementById('authOverlay');
-      if (!overlay) return;
-      overlay.classList.add('open');
-      switchTab(tab || 'login');
-    }
-    function closeAuth() {
-      var overlay = document.getElementById('authOverlay');
-      if (!overlay) return;
-      overlay.classList.remove('open');
-    }
-    function closeAuthOnBg(e) {
-      if (e.target === document.getElementById('authOverlay')) closeAuth();
-    }
-    function switchTab(tab) {
-      var loginTab = document.getElementById('tabLogin');
-      var regTab = document.getElementById('tabRegister');
-      var loginPanel = document.getElementById('panelLogin');
-      var regPanel = document.getElementById('panelRegister');
-      if (!loginTab || !regTab || !loginPanel || !regPanel) return;
-      if (tab === 'register') {
-        loginTab.classList.remove('active'); regTab.classList.add('active');
-        loginPanel.classList.remove('active'); regPanel.classList.add('active');
-      } else {
-        regTab.classList.remove('active'); loginTab.classList.add('active');
-        regPanel.classList.remove('active'); loginPanel.classList.add('active');
-      }
-    }
-    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeAuth(); });
-  </script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components/auth_modal.css') }}">
+  <script src="{{ url_for('static', filename='js/auth_modal.js') }}"></script>
   {% endif %}
   {% block scripts %}{% endblock %}
 </body>

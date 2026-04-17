@@ -1,0 +1,28 @@
+/* Floating action button component */
+
+.fab-create {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--navy);
+  color: white !important;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(13,31,60,0.28);
+  z-index: 2000;
+  text-decoration: none !important;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+}
+.fab-create:hover {
+  opacity: 0.95;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px rgba(13,31,60,0.32);
+}
+.fab-create:active { transform: translateY(0); }
+.fab-create i { font-size: 1.05rem; }
+

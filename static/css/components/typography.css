@@ -1,0 +1,18 @@
+/* Typography + icon font guards (global) */
+
+body {
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* Force Inter everywhere (except icon glyphs). */
+*:not(.fa):not(.fas):not(.far):not(.fab):not(.fa-solid):not(.fa-regular):not(.fa-brands):not(.fa-classic) {
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* Ensure Font Awesome keeps its icon font (avoid being overridden by global fonts). */
+.fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands, .fa-classic {
+  font-family: "Font Awesome 6 Free" !important;
+}
+.fab, .fa-brands { font-family: "Font Awesome 6 Brands" !important; }
+.far, .fa-regular { font-weight: 400 !important; }
+
