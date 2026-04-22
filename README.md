@@ -4,7 +4,7 @@
 **Phiên bản:** 1.0  
 **Ngày cập nhật:** Tháng 4, 2026  
 **Tác giả:** Nguyễn Hà Anh
-**Trạng thái:** Active Development
+
 
 ---
 
