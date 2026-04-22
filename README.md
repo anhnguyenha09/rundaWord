@@ -3,7 +3,7 @@
 
 **Phiên bản:** 1.0  
 **Ngày cập nhật:** Tháng 4, 2026  
-**Tác giả:** Development Team  
+**Tác giả:** Nguyễn Hà Anh
 **Trạng thái:** Active Development
 
 ---
